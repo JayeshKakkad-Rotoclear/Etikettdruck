@@ -1,0 +1,252 @@
+// Shared generator and datasource
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["cpro_steuerrechner", "c2_steuerrechner", "cbasic_steuerrechner", "kk_kamerakopf", "zubehoer_etikett", "outer_karton", "outer_karton_entry"]
+}
+
+// --- C Pro SCHEMA ---
+
+enum KonfigurationCPro {
+  RC
+  DMG
+  DEMO
+  EDU
+
+  @@schema("cpro_steuerrechner")
+}
+
+enum Festplattengroesse {
+  GB_256
+  TB_1
+  TB_4
+
+  @@schema("cpro_steuerrechner")
+}
+
+enum FreierFestplattenspeicher {
+  GB_233
+  GB_890
+  GB_3700
+
+  @@schema("cpro_steuerrechner")
+}
+
+model SingleItem {
+  id                           Int                        @id @default(autoincrement())
+  serialnummer                 String                     @unique
+  hinweis                     String?
+  ba_nummer                   String?
+  artikel_nummer              String?
+  artikel_bezeichnung         String?
+  software_version            String?
+  konfiguration               KonfigurationCPro?
+  seriennummer_elektronik     String?
+  mac_adresse                 String?
+  seriennummer_festplatte     String?
+  festplattengroesse          Festplattengroesse?
+  datum                       DateTime
+  produktionsjahr             String?
+  pruefer_a                   String?
+  pruefer_b                   String?
+  hardware_ok                 Boolean?
+  hdmi_ok                     Boolean?
+  web_ok                      Boolean?
+  zoom_ok                     Boolean?
+  menue_bedienbar             Boolean?
+  festplatte_angezeigt        Boolean?
+  freier_festplattenspeicher  FreierFestplattenspeicher?
+  ip_adresse                  Boolean?
+  kameraeingang_ok            Boolean?
+  zustandsdaten_ok            Boolean?
+  zustandsdaten_fehler        String?
+  automatiktest_ok            Boolean?
+  qr_code_automatiktest       String?
+  werkseinstellung            Boolean?
+  lp_verschraubt              Boolean?
+  festplatte_leer             Boolean?
+
+  @@schema("cpro_steuerrechner")
+}
+
+// --- C2 SCHEMA ---
+
+enum KonfigurationC2 {
+  RC
+  DMG
+  DEMO
+  EDU
+
+  @@schema("c2_steuerrechner")
+}
+
+model SingleItemC2 {
+  id                           Int                        @id @default(autoincrement())
+  serialnummer                 String                     @unique
+  hinweis                     String?
+  ba_nummer                   String?
+  artikel_nummer              String?
+  artikel_bezeichnung         String?
+  software_version            String?
+  konfiguration               KonfigurationC2?
+  seriennummer_elektronik     String?
+  mac_adresse                 String?
+  datum                       DateTime
+  produktionsjahr             String?
+  pruefer_a                   String?
+  pruefer_b                   String?
+  hardware_ok                 Boolean?
+  hutschienenclip_montiert    Boolean?
+  hdmi_ok                     Boolean?
+  web_ok                      Boolean?
+  zoom_ok                     Boolean?
+  menue_bedienbar             Boolean?
+  ip_adresse                  Boolean?
+  kameraeingang_ok            Boolean?
+  zustandsdaten_ok            Boolean?
+  zustandsdaten_fehler        String?
+  automatiktest_ok            Boolean?
+  qr_code_automatiktest       String?                    @db.Text
+  werkseinstellung            Boolean?
+  lp_verschraubt              Boolean?
+
+  @@schema("c2_steuerrechner")
+}
+
+// --- C Basic SCHEMA ---
+
+model SingleItemCbasic {
+  id                           Int                        @id @default(autoincrement())
+  serialnummer                 String                     @unique
+  hinweis                     String?
+  ba_nummer                   String?
+  artikel_nummer              String?
+  artikel_bezeichnung         String?
+  software_version            String?
+  seriennummer_elektronik     String?
+  datum                       DateTime
+  produktionsjahr             String?
+  pruefer_a                   String?
+  pruefer_b                   String?
+  hardware_ok                 Boolean?
+  hutschienenclip_montiert    Boolean?
+  hdmi_ok                     Boolean?
+  zoom_ok                     Boolean?
+  kameraeingang_ok            Boolean?
+  sprache_wechslen            Boolean?
+  sprache_auf_englisch        Boolean?
+  lp_verschraubt              Boolean?
+
+  @@schema("cbasic_steuerrechner")
+}
+
+// --- KK (Kamerakopf) SCHEMA ---
+
+enum AnzahlOptiken {
+  Ein_Optik
+  Zwei_Optiken
+
+  @@schema("kk_kamerakopf")
+}
+
+enum OptikFormat {
+  F1
+  F2
+  TFT
+  F1_F2
+  F1_TFT
+  F2_TFT
+
+  @@schema("kk_kamerakopf")
+}
+
+enum KonfigurationKK {
+  RC
+  DMG
+
+  @@schema("kk_kamerakopf")
+}
+
+model SingleItemKK {
+  id                              Int               @id @default(autoincrement())
+  serialnummer                    String            @unique
+  hinweis                        String?
+  ba_nummer                      String?
+  artikel_nummer                 String?
+  artikel_bezeichnung            String?
+  firmware_version               String?
+  seriennummer_elektronik        String?
+  seriennummer_optik1            String?
+  seriennummer_optik2            String?
+  datum                          DateTime
+  produktionsjahr                String?
+  automatiktest_ok               Boolean?
+  qr_code_automatiktest          String?           @db.Text
+  konfiguration               KonfigurationKK?
+  pigtail_schrumpfschlauch       Boolean?
+  pigtail_drehmoment             Boolean?
+  pruefer_a                      String?
+  pruefer_b                      String?
+  chargenummer                   String?
+  hardware_ok                    Boolean?
+  optikglas_ok                   Boolean?
+  rotor_ok                       Boolean?
+  klebung_rotor_ok               Boolean?
+  kleber_2k_ok                   Boolean?
+  dichtring_datenkabel_eingelegt Boolean?
+  druckluftanscluss_montiert     Boolean?
+  uberdrucktest_ok               Boolean?
+  lichtmodul_ok                  Boolean?
+  motor_ok                       Boolean?
+  motor_dauerhaft_drehbar        Boolean?
+  laufzeit_motor                 String?
+  drucksensor_ok                 Boolean?
+  lagesensor_ok                  Boolean?
+  zustandsdaten_ok               Boolean?
+  zustandsdaten_fehler           String?
+  anzahl_optiken                 AnzahlOptiken?
+  optik_format                   OptikFormat?
+  fokuslage_ok                   Boolean?
+  optik_wechseln_funktioniert    Boolean?
+  siegellack_aufgebracht         Boolean?
+
+  @@schema("kk_kamerakopf")
+}
+
+// --- Zubehoer SCHEMA ---
+
+model ZubehoerEtikett {
+  id           Int      @id @default(autoincrement())
+  created_at   DateTime @default(now())
+  serialnummer String?  
+  entries      Json     
+
+  @@schema("zubehoer_etikett")
+}
+
+model OuterKarton {
+  id        Int                 @id @default(autoincrement())
+  createdAt DateTime           @default(now())
+  entries   OuterKartonEntry[]
+
+  @@schema("outer_karton")
+}
+
+model OuterKartonEntry {
+  id                  Int          @id @default(autoincrement())
+  outerKartonId       Int
+  artikelnummer       String
+  artikelbezeichnung  String
+  menge               Int
+  serialnummer        String?
+
+  outerKarton OuterKarton @relation(fields: [outerKartonId], references: [id], onDelete: Cascade)
+
+  @@schema("outer_karton_entry")
+}
+
+
