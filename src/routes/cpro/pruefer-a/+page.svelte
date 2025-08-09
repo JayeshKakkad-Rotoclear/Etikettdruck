@@ -66,6 +66,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>C Pro Prüfer A - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={submitFormCproA} class="form">
 	<h1>C Pro Prüfprotokoll - Prüfer A</h1>
 	<div class="field">
@@ -178,7 +182,6 @@
 
 	<button type="submit" class="submit-button">Speichern</button>
 </form>
-
 
 <style>
 	h1 {

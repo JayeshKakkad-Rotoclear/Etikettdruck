@@ -104,6 +104,10 @@
 	}
 </script>
 
+<svelte:head>
+  <title>C2 Prüfer B - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={loadSerialDataC2} class="form">
     <h1>C2 Prüfprotokoll - Prüfer B</h1>
 	<div class="field">

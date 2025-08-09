@@ -63,6 +63,10 @@
     }
 </script>
 
+<svelte:head>
+  <title>C2 Prüfer A - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={submitFormC2A} class="form">
 	<h1>C2 Prüfprotokoll - Prüfer A</h1>
 	<div class="field">

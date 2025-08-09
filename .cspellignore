@@ -1,0 +1,33 @@
+# Ignore all node_modules
+node_modules/
+
+# Ignore build outputs
+.svelte-kit/
+build/
+dist/
+
+# Ignore package files
+package-lock.json
+yarn.lock
+
+# Ignore generated files
+*.d.ts
+*.map
+
+# Ignore migrations
+prisma/migrations/
+
+# Ignore specific files with many technical terms
+src/routes/api/**/*.ts
+*.config.js
+*.config.ts
+
+# Ignore environment files
+.env*
+
+# Ignore git files
+.git/
+
+# If you want to ignore specific problem files completely
+# src/lib/auth.ts
+# src/hooks.server.ts

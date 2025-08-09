@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { authStore } from '$lib/stores/auth.js';
+  import { goto } from '$app/navigation';
+  import { canActAsProeferA, canActAsProeferB, canAccessDatabase } from '$lib/client-auth';
 
   interface DashboardStats {
     totals: Record<string, number>;
@@ -23,9 +26,29 @@
   let stats: DashboardStats | null = null;
   let loading = true;
   let error: string | null = null;
+  let currentUser: any = null;
 
-  onMount(async () => {
+  onMount(() => {
+    // Check authentication first
+    const unsubscribe = authStore.subscribe(state => {
+      currentUser = state.user;
+      if (!state.isAuthenticated && !state.isLoading) {
+        goto('/login');
+        return;
+      }
+      
+      // If we have a user and not loading, load dashboard stats
+      if (state.user && !state.isLoading) {
+        loadDashboardStats();
+      }
+    });
+
+    return unsubscribe;
+  });
+
+  async function loadDashboardStats() {
     try {
+      loading = true;
       const response = await fetch('/api/dashboard-stats');
       const data = await response.json();
       
@@ -39,12 +62,24 @@
     } finally {
       loading = false;
     }
-  });
+  }
 
   function formatNumber(num: number): string {
     return num.toLocaleString('de-DE');
   }
+
+  // Role-based access checks
+  $: canViewProeferA = currentUser ? canActAsProeferA(currentUser.role) : false;
+  $: canViewProeferB = currentUser ? canActAsProeferB(currentUser.role) : false;
+  $: canViewDatabase = currentUser ? (currentUser.role === 'MANAGEMENT' || currentUser.role === 'ADMIN') : false;
+  $: isViewer = currentUser?.role === 'VIEWER';
+  $: isAdmin = currentUser?.role === 'ADMIN';
+  $: isManagement = currentUser?.role === 'MANAGEMENT';
 </script>
+
+<svelte:head>
+  <title>Dashboard</title>
+</svelte:head>
 
 <div class="home-container">
   <header class="hero-section">
@@ -53,65 +88,101 @@
   </header>
 
   <!-- Navigation Grid -->
-  <section class="nav-section">
-    <h2 class="section-title">Produktsysteme</h2>
-    <div class="nav-grid">
-      <div class="nav-category">
-        <h3 class="category-title">C Pro Steuerrechner</h3>
-        <div class="nav-links">
-          <a href="/cpro/pruefer-a" class="nav-link">Prüfer A Formular</a>
-          <a href="/cpro/pruefer-b" class="nav-link">Prüfer B Formular</a>
-          <a href="/cpro/qr-preview" class="nav-link">QR-Code Vorschau</a>
-          <a href="/dashboard/cpro" class="nav-link dashboard">Datenbank</a>
-        </div>
-      </div>
-
-      <div class="nav-category">
-        <h3 class="category-title">C2 Steuerrechner</h3>
-        <div class="nav-links">
-          <a href="/c2/pruefer-a" class="nav-link">Prüfer A Formular</a>
-          <a href="/c2/pruefer-b" class="nav-link">Prüfer B Formular</a>
-          <a href="/c2/qr-preview" class="nav-link">QR-Code Vorschau</a>
-          <a href="/dashboard/c2" class="nav-link dashboard">Datenbank</a>
-        </div>
-      </div>
-
-      <div class="nav-category">
-        <h3 class="category-title">C Basic Steuerrechner</h3>
-        <div class="nav-links">
-          <a href="/cbasic/pruefer-a" class="nav-link">Prüfer A Formular</a>
-          <a href="/cbasic/pruefer-b" class="nav-link">Prüfer B Formular</a>
-          <a href="/dashboard/cbasic" class="nav-link dashboard">Datenbank</a>
-        </div>
-      </div>
-
-      <div class="nav-category">
-        <h3 class="category-title">Kamerakopf</h3>
-        <div class="nav-links">
-          <a href="/kk/pruefer-a" class="nav-link">Prüfer A Formular</a>
-          <a href="/kk/pruefer-b" class="nav-link">Prüfer B Formular</a>
-          <a href="/kk/qr-preview" class="nav-link">QR-Code Vorschau</a>
-          <a href="/dashboard/kk" class="nav-link dashboard">Datenbank</a>
-        </div>
-      </div>
-
+  {#if !isViewer}
+    <section class="nav-section">
+      <h2 class="section-title">Produktsysteme</h2>
+      <div class="nav-grid">
         <div class="nav-category">
-          <h3 class="category-title">Zubehör</h3>
+          <h3 class="category-title">C Pro Steuerrechner</h3>
           <div class="nav-links">
-              <a href="/zubehoer" class="nav-link">Zubehör Etikett</a>
-              <a href="/dashboard/zubehoer" class="nav-link dashboard">Zubehör Datenbank</a>
+            {#if canViewProeferA}
+              <a href="/cpro/pruefer-a" class="nav-link">Prüfer A Formular</a>
+            {/if}
+            {#if canViewProeferB}
+              <a href="/cpro/pruefer-b" class="nav-link">Prüfer B Formular</a>
+            {/if}
+            {#if canViewProeferA || canViewProeferB}
+              <a href="/cpro/qr-preview" class="nav-link">QR-Code Vorschau</a>
+            {/if}
+            {#if canViewDatabase}
+              <a href="/dashboard/cpro" class="nav-link dashboard">Datenbank</a>
+            {/if}
           </div>
         </div>
 
         <div class="nav-category">
-        <h3 class="category-title">Verpackung</h3>
-        <div class="nav-links">
-            <a href="/outer-karton" class="nav-link">Außenkarton Etikett</a>
-            <a href="/dashboard/outer-karton" class="nav-link dashboard">Außenkarton Datenbank</a>
+          <h3 class="category-title">C2 Steuerrechner</h3>
+          <div class="nav-links">
+            {#if canViewProeferA}
+              <a href="/c2/pruefer-a" class="nav-link">Prüfer A Formular</a>
+            {/if}
+            {#if canViewProeferB}
+              <a href="/c2/pruefer-b" class="nav-link">Prüfer B Formular</a>
+            {/if}
+            {#if canViewProeferA || canViewProeferB}
+              <a href="/c2/qr-preview" class="nav-link">QR-Code Vorschau</a>
+            {/if}
+            {#if canViewDatabase}
+              <a href="/dashboard/c2" class="nav-link dashboard">Datenbank</a>
+            {/if}
+          </div>
         </div>
+
+        <div class="nav-category">
+          <h3 class="category-title">C Basic Steuerrechner</h3>
+          <div class="nav-links">
+            {#if canViewProeferA}
+              <a href="/cbasic/pruefer-a" class="nav-link">Prüfer A Formular</a>
+            {/if}
+            {#if canViewProeferB}
+              <a href="/cbasic/pruefer-b" class="nav-link">Prüfer B Formular</a>
+            {/if}
+            {#if canViewDatabase}
+              <a href="/dashboard/cbasic" class="nav-link dashboard">Datenbank</a>
+            {/if}
+          </div>
+        </div>
+
+        <div class="nav-category">
+          <h3 class="category-title">Kamerakopf</h3>
+          <div class="nav-links">
+            {#if canViewProeferA}
+              <a href="/kk/pruefer-a" class="nav-link">Prüfer A Formular</a>
+            {/if}
+            {#if canViewProeferB}
+              <a href="/kk/pruefer-b" class="nav-link">Prüfer B Formular</a>
+            {/if}
+            {#if canViewProeferA || canViewProeferB}
+              <a href="/kk/qr-preview" class="nav-link">QR-Code Vorschau</a>
+            {/if}
+            {#if canViewDatabase}
+              <a href="/dashboard/kk" class="nav-link dashboard">Datenbank</a>
+            {/if}
+          </div>
+        </div>
+
+        <div class="nav-category">
+          <h3 class="category-title">Zubehör</h3>
+          <div class="nav-links">
+            <a href="/zubehoer" class="nav-link">Zubehör Etikett</a>
+            {#if canViewDatabase}
+              <a href="/dashboard/zubehoer" class="nav-link dashboard">Zubehör Datenbank</a>
+            {/if}
+          </div>
+        </div>
+
+        <div class="nav-category">
+          <h3 class="category-title">Verpackung</h3>
+          <div class="nav-links">
+            <a href="/outer-karton" class="nav-link">Außenkarton Etikett</a>
+            {#if canViewDatabase}
+              <a href="/dashboard/outer-karton" class="nav-link dashboard">Außenkarton Datenbank</a>
+            {/if}
+          </div>
         </div>
       </div>
-  </section>
+    </section>
+  {/if}
 
   <!-- Statistics Dashboard -->
   {#if loading}

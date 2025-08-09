@@ -128,6 +128,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>C Pro Dashboard - Datenbank Übersicht</title>
+</svelte:head>
+
 <h1 class="text-2xl font-bold p-4">C Pro Steuerrechner Datenbank Übersicht</h1>
 
 <button on:click={downloadCSV} class="ml-4 mt-2 mb-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">

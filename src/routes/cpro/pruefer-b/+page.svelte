@@ -111,6 +111,10 @@
 	}        
 </script>
 
+<svelte:head>
+  <title>C Pro Prüfer B - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={loadSerialDataCpro} class="form">
     <h1>C Pro Prüfprotokoll - Prüfer B</h1>
 	<div class="field">

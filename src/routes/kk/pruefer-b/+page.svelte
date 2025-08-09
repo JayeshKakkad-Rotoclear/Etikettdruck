@@ -129,6 +129,10 @@
 	}  
 </script>
 
+<svelte:head>
+	<title>Kamerakopf Prüfer B - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={loadSerialDataKK} class="form">
     <h1>Kamerakopf Prüfprotokoll - Prüfer B</h1>
 	<div class="field">

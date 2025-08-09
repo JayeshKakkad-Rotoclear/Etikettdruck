@@ -1,3 +1,4 @@
+// cSpell:disable
 // Shared generator and datasource
 generator client {
   provider = "prisma-client-js"
@@ -6,7 +7,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["cpro_steuerrechner", "c2_steuerrechner", "cbasic_steuerrechner", "kk_kamerakopf", "zubehoer_etikett", "outer_karton", "outer_karton_entry"]
+  schemas  = ["cpro_steuerrechner", "c2_steuerrechner", "cbasic_steuerrechner", "kk_kamerakopf", "zubehoer_etikett", "outer_karton", "outer_karton_entry", "user_management"]
 }
 
 // --- C Pro SCHEMA ---
@@ -247,6 +248,58 @@ model OuterKartonEntry {
   outerKarton OuterKarton @relation(fields: [outerKartonId], references: [id], onDelete: Cascade)
 
   @@schema("outer_karton_entry")
+}
+
+// --- USER MANAGEMENT SCHEMA ---
+
+enum UserRole {
+  ADMIN
+  MANAGEMENT
+  PRUEFER_AB
+  PRUEFER_A
+  PRUEFER_B
+  VIEWER
+
+  @@schema("user_management")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+
+  @@schema("user_management")
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  username        String      @unique
+  email           String      @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            UserRole
+  status          UserStatus  @default(ACTIVE)
+  lastLoginAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  createdBy       String?
+
+  // Audit fields for tracking user activity
+  sessions        Session[]
+
+  @@schema("user_management")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  userId      Int
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("user_management")
 }
 
 

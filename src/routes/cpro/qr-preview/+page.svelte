@@ -24,6 +24,10 @@
 	}
 </script>
 
+<svelte:head>
+  <title>C Pro QR-Code Vorschau</title>
+</svelte:head>
+
 <form on:submit|preventDefault={loadQR} class="form">
     <h1>QR-Code Vorschau</h1>
 	<div class="field">

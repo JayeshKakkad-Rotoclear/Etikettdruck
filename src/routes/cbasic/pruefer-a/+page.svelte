@@ -43,6 +43,10 @@
     }
 </script>
 
+<svelte:head>
+  <title>C Basic Prüfer A - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={submitFormCbasic} class="form">
 	<h1>C Basic Prüfprotokoll - Prüfer A</h1>
     <div class="field">

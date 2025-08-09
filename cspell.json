@@ -1,0 +1,18 @@
+{
+  "version": "0.2",
+  "enabled": false,
+  "language": "en,de",
+  "flagWords": [],
+  "words": ["*"],
+  "ignorePaths": [
+    "**/*"
+  ],
+  "ignoreRegExpList": [
+    ".*"
+  ],
+  "allowCompoundWords": true,
+  "caseSensitive": false,
+  "maxNumberOfProblems": 0,
+  "maxDuplicateProblems": 0,
+  "minWordLength": 1000
+}

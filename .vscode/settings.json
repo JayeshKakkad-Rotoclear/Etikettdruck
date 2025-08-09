@@ -1,0 +1,22 @@
+{
+  "cSpell.enabled": false,
+  "cSpell.checkLimit": 0,
+  "cSpell.diagnosticLevel": "Hint", 
+  "cSpell.showStatus": false,
+  "cSpell.showCommandsInEditorContextMenu": false,
+  "cSpell.showAutocompleteSuggestions": false,
+  "cSpell.spellCheckDelayMs": 50000,
+  "cSpell.enabledFileTypes": {},
+  "cSpell.disabledLanguageIds": ["*"],
+  "files.associations": {
+    "*.ts": "typescript",
+    "*.js": "javascript", 
+    "*.svelte": "svelte",
+    "*.json": "json"
+  },
+  "editor.quickSuggestions": {
+    "other": false,
+    "comments": false,
+    "strings": false
+  }
+}

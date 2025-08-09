@@ -86,6 +86,10 @@
   }
 </script>
 
+<svelte:head>
+	<title>Kamerakopf Prüfer A - Prüfprotokoll</title>
+</svelte:head>
+
 <form on:submit|preventDefault={submitFormKKA} class="form">
 	<h1>Kamerakopf Prüfprotokoll - Prüfer A</h1>
 	<div class="field">
