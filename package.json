@@ -4,14 +4,19 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite dev",
+		"dev": "vite dev --host 0.0.0.0 --port 3000",
+		"dev:network": "vite dev --host 0.0.0.0 --port 3000",
 		"build": "vite build",
-		"preview": "vite preview",
+		"start": "node build/index.js",
+		"start:prod": "NODE_ENV=production node build/index.js",
+		"preview": "vite preview --host 0.0.0.0 --port 4173",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"db:seed": "tsx prisma/seed.ts",
-		"db:setup": "npx prisma db push && npm run db:seed"
+		"db:setup": "npx prisma db push && npm run db:seed",
+		"db:generate": "npx prisma generate",
+		"db:deploy": "npx prisma db push"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",
@@ -30,6 +35,7 @@
 	},
 	"dependencies": {
 		"@prisma/client": "^6.12.0",
+		"@sveltejs/adapter-node": "^5.2.14",
 		"bcryptjs": "^2.4.3",
 		"cookie": "^0.6.0",
 		"date-fns": "^4.1.0",
