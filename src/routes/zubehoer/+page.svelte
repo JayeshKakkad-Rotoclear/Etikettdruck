@@ -32,12 +32,16 @@
       items: [
         { artikelnummer: '10035', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (10m)' },
         { artikelnummer: '10036', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (20m)' },
+		{ artikelnummer: '10358', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (männlich - weiblich), x-kodiert. Länge: 20m' },
       ],
     },
     {
       category: 'Extras',
       items: [
         { artikelnummer: '10091', artikelbezeichnung: 'Stromkabel (2m)' },
+		{ artikelnummer: '10343', artikelbezeichnung: 'Netzteil 230V -> 24V für Rotoclear Produkte' },
+		{ artikelnummer: '10344', artikelbezeichnung: 'Schutzschlauchsystem 1,5m für Flex-Armhalter' },
+		{ artikelnummer: '10086', artikelbezeichnung: 'Ersatzscheibe (rotierende Scheibe) für Kamerakopf' },
         { artikelnummer: '10038', artikelbezeichnung: 'Sperrluftleitung 5m (6x1mm)' },
         { artikelnummer: '10299', artikelbezeichnung: 'Durchgangsventil für Sperrluftschlauch 6mm' },
       ],
@@ -113,297 +117,551 @@ async function submitForm() {
 }
 </script>
 
-<form on:submit|preventDefault={submitForm} class="form">
-    <h1 class="page-title">Zubehör Etikett erstellen</h1>
+<svelte:head>
+  <title>Zubehör Etikett - Erstellen</title>
+</svelte:head>
 
-    {#each initialItems as categoryBlock}
-    <div class="category-container">
-        <div class="category-header">
-            <span class="category-title">{categoryBlock.category}</span>
-            <div class="option-group">
-                <label class:active={selectedCategories[categoryBlock.category] === true}>
-                    <input
-                        type="radio"
-                        name={categoryBlock.category}
-                        on:change={() => selectedCategories[categoryBlock.category] = true}
-                    />
-                    Ja
-                </label>
-                <label class:active={selectedCategories[categoryBlock.category] === false}>
-                    <input
-                        type="radio"
-                        name={categoryBlock.category}
-                        on:change={() => selectedCategories[categoryBlock.category] = false}
-                    />
-                    Nein
-                </label>
-            </div>
-        </div>
+<div class="form-container">
+	<form on:submit|preventDefault={submitForm} class="form">
+        <h1>Zubehör Etikett erstellen</h1>
 
-        {#if selectedCategories[categoryBlock.category] === true}
-            <div class="items-container">
-                {#each categoryBlock.items as item}
-                    <div class="item-group">
-                        <div class="item-row">
-                            <span class="item-title">{item.artikelbezeichnung}</span>
-                            <div class="option-group">
-                                <label class:active={itemSelections[item.artikelnummer].selected === true}>
-                                    <input
-                                        type="radio"
-                                        name={item.artikelnummer}
-                                        on:change={() => itemSelections[item.artikelnummer].selected = true}
-                                    />
-                                    Ja
-                                </label>
-                                <label class:active={itemSelections[item.artikelnummer].selected === false}>
-                                    <input
-                                        type="radio"
-                                        name={item.artikelnummer}
-                                        on:change={() => itemSelections[item.artikelnummer].selected = false}
-                                    />
-                                    Nein
-                                </label>
-                            </div>
-                        </div>
+		<div class="categories-grid">
+			{#each initialItems as categoryBlock}
+				<div class="category-container">
+					<div class="category-header">
+						<h3 class="category-title">{categoryBlock.category}</h3>
+						<div class="category-radio-group">
+							<label class="radio-option" class:active={selectedCategories[categoryBlock.category] === true}>
+								<input
+									type="radio"
+									name={categoryBlock.category}
+									on:change={() => selectedCategories[categoryBlock.category] = true}
+								/>
+								<span class="radio-text">Ja</span>
+							</label>
+							<label class="radio-option" class:active={selectedCategories[categoryBlock.category] === false}>
+								<input
+									type="radio"
+									name={categoryBlock.category}
+									on:change={() => selectedCategories[categoryBlock.category] = false}
+								/>
+								<span class="radio-text">Nein</span>
+							</label>
+						</div>
+					</div>
 
-                        {#if itemSelections[item.artikelnummer].selected === true}
-                            <div class="item-row secondary-row">
-                                <div class="quantity-control">
-                                    <label class="quantity-label">Menge:
-                                        <select bind:value={itemSelections[item.artikelnummer].menge} class="quantity-select">
-                                            {#each [1, 2, 3, 4, 5] as n}
-                                                <option value={n}>{n}</option>
-                                            {/each}
-                                        </select>
-                                    </label>
-                                </div>
+					{#if selectedCategories[categoryBlock.category] === true}
+						<div class="items-container">
+							{#each categoryBlock.items as item}
+								<div class="item-group">
+									<div class="item-header">
+										<span class="item-title">{item.artikelbezeichnung}</span>
+										<div class="item-radio-group">
+											<label class="radio-option small" class:active={itemSelections[item.artikelnummer].selected === true}>
+												<input
+													type="radio"
+													name={item.artikelnummer}
+													on:change={() => itemSelections[item.artikelnummer].selected = true}
+												/>
+												<span class="radio-text">Ja</span>
+											</label>
+											<label class="radio-option small" class:active={itemSelections[item.artikelnummer].selected === false}>
+												<input
+													type="radio"
+													name={item.artikelnummer}
+													on:change={() => itemSelections[item.artikelnummer].selected = false}
+												/>
+												<span class="radio-text">Nein</span>
+											</label>
+										</div>
+									</div>
 
-                                {#if item.artikelnummer === '10370'}
-                                    <div class="serial-control">
-                                        <label class="serial-label">Serialnummer:
-                                            <input type="text" bind:value={serialnummer} placeholder="z.B. 12345" class="serial-input" />
-                                        </label>
-                                    </div>
-                                {/if}
-                            </div>
-                        {/if}
-                    </div>
-                {/each}
-            </div>
-        {/if}
-    </div>
-    {/each}
+									{#if itemSelections[item.artikelnummer].selected === true}
+										<div class="item-details">
+											<div class="quantity-section">
+												<label class="control-label" for="quantity-{item.artikelnummer}">Menge:</label>
+												<select bind:value={itemSelections[item.artikelnummer].menge} class="quantity-select" id="quantity-{item.artikelnummer}">
+													{#each [1, 2, 3, 4, 5] as n}
+														<option value={n}>{n}</option>
+													{/each}
+												</select>
+											</div>
 
-    <button type="submit" class="submit-button">
-        Speichern & Drucken
-    </button>
-</form>
+											{#if item.artikelnummer === '10370'}
+												<div class="serial-section">
+													<label class="control-label" for="serial-{item.artikelnummer}">Serialnummer:</label>
+													<input 
+														type="text" 
+														bind:value={serialnummer}
+														class="serial-input" 
+														id="serial-{item.artikelnummer}"
+													/>
+												</div>
+											{/if}
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
+			{/each}
+		</div>
+
+		<button type="submit" class="submit-button">
+			Speichern & Drucken
+		</button>
+	</form>
+</div>
 
 <style>
-    .form {
-        max-width: 800px;
-        margin: 70px auto;
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-        padding: 2rem 3rem;
-        border-radius: 8px;
-        background: #fff;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-    }
+	.form-container {
+		min-height: 100vh;
+		/* background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%); */
+		padding: var(--spacing-lg) var(--spacing-md);
+	}
 
-    .page-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 1.5rem;
-        text-align: center;
-        color: #123345;
-    }
+	h1 {
+		font-size: var(--font-size-xxl);
+		font-weight: var(--font-weight-bold);
+		color: var(--text-primary);
+		text-align: center;
+		margin-bottom: var(--spacing-xl);
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
 
-    .category-container {
-        border: 2px solid #e5e5e5;
-        border-radius: 8px;
-        padding: 1.5rem;
-        background-color: #fafafa;
-        margin-bottom: 1rem;
-    }
+	.form {
+		max-width: 1000px;
+		margin: 0 auto var(--spacing-xl) auto;
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		padding: var(--spacing-xl);
+		box-shadow: var(--shadow-medium);
+		border: 1px solid var(--border-light);
+		position: relative;
+		overflow: hidden;
+	}
 
-    .category-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid #ddd;
-    }
+	.form::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+	}
 
-    .category-title {
-        font-weight: bold;
-        font-size: 1.2rem;
-        color: #123345;
-    }
+	.categories-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+		gap: var(--spacing-xl);
+		margin-bottom: var(--spacing-xl);
+	}
 
-    .items-container {
-        background-color: white;
-        border-radius: 6px;
-        padding: 1rem;
-        border: 1px solid #e0e0e0;
-    }
+	.category-container {
+		background: var(--bg-light);
+		border: 2px solid var(--border-light);
+		border-radius: var(--border-radius-lg);
+		padding: var(--spacing-lg);
+		transition: all var(--transition-smooth);
+		position: relative;
+		overflow: hidden;
+	}
 
-    .item-group {
-        margin-bottom: 1rem;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 0.75rem;
-    }
+	.category-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 3px;
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+	}
 
-    .item-group:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-    }
+	.category-container:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-lg);
+		border-color: var(--primary-light);
+	}
 
-    .item-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5rem 0;
-        gap: 1rem;
-    }
+	.category-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: var(--spacing-lg);
+		padding-bottom: var(--spacing-md);
+		border-bottom: 1px solid var(--border-medium);
+	}
 
-    .secondary-row {
-        background-color: #f8f9fa;
-        padding: 0.75rem;
-        border-radius: 4px;
-        margin-top: 0.5rem;
-        justify-content: flex-start;
-        gap: 2rem;
-    }
+	.category-title {
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-bold);
+		color: var(--primary-color);
+		margin: 0;
+	}
 
-    .item-title {
-        font-weight: 500;
-        flex: 1;
-        min-width: 200px;
-        color: #123345;
-    }
+	.category-radio-group {
+		display: flex;
+		gap: var(--spacing-sm);
+	}
 
-    .option-group {
-        display: flex;
-        gap: 0.75rem;
-        flex-wrap: wrap;
-    }
+	.radio-option {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--spacing-xs);
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: 2px solid var(--border-medium);
+		border-radius: var(--border-radius-md);
+		background: var(--white);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
+		min-height: 40px;
+		min-width: 60px;
+		box-sizing: border-box;
+	}
 
-    .option-group label {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.4rem 0.8rem;
-        border-radius: 0.5rem;
-        border: 1px solid #ddd;
-        background-color: #f9f9ff;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-        font-size: 0.9rem;
-    }
+	.radio-option.small {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		font-size: var(--font-size-sm);
+		min-height: 36px;
+		min-width: 50px;
+	}
 
-    .option-group label:hover {
-        background-color: #e0e0f0;
-    }
+	.radio-option:hover {
+		border-color: var(--primary-color);
+		background: var(--primary-light);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-sm);
+	}
 
-    .option-group label.active {
-        color: #123345;
-        font-weight: 500;
-    }
+	.radio-option.active {
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+		color: var(--white);
+		border-color: var(--primary-color);
+		box-shadow: var(--shadow-md);
+	}
 
-    .quantity-control {
-        display: flex;
-        align-items: center;
-    }
+	.radio-option input[type="radio"] {
+		opacity: 0;
+		position: absolute;
+		margin: 0;
+	}
 
-    .quantity-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
+	.radio-text {
+		font-weight: inherit;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
 
-    .quantity-select {
-        border: 1px solid #ccc;
-        padding: 0.3rem;
-        border-radius: 0.3rem;
-        font-size: 0.9rem;
-        background-color: white;
-    }
+	.items-container {
+		background: var(--white);
+		border-radius: var(--border-radius-md);
+		padding: var(--spacing-lg);
+		border: 1px solid var(--border-light);
+		box-shadow: var(--shadow-sm);
+		animation: slideDown 0.3s ease-out;
+	}
 
-    .serial-control {
-        display: flex;
-        align-items: center;
-    }
+	@keyframes slideDown {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-    .serial-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-weight: 500;
-        font-size: 0.9rem;
-    }
+	.item-group {
+		margin-bottom: var(--spacing-lg);
+		padding-bottom: var(--spacing-md);
+		border-bottom: 1px solid var(--border-light);
+	}
 
-    .serial-input {
-        border: 1px solid #ccc;
-        padding: 0.3rem 0.5rem;
-        border-radius: 0.3rem;
-        font-size: 0.9rem;
-        width: 120px;
-    }
+	.item-group:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+	}
 
-    .submit-button {
-        margin-top: 1.5rem;
-        padding: 0.75rem 1.5rem;
-        background-color: #123345;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        align-self: center;
-    }
+	.item-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-md);
+		margin-bottom: var(--spacing-md);
+	}
 
-    .submit-button:hover {
-        background-color: #005fa3;
-    }
+	.item-title {
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-primary);
+		font-size: var(--font-size-base);
+		flex: 1;
+		min-width: 200px;
+	}
 
-    input[type='radio'] {
-        accent-color: #123345;
-        margin: 0;
-    }
+	.item-radio-group {
+		display: flex;
+		gap: var(--spacing-xs);
+		flex-shrink: 0;
+	}
 
-    @media (max-width: 768px) {
-        .form {
-            padding: 1rem;
-            margin: 20px auto;
-        }
+	.item-details {
+		background: var(--bg-light);
+		padding: var(--spacing-md);
+		border-radius: var(--border-radius-md);
+		display: flex;
+		gap: var(--spacing-lg);
+		align-items: center;
+		flex-wrap: wrap;
+		animation: fadeIn 0.3s ease-out;
+	}
 
-        .category-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+			transform: translateY(-5px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
 
-        .item-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.75rem;
-        }
+	.quantity-section,
+	.serial-section {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
 
-        .secondary-row {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start;
-        }
+	.control-label {
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-secondary);
+		font-size: var(--font-size-sm);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		white-space: nowrap;
+	}
 
-        .item-title {
-            min-width: unset;
-        }
-    }
+	.quantity-select {
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: 2px solid var(--border-medium);
+		border-radius: var(--border-radius-md);
+		background: var(--white);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-medium);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+		min-height: 40px;
+	}
+
+	.quantity-select:focus {
+		outline: none;
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px var(--primary-light);
+	}
+
+	.quantity-select:hover {
+		border-color: var(--border-color);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.serial-input {
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: 2px solid var(--border-medium);
+		border-radius: var(--border-radius-md);
+		background: var(--white);
+		font-size: var(--font-size-base);
+		transition: all var(--transition-smooth);
+		min-height: 40px;
+		box-sizing: border-box;
+		width: 150px;
+	}
+
+	.serial-input:focus {
+		outline: none;
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px var(--primary-light);
+		background: var(--bg-light);
+	}
+
+	.serial-input:hover:not(:focus) {
+		border-color: var(--border-color);
+		box-shadow: var(--shadow-sm);
+	}
+	
+	.submit-button {
+		width: 100%;
+		max-width: 400px;
+		margin: var(--spacing-xl) auto 0 auto;
+		padding: var(--spacing-lg) var(--spacing-xl);
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+		color: var(--white);
+		border: none;
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-semibold);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+		min-height: 64px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		box-shadow: var(--shadow-md);
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--spacing-md);
+	}
+
+	.submit-button::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		transition: left 0.6s ease;
+	}
+
+	.submit-button:hover::before {
+		left: 100%;
+	}
+
+	.submit-button:hover {
+		background: linear-gradient(135deg, var(--primary-hover), var(--primary-active));
+		transform: translateY(-3px);
+		box-shadow: var(--shadow-lg);
+	}
+
+	.submit-button:active {
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-md);
+	}
+
+	@media (max-width: 768px) {
+		.form-container {
+			padding: var(--spacing-md) var(--spacing-sm);
+		}
+
+		.form {
+			padding: var(--spacing-lg);
+		}
+
+		h1 {
+			font-size: var(--font-size-xl);
+		}
+
+		.categories-grid {
+			grid-template-columns: 1fr;
+			gap: var(--spacing-lg);
+		}
+
+		.category-header {
+			flex-direction: column;
+			gap: var(--spacing-md);
+			align-items: flex-start;
+		}
+
+		.category-radio-group {
+			width: 100%;
+		}
+
+		.category-radio-group .radio-option {
+			flex: 1;
+		}
+
+		.item-header {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--spacing-sm);
+		}
+
+		.item-radio-group {
+			width: 100%;
+		}
+
+		.item-radio-group .radio-option {
+			flex: 1;
+		}
+
+		.item-details {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--spacing-md);
+		}
+
+		.item-title {
+			min-width: unset;
+		}
+
+		.submit-button {
+			font-size: var(--font-size-base);
+			padding: var(--spacing-md) var(--spacing-lg);
+			min-height: 56px;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.form-container {
+			padding: var(--spacing-sm);
+		}
+
+		.form {
+			padding: var(--spacing-md);
+			border-radius: var(--border-radius-md);
+		}
+
+		h1 {
+			font-size: var(--font-size-lg);
+			margin-bottom: var(--spacing-lg);
+		}
+
+		.category-container {
+			padding: var(--spacing-md);
+		}
+
+		.items-container {
+			padding: var(--spacing-md);
+		}
+
+		.category-radio-group {
+			width: 100%;
+		}
+
+		.radio-option {
+			flex: 1;
+			justify-content: center;
+			min-width: 0;
+		}
+
+		.item-radio-group {
+			width: 100%;
+		}
+
+		.item-radio-group .radio-option {
+			flex: 1;
+			justify-content: center;
+			min-width: 0;
+		}
+
+		.submit-button {
+			min-height: 48px;
+		}
+
+		.serial-input {
+			width: 100%;
+		}
+	}
 </style>

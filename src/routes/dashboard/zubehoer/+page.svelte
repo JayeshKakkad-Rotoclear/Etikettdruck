@@ -145,194 +145,634 @@
   });
 </script>
 
-<h1 class="text-2xl font-bold p-4">Zubehör Etikett Übersicht</h1>
+<svelte:head>
+	<title>Zubehör Dashboard - Datenbank Übersicht</title>
+</svelte:head>
 
-{#if !loading && !error}
-  <div class="p-4">
-    <p class="text-lg font-medium text-gray-700">
-      {totalEtiketten} Zubehör-Etiketten mit insgesamt {totalArtikel} Artikeln gefunden
-    </p>
-  </div>
-{/if}
+<div class="dashboard-container">
+	<div class="dashboard-header">
+		<h1 class="dashboard-title">Zubehör Datenbank</h1>
+		<div class="header-actions">
+			<div class="data-summary">
+				<span class="data-count">{totalEtiketten} Etiketten</span>
+				<span class="data-count">{totalArtikel} Artikel</span>
+			</div>
+			<button on:click={downloadCSV} class="export-btn">
+				<svg class="export-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+					<polyline points="7,10 12,15 17,10"/>
+					<line x1="12" y1="15" x2="12" y2="3"/>
+				</svg>
+				CSV Export
+			</button>
+		</div>
+	</div>
 
-<button on:click={downloadCSV} class="ml-4 mt-2 mb-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-  CSV Export
-</button>
+	{#if loading}
+		<div class="loading-container">
+			<div class="loading-spinner"></div>
+			<p class="loading-text">Lade Datenbank...</p>
+		</div>
+	{:else if error}
+		<div class="error-container">
+			<p class="error-message">Fehler beim Laden der Daten: {error}</p>
+		</div>
+	{:else if items.length === 0}
+		<div class="empty-container">
+			<p class="empty-message">Keine Zubehör-Etiketten vorhanden.</p>
+		</div>
+	{:else}
+		<div class="table-wrapper">
+			<div class="table-container">
+				<table class="data-table">
+					<thead>
+						<tr class="header-row">
+							<th class="table-header expand-column">
+								<div class="header-content">
+									<span class="header-label">Etikett</span>
+								</div>
+							</th>
+							{#each Object.keys(fieldLabels) as key}
+								<th class="table-header" class:sortable={sortableFields.includes(key)} on:click={() => toggleSort(key)}>
+									<div class="header-content">
+										<span class="header-label">{fieldLabels[key]}</span>
+										{#if sortField === key}
+											<span class="sort-icon">
+												{#if sortAsc}
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M7 14l5-5 5 5z"/>
+													</svg>
+												{:else}
+													<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+														<path d="M7 10l5 5 5-5z"/>
+													</svg>
+												{/if}
+											</span>
+										{/if}
+									</div>
+								</th>
+							{/each}
+						</tr>
+						<tr class="filter-row">
+							<td class="filter-cell"></td>
+							{#each Object.keys(fieldLabels) as key}
+								<td class="filter-cell">
+									<input
+										type="text"
+										placeholder="Filter..."
+										bind:value={filters[key]}
+										class="filter-input"
+									/>
+								</td>
+							{/each}
+						</tr>
+					</thead>
+					<tbody>
+						{#each paginatedGroups as group (group.id)}
+							<tr class="group-header-row" on:click={() => toggleGroup(group.id)}>
+								<td class="group-toggle-cell">
+									<div class="group-toggle">
+										<span class="toggle-icon">
+											{#if expandedGroups.has(group.id)}
+												<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+													<path d="M7 10l5 5 5-5z"/>
+												</svg>
+											{:else}
+												<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+													<path d="M9 6l6 6-6 6z"/>
+												</svg>
+											{/if}
+										</span>
+										<span class="etikett-label">Etikett #{group.id}</span>
+									</div>
+								</td>
+								<td class="group-header-cell">{group.id}</td>
+								<td class="group-header-cell">{formatDate(group.created_at)}</td>
+								<td class="group-header-cell" colspan="4">
+									<span class="article-count">{group.entries.length} Artikel</span>
+								</td>
+							</tr>
+							{#if expandedGroups.has(group.id)}
+								{#each group.entries as product}
+									<tr class="product-row">
+										<td class="product-indent-cell">
+											<div class="indent-line"></div>
+										</td>
+										<td class="data-cell">{group.id}</td>
+										<td class="data-cell">{formatDate(group.created_at)}</td>
+										<td class="data-cell">{product.artikelnummer}</td>
+										<td class="data-cell">{product.artikelbezeichnung}</td>
+										<td class="data-cell">{product.menge}</td>
+										<td class="data-cell">{product.serialnummer || ''}</td>
+									</tr>
+								{/each}
+							{/if}
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</div>
 
-{#if loading}
-  <p class="p-4">Lade Daten...</p>
-{:else if error}
-  <p class="text-red-500 p-4">Fehler: {error}</p>
-{:else}
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Etikett</th>
-          {#each Object.keys(fieldLabels) as key}
-            <th on:click={() => toggleSort(key)} class:clickable={sortableFields.includes(key)}>
-              {fieldLabels[key]}
-              {#if sortField === key}
-                <span class="sort-icon">
-                  {#if sortAsc}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7 14l5-5 5 5z"/>
-                    </svg>
-                  {:else}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M7 10l5 5 5-5z"/>
-                    </svg>
-                  {/if}
-                </span>
-              {/if}
-            </th>
-          {/each}
-        </tr>
-        <tr>
-          <td></td>
-          {#each Object.keys(fieldLabels) as key}
-            <td>
-              <input
-                type="text"
-                placeholder="Filter..."
-                bind:value={filters[key]}
-                class="filter-input"
-              />
-            </td>
-          {/each}
-        </tr>
-      </thead>
-      <tbody>
-        {#each paginatedGroups as group (group.id)}
-          <tr class="group-header" on:click={() => toggleGroup(group.id)}>
-            <td class="group-toggle">
-              <span class="toggle-icon">{expandedGroups.has(group.id) ? '▼' : '▶'}</span>
-              Etikett #{group.id}
-            </td>
-            <td>{group.id}</td>
-            <td>{formatDate(group.created_at)}</td>
-            <td colspan="4" class="group-summary">
-              {group.entries.length} Artikel(e)
-            </td>
-          </tr>
-          {#if expandedGroups.has(group.id)}
-            {#each group.entries as product}
-              <tr class="product-row">
-                <td class="indent"></td>
-                <td>{group.id}</td>
-                <td>{formatDate(group.created_at)}</td>
-                <td>{product.artikelnummer}</td>
-                <td>{product.artikelbezeichnung}</td>
-                <td>{product.menge}</td>
-                <td>{product.serialnummer || ''}</td>
-              </tr>
-            {/each}
-          {/if}
-        {/each}
-      </tbody>
-    </table>
-  </div>
-  <div class="pagination-controls p-4">
-    <button on:click={() => currentPage--} disabled={currentPage === 1}>Zurück</button>
-    <span class="mx-2">Seite {currentPage} von {Math.ceil(filteredGroups.length / rowsPerPage)}</span>
-    <button on:click={() => currentPage++} disabled={currentPage * rowsPerPage >= filteredGroups.length}>Weiter</button>
-  </div>
-{/if}
+		<div class="pagination-container">
+			<div class="pagination-info">
+				<span class="pagination-text">
+					Seite {currentPage} von {Math.ceil(filteredGroups.length / rowsPerPage)}
+				</span>
+				<span class="pagination-count">
+					{Math.min((currentPage - 1) * rowsPerPage + 1, filteredGroups.length)} - {Math.min(currentPage * rowsPerPage, filteredGroups.length)} von {filteredGroups.length}
+				</span>
+			</div>
+			<div class="pagination-controls">
+				<button 
+					class="pagination-btn" 
+					class:disabled={currentPage === 1}
+					on:click={() => currentPage--} 
+					disabled={currentPage === 1}
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="15,18 9,12 15,6"></polyline>
+					</svg>
+					Zurück
+				</button>
+				<button 
+					class="pagination-btn" 
+					class:disabled={currentPage * rowsPerPage >= filteredGroups.length}
+					on:click={() => currentPage++} 
+					disabled={currentPage * rowsPerPage >= filteredGroups.length}
+				>
+					Weiter
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polyline points="9,18 15,12 9,6"></polyline>
+					</svg>
+				</button>
+			</div>
+		</div>
+	{/if}
+</div>
 
 <style>
-.table-container {
-  overflow-x: auto;
-  margin: 1rem 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  max-width: 100%;
-}
+	/* Dashboard Layout */
+	.dashboard-container {
+		padding: var(--spacing-lg);
+		max-width: 1400px;
+		margin: 0 auto;
+		min-height: calc(100vh - 180px);
+		background: var(--bg-light);
+	}
 
-.table-container table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
+	.dashboard-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--spacing-lg);
+		padding: var(--spacing-lg);
+		background: var(--white);
+		border-radius: var(--border-radius-md);
+		box-shadow: var(--shadow-md);
+		border: 1px solid var(--border-light);
+	}
 
-th, td {
-  padding: 0.6rem 0.8rem;
-  border: 1px solid #ddd;
-  text-align: left;
-  vertical-align: top;
-}
+	.dashboard-title {
+		font-size: var(--font-size-2xl);
+		font-weight: var(--font-weight-bold);
+		color: var(--text-primary);
+		margin: 0;
+	}
 
-th.clickable {
-  cursor: pointer;
-  background-color: #f0f8ff;
-}
+	.header-actions {
+		display: flex;
+		gap: var(--spacing-md);
+		align-items: center;
+	}
 
-th {
-  background-color: #f4f4f4;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  font-weight: 600;
-}
+	.data-summary {
+		display: flex;
+		gap: var(--spacing-md);
+		align-items: center;
+	}
 
-.filter-input {
-  width: 100%;
-  padding: 0.2rem;
-  font-size: 0.8rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+	.data-count {
+		padding: var(--spacing-sm) var(--spacing-md);
+		background: var(--info-color);
+		color: var(--white);
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		box-shadow: var(--shadow-sm);
+	}
 
-tbody tr:nth-child(odd) {
-  background-color: #fafafa;
-}
+	.export-btn {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-sm) var(--spacing-md);
+		background: var(--success-color);
+		color: var(--white);
+		border: none;
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		cursor: pointer;
+		transition: background-color var(--transition-smooth);
+	}
 
-tbody tr:hover {
-  background-color: #f1f7ff;
-}
+	.export-btn:hover {
+		background: var(--success-hover);
+	}
 
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.5rem;
-}
+	.export-icon {
+		flex-shrink: 0;
+	}
 
-.group-header {
-  background-color: #e3f2fd !important;
-  font-weight: 600;
-  cursor: pointer;
-}
+	/* Loading, Error and Empty States */
+	.loading-container, .error-container, .empty-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: var(--spacing-2xl);
+		text-align: center;
+		background: var(--white);
+		border-radius: var(--border-radius-md);
+		box-shadow: var(--shadow-md);
+		border: 1px solid var(--border-light);
+	}
 
-.group-header:hover {
-  background-color: #bbdefb !important;
-}
+	.loading-spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid var(--bg-light);
+		border-top: 4px solid var(--info-color);
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: var(--spacing-md);
+	}
 
-.group-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
 
-.toggle-icon {
-  color: #1976d2;
-  font-weight: bold;
-}
+	.loading-text, .error-message, .empty-message {
+		font-size: var(--font-size-lg);
+		color: var(--text-muted);
+		margin: 0;
+	}
 
-.group-summary {
-  font-style: italic;
-  color: #666;
-}
+	/* Table Styles */
+	.table-wrapper {
+		background: var(--white);
+		border-radius: var(--border-radius-md);
+		box-shadow: var(--shadow-lg);
+		border: 1px solid var(--border-light);
+		overflow: hidden;
+		margin-bottom: var(--spacing-lg);
+	}
 
-.product-row {
-  background-color: #f8f9fa;
-}
+	.table-container {
+		overflow-x: auto;
+	}
 
-.product-row:hover {
-  background-color: #e9ecef !important;
-}
+	.data-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: var(--font-size-sm);
+	}
 
-.indent {
-  padding-left: 2rem;
-  border-left: 3px solid #ddd;
-}
+	.header-row {
+		background: var(--bg-light);
+		border-bottom: 2px solid var(--border-medium);
+	}
+
+	.filter-row {
+		background: var(--bg-muted);
+		border-bottom: 1px solid var(--border-light);
+	}
+
+	.table-header {
+		padding: var(--spacing-md) var(--spacing-lg);
+		text-align: left;
+		border-right: 1px solid var(--border-light);
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-secondary);
+	}
+
+	.table-header:last-child {
+		border-right: none;
+	}
+
+	.table-header.sortable {
+		cursor: pointer;
+		transition: background-color var(--transition-smooth);
+	}
+
+	.table-header.sortable:hover {
+		background: var(--bg-hover);
+	}
+
+	.expand-column {
+		width: 140px;
+		min-width: 140px;
+	}
+
+	.header-content {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-sm);
+	}
+
+	.header-label {
+		font-size: var(--font-size-sm);
+	}
+
+	.sort-icon {
+		color: var(--info-color);
+		display: flex;
+		align-items: center;
+	}
+
+	.filter-cell {
+		padding: var(--spacing-sm) var(--spacing-lg);
+		border-right: 1px solid var(--border-light);
+	}
+
+	.filter-cell:last-child {
+		border-right: none;
+	}
+
+	.filter-input {
+		width: 100%;
+		padding: var(--spacing-sm);
+		border: 1px solid var(--border-medium);
+		border-radius: var(--border-radius-sm);
+		font-size: var(--font-size-xs);
+		background: var(--white);
+		transition: border-color var(--transition-smooth);
+	}
+
+	.filter-input:focus {
+		outline: none;
+		border-color: var(--info-color);
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+	}
+
+	/* Group Header Styles */
+	.group-header-row {
+		background: var(--primary-light);
+		border-bottom: 1px solid var(--border-medium);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+	}
+
+	.group-header-row:hover {
+		background: var(--bg-hover);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	}
+
+	.group-toggle-cell {
+		padding: var(--spacing-md) var(--spacing-lg);
+		border-right: 1px solid var(--border-light);
+	}
+
+	.group-header-cell {
+		padding: var(--spacing-md) var(--spacing-lg);
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-primary);
+		border-right: 1px solid var(--border-light);
+	}
+
+	.group-header-cell:last-child {
+		border-right: none;
+	}
+
+	.group-toggle {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+	}
+
+	.toggle-icon {
+		color: var(--primary-color);
+		display: flex;
+		align-items: center;
+		transition: transform var(--transition-smooth);
+	}
+
+	.etikett-label {
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-primary);
+	}
+
+	.article-count {
+		padding: var(--spacing-xs) var(--spacing-sm);
+		background: var(--info-color);
+		color: var(--white);
+		border-radius: var(--border-radius-sm);
+		font-size: var(--font-size-xs);
+		font-weight: var(--font-weight-medium);
+	}
+
+	/* Product Row Styles */
+	.product-row {
+		background: var(--bg-card);
+		border-bottom: 1px solid var(--border-light);
+		transition: all var(--transition-smooth);
+	}
+
+	.product-row:hover {
+		background: var(--bg-hover);
+		transform: translateY(-1px);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+	}
+
+	.product-indent-cell {
+		padding: var(--spacing-sm) var(--spacing-lg);
+		border-right: 1px solid var(--border-light);
+		position: relative;
+		width: 140px;
+		min-width: 140px;
+	}
+
+	.indent-line {
+		position: absolute;
+		left: var(--spacing-xl);
+		top: 0;
+		bottom: 0;
+		width: 3px;
+		background: var(--info-color);
+		border-radius: var(--border-radius-full);
+	}
+
+	.data-cell {
+		padding: var(--spacing-sm) var(--spacing-lg);
+		border-right: 1px solid var(--border-light);
+		color: var(--text-secondary);
+	}
+
+	.data-cell:last-child {
+		border-right: none;
+	}
+
+	/* Pagination Styles */
+	.pagination-container {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: var(--spacing-lg);
+		background: var(--white);
+		border-radius: var(--border-radius-md);
+		box-shadow: var(--shadow-sm);
+		border: 1px solid var(--border-light);
+	}
+
+	.pagination-info {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-xs);
+	}
+
+	.pagination-text {
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-medium);
+		color: var(--text-primary);
+	}
+
+	.pagination-count {
+		font-size: var(--font-size-xs);
+		color: var(--text-muted);
+	}
+
+	.pagination-controls {
+		display: flex;
+		gap: var(--spacing-sm);
+	}
+
+	.pagination-btn {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-sm);
+		padding: var(--spacing-sm) var(--spacing-md);
+		background: var(--white);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-medium);
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-sm);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+	}
+
+	.pagination-btn:hover:not(.disabled) {
+		background: var(--info-color);
+		color: var(--white);
+		border-color: var(--info-color);
+		transform: translateY(-1px);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.pagination-btn.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		background: var(--bg-light);
+		color: var(--text-muted);
+	}
+
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.dashboard-container {
+			padding: var(--spacing-md);
+		}
+
+		.dashboard-header {
+			flex-direction: column;
+			gap: var(--spacing-md);
+			align-items: stretch;
+		}
+
+		.header-actions {
+			justify-content: space-between;
+		}
+
+		.data-summary {
+			flex: 1;
+			justify-content: flex-start;
+		}
+
+		.dashboard-title {
+			font-size: var(--font-size-xl);
+			text-align: center;
+		}
+
+		.table-container {
+			font-size: var(--font-size-xs);
+		}
+
+		.table-header,
+		.group-header-cell,
+		.group-toggle-cell,
+		.data-cell,
+		.product-indent-cell {
+			padding: var(--spacing-sm) var(--spacing-md);
+		}
+
+		.expand-column,
+		.product-indent-cell {
+			width: 100px;
+			min-width: 100px;
+		}
+
+		.pagination-container {
+			flex-direction: column;
+			gap: var(--spacing-md);
+			align-items: stretch;
+		}
+
+		.pagination-controls {
+			justify-content: center;
+		}
+
+		.data-count {
+			font-size: var(--font-size-xs);
+			padding: var(--spacing-xs) var(--spacing-sm);
+		}
+
+		.export-btn {
+			padding: var(--spacing-sm) var(--spacing-md);
+			font-size: var(--font-size-xs);
+		}
+	}
+
+	@media (max-width: 480px) {
+		.dashboard-title {
+			font-size: var(--font-size-lg);
+		}
+
+		.table-container {
+			font-size: 11px;
+		}
+
+		.table-header,
+		.group-header-cell,
+		.group-toggle-cell,
+		.data-cell,
+		.product-indent-cell {
+			padding: var(--spacing-xs) var(--spacing-sm);
+		}
+
+		.expand-column,
+		.product-indent-cell {
+			width: 80px;
+			min-width: 80px;
+		}
+
+		.header-actions {
+			flex-direction: column;
+			gap: var(--spacing-sm);
+		}
+
+		.data-summary {
+			justify-content: center;
+		}
+	}
 </style>

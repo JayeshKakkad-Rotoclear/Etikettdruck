@@ -12,7 +12,7 @@
 		margin-top: auto;
 		padding: 0.5rem 0;
 		text-align: center;
-		background-color: #123345;
+		background: linear-gradient(225deg, var(--primary-color) 20%, var(--primary-hover) 100%);
 		color: #fff;
 		font-size: 0.5rem;
         position: sticky;

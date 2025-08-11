@@ -14,6 +14,8 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 
 ### Core Features
 
+- **Role-Based Access Control (RBAC)** - Comprehensive 6-level user role system with secure authentication
+- **User Management** - Complete user administration with profile management and role assignment
 - **Multi-Product Quality Control** - Standardized testing protocols for C Pro, C2, C Basic, and Kamerakopf product lines
 - **Dual-Inspector Workflow** - Sequential testing by Prüfer A and Prüfer B with comprehensive validation
 - **Comprehensive Dashboard** - Real-time statistics, production metrics, and performance analytics
@@ -21,6 +23,7 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 - **Database Management** - Complete data viewing, searching, and management capabilities
 - **Packaging Support** - Outer carton labeling with dual-mode (scan/manual) product selection
 - **Accessory Management** - Zubehör (accessory) label creation and tracking
+- **Secure Authentication** - JWT-based authentication with HTTP-only cookies and session management
 
 ## Technical Architecture
 
@@ -34,6 +37,9 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 - **Prisma 6.13.0** - Type-safe database ORM
 - **PostgreSQL** - Multi-schema database architecture
 - **Node.js APIs** - RESTful API endpoints for all operations
+- **JWT Authentication** - Secure token-based authentication with HTTP-only cookies
+- **bcryptjs** - Password hashing and security
+- **Role-Based Authorization** - Comprehensive access control system
 
 ### Database Design
 ```
@@ -44,8 +50,35 @@ Schemas:
 ├── kk_kamerakopf          (Camera Heads)
 ├── zubehoer_etikett       (Accessory Labels)
 ├── outer_karton           (Outer Carton Labels)
-└── outer_karton_entry     (Carton Contents)
+├── outer_karton_entry     (Carton Contents)
+└── User                   (User Management & Authentication)
 ```
+
+## Authentication & Security
+
+### Role-Based Access Control (RBAC)
+The system implements a comprehensive 6-level role hierarchy:
+
+1. **VIEWER** - Basic read-only access to authorized content
+2. **PRUEFER_B** - Inspector B role with testing capabilities for Prüfer B workflows
+3. **PRUEFER_A** - Inspector A role with testing capabilities for Prüfer A workflows  
+4. **PRUEFER_AB** - Combined inspector role with access to both A and B workflows
+5. **MANAGEMENT** - Management access including dashboard analytics and reporting
+6. **ADMIN** - Full system administration including user management and database operations
+
+### Security Features
+- **JWT Authentication** - Secure token-based authentication with automatic expiration
+- **HTTP-Only Cookies** - Prevents XSS attacks by making tokens inaccessible to client-side scripts
+- **Password Hashing** - bcryptjs-based secure password storage
+- **Route Protection** - Layout-based guards preventing unauthorized access to protected pages
+- **Session Management** - Automatic session validation and renewal
+- **Role Validation** - Server-side permission checking for all protected operations
+
+### User Management
+- **User Administration** - Complete CRUD operations for user accounts
+- **Role Assignment** - Flexible role-based permission assignment
+- **Profile Management** - User profile editing and password change functionality
+- **Initial Setup** - First-time setup wizard for creating the initial admin user
 
 ## Product Lines
 
@@ -200,14 +233,27 @@ echo "DATABASE_URL=postgresql://username:password@localhost:5432/etikettdrucker"
 # Generate Prisma client
 npx prisma generate
 
-# Run database migrations
+# Run database migrations and seed data
 npx prisma db push
+npm run db:seed
 ```
 
-4. **Start development server:**
+4. **Initial setup:**
 ```bash
+# Start the development server
 npm run dev
+
+# Navigate to http://localhost:5173/setup to create the first admin user
+# This is a one-time setup required before the system can be used
 ```
+
+5. **Access the application:**
+```bash
+# The application will be available at http://localhost:5173
+# Login with your admin credentials to access the system
+```
+
+**Important:** The application requires authentication for all operations. After setup, users must log in to access any functionality. Roles determine what features each user can access.
 
 The application will be available at `http://localhost:5173`
 
@@ -230,18 +276,34 @@ npm run preview
 ```
 etikettendruck/
 ├── prisma/
-│   └── schema.prisma              # Database schema definitions
+│   ├── schema.prisma              # Database schema definitions
+│   ├── migrations/                # Database migration files
+│   └── seed.ts                    # Database seeding script
 ├── src/
 │   ├── lib/
 │   │   ├── components/            # Reusable Svelte components
 │   │   │   ├── header.svelte      # Navigation header
 │   │   │   ├── footer.svelte      # Application footer
 │   │   │   ├── booleanRadio.svelte # Boolean selection component
-│   │   │   └── selectRadio.svelte  # Multiple choice component
+│   │   │   ├── selectRadio.svelte  # Multiple choice component
+│   │   │   └── RouteGuard.svelte   # Route protection component
+│   │   ├── stores/               # Svelte stores
+│   │   │   └── auth.ts           # Authentication store
+│   │   ├── auth.ts               # Server-side authentication
+│   │   ├── client-auth.ts        # Client-side authentication utilities
+│   │   ├── roleUtils.ts          # Role validation utilities
 │   │   ├── index.ts              # Library exports
 │   │   └── version.ts            # Version management
 │   ├── routes/
 │   │   ├── api/                  # API endpoints
+│   │   │   ├── auth/             # Authentication API routes
+│   │   │   │   ├── login/        # Login endpoint
+│   │   │   │   ├── logout/       # Logout endpoint
+│   │   │   │   └── check/        # Auth status check
+│   │   │   ├── users/            # User management API
+│   │   │   ├── admin/            # Admin-specific API routes
+│   │   │   ├── setup/            # System setup API
+│   │   │   ├── database/         # Database management API
 │   │   │   ├── cpro/             # C Pro API routes
 │   │   │   ├── c2/               # C2 API routes  
 │   │   │   ├── cbasic/           # C Basic API routes
@@ -249,21 +311,35 @@ etikettendruck/
 │   │   │   ├── zubehoer/         # Accessory API routes
 │   │   │   ├── outerkarton/      # Outer carton API routes
 │   │   │   └── dashboard-stats/  # Dashboard statistics API
-│   │   ├── cpro/                 # C Pro testing forms
+│   │   ├── admin/                # Administration pages
+│   │   │   └── users/            # User management interface
+│   │   ├── login/                # Login page
+│   │   ├── setup/                # Initial system setup
+│   │   ├── profile/              # User profile management
+│   │   ├── database/             # Database management interface
+│   │   ├── debug/                # System debug information
+│   │   ├── cpro/                 # C Pro testing forms (role-protected)
 │   │   │   ├── pruefer-a/        # Inspector A form
 │   │   │   ├── pruefer-b/        # Inspector B form
 │   │   │   └── qr-preview/       # QR code preview
-│   │   ├── c2/                   # C2 testing forms
-│   │   ├── cbasic/               # C Basic testing forms
-│   │   ├── kk/                   # Kamerakopf testing forms
-│   │   ├── dashboard/            # Database management views
+│   │   ├── c2/                   # C2 testing forms (role-protected)
+│   │   ├── cbasic/               # C Basic testing forms (role-protected)
+│   │   ├── kk/                   # Kamerakopf testing forms (role-protected)
+│   │   ├── dashboard/            # Analytics dashboards (role-protected)
+│   │   │   ├── cpro/             # C Pro dashboard
+│   │   │   ├── c2/               # C2 dashboard
+│   │   │   └── cbasic/           # C Basic dashboard
 │   │   ├── zubehoer/             # Accessory label creation
 │   │   ├── outer-karton/         # Outer carton labeling
-│   │   ├── +layout.svelte        # Main application layout
+│   │   ├── +layout.svelte        # Main application layout with auth
 │   │   └── +page.svelte          # Dashboard home page
+│   ├── hooks.server.ts           # SvelteKit server hooks for auth
 │   ├── app.html                  # HTML template
-│   └── app.d.ts                  # TypeScript definitions
+│   └── app.d.ts                  # TypeScript definitions with auth types
 ├── static/                       # Static assets
+├── scripts/                      # Development and deployment scripts
+├── .vscode/                      # VS Code workspace configuration
+├── ROLES.md                      # Role hierarchy documentation
 ├── package.json                  # Dependencies and scripts
 ├── vite.config.ts               # Vite configuration
 ├── svelte.config.js             # SvelteKit configuration
@@ -275,13 +351,19 @@ etikettendruck/
 
 ### Environment Variables
 ```bash
-# Database
+# Database (Required)
 DATABASE_URL=postgresql://username:password@localhost:5432/etikettdrucker
 
-# Optional: Custom configurations
+# Authentication (Optional - defaults provided)
+JWT_SECRET=your-super-secret-jwt-key-here
+JWT_EXPIRES_IN=7d
+
+# Application (Optional)
 VITE_APP_TITLE="Etikettdrucker"
 VITE_API_BASE_URL="http://localhost:5173"
 ```
+
+**Important:** If `JWT_SECRET` is not provided, the system will generate a random secret on startup. For production deployments, always set a secure, persistent JWT secret.
 
 ### Database Schemas
 The application uses multiple PostgreSQL schemas for data organization:
@@ -292,6 +374,7 @@ The application uses multiple PostgreSQL schemas for data organization:
 - `zubehoer_etikett` - Accessory label data
 - `outer_karton` - Outer carton data
 - `outer_karton_entry` - Carton content tracking
+- `User` - User accounts and authentication data
 
 ## Available Scripts
 
@@ -301,6 +384,8 @@ npm run build        # Build for production
 npm run preview      # Preview production build
 npm run check        # Run TypeScript checking
 npm run check:watch  # Watch mode TypeScript checking
+npm run db:seed      # Seed database with initial data
+npm run db:setup     # Setup database (push schema + seed data)
 npx prisma studio    # Open Prisma database browser
 npx prisma generate  # Generate Prisma client
 npx prisma db push   # Push schema changes to database
@@ -323,15 +408,26 @@ Each product line follows standardized testing protocols ensuring:
 
 ## Security Considerations
 
+### Authentication & Authorization
+- **JWT Authentication** - Secure token-based authentication with HTTP-only cookies
+- **Password Security** - bcryptjs hashing with salt for secure password storage
+- **Session Management** - Automatic token validation and renewal
+- **XSS Protection** - HTTP-only cookies prevent client-side script access to tokens
+- **CSRF Protection** - SvelteKit's built-in CSRF protection mechanisms
+- **Role-Based Access Control** - 6-level hierarchy with granular permission management
+
 ### Data Protection
 - **Input Validation** - All user inputs are validated and sanitized
 - **SQL Injection Prevention** - Prisma ORM provides built-in protection
 - **Type Safety** - TypeScript ensures compile-time type checking
-- **Access Control** - Role-based access to sensitive operations
+- **Route Protection** - Server-side authentication validation for all protected routes
+- **Sensitive Data** - Passwords are never stored in plain text or logged
 
 ### Audit Trail
-- **Complete Logging** - All database operations are tracked
-- **User Attribution** - Inspector identification for all test results
+- **Authentication Logging** - All login attempts and session activities tracked
+- **User Attribution** - Complete user identification for all operations
+- **Role Changes** - Administrator actions and role modifications logged
+- **Database Operations** - All CRUD operations tracked with user context
 - **Timestamp Tracking** - Precise timing of all operations
 - **Change History** - Complete revision history for all records
 
@@ -370,13 +466,19 @@ This project is proprietary software developed for Rotoclear GmbH. All rights re
 ## Version History
 
 ### v0.0.1 (Current)
-- Initial release with complete quality control workflow
-- Dashboard with comprehensive analytics
-- Multi-product testing protocols
-- Label generation and printing capabilities
-- Database management and search functionality
-- Outer carton dual-mode labeling system
-- Accessory management and tracking
+- **Authentication System** - Complete JWT-based authentication with HTTP-only cookies
+- **Role-Based Access Control** - 6-level user hierarchy (VIEWER → PRUEFER_B → PRUEFER_A → PRUEFER_AB → MANAGEMENT → ADMIN)
+- **User Management** - Comprehensive user administration with role assignment and profile management
+- **Route Protection** - Layout-based guards protecting all sensitive operations
+- **Security Features** - Password hashing, session management, and XSS protection
+- **Initial Setup Wizard** - First-time admin user creation and system configuration
+- **Complete Quality Control Workflow** - Multi-product testing protocols for C Pro, C2, C Basic, and Kamerakopf
+- **Dashboard Analytics** - Real-time statistics, production metrics, and performance analytics  
+- **Label Generation** - Automated QR code generation and printing capabilities
+- **Database Management** - Complete data viewing, searching, and administrative tools
+- **Outer Carton Labeling** - Dual-mode (scan/manual) product selection system
+- **Accessory Management** - Zubehör label creation and tracking
+- **Enhanced UI/UX** - Comprehensive page titles and improved navigation
 
 ---
 

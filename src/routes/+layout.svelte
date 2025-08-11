@@ -1,4 +1,5 @@
 <script>
+    import '../app.css';
     import { onMount } from 'svelte';
     import { authStore, AuthService } from '$lib/stores/auth.js';
     import Header from '$lib/components/header.svelte';

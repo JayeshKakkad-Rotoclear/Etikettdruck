@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { slide } from 'svelte/transition';
 
   // Scanning mode variables
   let scannedQRs: string[] = [];
@@ -12,6 +13,15 @@
   let availableZubehoer: any[] = [];
   let manualSelections: Record<string, { selected: boolean; serialNumber: string; etikettId: string }> = {};
   let manualEntries: any[] = [];
+  
+  // Collapsible categories state
+  let expandedCategories: Record<string, boolean> = {
+    cpro: false,
+    c2: false,
+    cbasic: false,
+    kk: false,
+    zubehoer: false
+  };
   
   // Common variables
   let submitSuccess = false;
@@ -173,417 +183,1012 @@
     error = null;
     submitSuccess = false;
   }
+
+  function toggleCategory(category: string) {
+    expandedCategories[category] = !expandedCategories[category];
+  }
+
+  function getSelectedCount(categoryType: string): number {
+    if (categoryType === 'zubehoer') {
+      return availableZubehoer.filter(item => 
+        manualSelections[`zubehoer_${item.id}`]?.selected
+      ).length;
+    } else {
+      return availableProducts.filter(product => 
+        product.type === categoryType && 
+        manualSelections[`${product.type}_${product.serialnummer}`]?.selected
+      ).length;
+    }
+  }
 </script>
 
-<form on:submit|preventDefault={submitOuterKarton} class="outer-karton-form">
+<svelte:head>
+  <title>Außenkarton - QR-Scan Übersicht</title>
+</svelte:head>
+
+<div class="form-container">
+  <form on:submit|preventDefault={submitOuterKarton} class="form">
     <h1 class="page-title">Außenkarton – QR-Scan Übersicht</h1>
 
     <div class="mode-switcher">
-    <button 
+      <button 
+        type="button"
         class="mode-button" 
         class:active={!manualMode}
         on:click={() => manualMode = false}
-    >
+      >
         Scan-Modus
-    </button>
-    <button 
+      </button>
+      <button 
+        type="button"
         class="mode-button" 
         class:active={manualMode}
         on:click={() => manualMode = true}
-    >
+      >
         Manuelle Auswahl
-    </button>
+      </button>
     </div>
 
     {#if !manualMode}
     <!-- Scanning Mode -->
-    <div class="input-section">
+    <div class="scan-section">
+      <div class="input-section">
         <label for="scanInput" class="input-label">QR-Code scannen oder einfügen:</label>
-        <input 
-        id="scanInput" 
-        type="text" 
-        bind:value={scanInput} 
-        on:keydown={(e) => e.key === 'Enter' && handleScanInput()} 
-        class="scan-input" 
-        placeholder="QR-Code scannen oder einfügen" 
-        />
-    </div>
-
-    {#if scannedQRs.length > 0}
-        <div class="results-section">
-        <h2 class="section-title">Scans ({scannedQRs.length}):</h2>
-        <ul class="scan-list">
-            {#each scannedQRs as qr, index}
-            <li>QR {index + 1}</li>
-            {/each}
-        </ul>
+        <div class="input-wrapper">
+          <input 
+            id="scanInput" 
+            type="text" 
+            bind:value={scanInput} 
+            on:keydown={(e) => e.key === 'Enter' && handleScanInput()} 
+            class="scan-input"
+          />
+          <button type="button" class="scan-button" on:click={handleScanInput}>
+            Hinzufügen
+          </button>
         </div>
-    {/if}
+      </div>
+
+      {#if scannedQRs.length > 0}
+        <div class="results-section">
+          <h2 class="section-title">
+            Gescannte QR-Codes ({scannedQRs.length})
+          </h2>
+          <div class="scan-grid">
+            {#each scannedQRs as qr, index}
+              <div class="scan-item">
+                <span class="scan-number">QR {index + 1}</span>
+                <button type="button" class="remove-button" on:click={() => scannedQRs = scannedQRs.filter((_, i) => i !== index)}>
+                  ✕
+                </button>
+              </div>
+            {/each}
+          </div>
+        </div>
+      {/if}
+    </div>
     {:else}
     <!-- Manual Selection Mode -->
     <div class="manual-section">
-        <h2 class="section-title">Produkte manuell auswählen</h2>
-        
-        <div class="product-categories">
+      <h2 class="section-title">
+        Produkte manuell auswählen
+      </h2>
+      
+      <div class="product-categories">
         <!-- C Pro Products -->
         {#if availableProducts.filter(p => p.type === 'cpro').length > 0}
-            <div class="category-container">
-            <h3 class="category-title">C Pro Steuerrechner</h3>
-            {#each availableProducts.filter(p => p.type === 'cpro') as product}
-                <div class="product-item">
-                <label class="product-label">
-                    <input 
-                    type="checkbox" 
-                    bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
-                    />
-                    {product.artikel_bezeichnung} - {product.serialnummer}
-                </label>
+          <div class="category-container">
+            <button 
+              type="button" 
+              class="category-header"
+              class:expanded={expandedCategories.cpro}
+              on:click={() => toggleCategory('cpro')}
+            >
+              <div class="category-header-content">
+                <h3 class="category-title">C Pro Steuerrechner</h3>
+                <div class="category-info">
+                  <span class="category-count">
+                    {getSelectedCount('cpro')} / {availableProducts.filter(p => p.type === 'cpro').length} ausgewählt
+                  </span>
+                  <svg class="category-arrow" class:rotated={expandedCategories.cpro} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
-            {/each}
-            </div>
+              </div>
+            </button>
+            
+            {#if expandedCategories.cpro}
+              <div class="product-list" in:slide="{{ duration: 300 }}" out:slide="{{ duration: 200 }}">
+                {#each availableProducts.filter(p => p.type === 'cpro') as product}
+                  <div class="product-row" class:selected={manualSelections[`${product.type}_${product.serialnummer}`].selected}>
+                    <label class="product-item">
+                      <input 
+                        type="checkbox" 
+                        bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        class="product-checkbox"
+                      />
+                      <div class="product-content">
+                        <span class="product-name">{product.artikel_bezeichnung}</span>
+                        <span class="product-serial">SN: {product.serialnummer}</span>
+                      </div>
+                    </label>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
 
         <!-- C2 Products -->
         {#if availableProducts.filter(p => p.type === 'c2').length > 0}
-            <div class="category-container">
-            <h3 class="category-title">C2 Steuerrechner</h3>
-            {#each availableProducts.filter(p => p.type === 'c2') as product}
-                <div class="product-item">
-                <label class="product-label">
-                    <input 
-                    type="checkbox" 
-                    bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
-                    />
-                    {product.artikel_bezeichnung} - {product.serialnummer}
-                </label>
+          <div class="category-container">
+            <button 
+              type="button" 
+              class="category-header"
+              class:expanded={expandedCategories.c2}
+              on:click={() => toggleCategory('c2')}
+            >
+              <div class="category-header-content">
+                <h3 class="category-title">C2 Steuerrechner</h3>
+                <div class="category-info">
+                  <span class="category-count">
+                    {getSelectedCount('c2')} / {availableProducts.filter(p => p.type === 'c2').length} ausgewählt
+                  </span>
+                  <svg class="category-arrow" class:rotated={expandedCategories.c2} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
-            {/each}
-            </div>
+              </div>
+            </button>
+            
+            {#if expandedCategories.c2}
+              <div class="product-list" in:slide="{{ duration: 300 }}" out:slide="{{ duration: 200 }}">
+                {#each availableProducts.filter(p => p.type === 'c2') as product}
+                  <div class="product-row" class:selected={manualSelections[`${product.type}_${product.serialnummer}`].selected}>
+                    <label class="product-item">
+                      <input 
+                        type="checkbox" 
+                        bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        class="product-checkbox"
+                      />
+                      <div class="product-content">
+                        <span class="product-name">{product.artikel_bezeichnung}</span>
+                        <span class="product-serial">SN: {product.serialnummer}</span>
+                      </div>
+                    </label>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
 
         <!-- C Basic Products -->
         {#if availableProducts.filter(p => p.type === 'cbasic').length > 0}
-            <div class="category-container">
-            <h3 class="category-title">C Basic Steuerrechner</h3>
-            {#each availableProducts.filter(p => p.type === 'cbasic') as product}
-                <div class="product-item">
-                <label class="product-label">
-                    <input 
-                    type="checkbox" 
-                    bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
-                    />
-                    {product.artikel_bezeichnung} - {product.serialnummer}
-                </label>
+          <div class="category-container">
+            <button 
+              type="button" 
+              class="category-header"
+              class:expanded={expandedCategories.cbasic}
+              on:click={() => toggleCategory('cbasic')}
+            >
+              <div class="category-header-content">
+                <h3 class="category-title">C Basic Steuerrechner</h3>
+                <div class="category-info">
+                  <span class="category-count">
+                    {getSelectedCount('cbasic')} / {availableProducts.filter(p => p.type === 'cbasic').length} ausgewählt
+                  </span>
+                  <svg class="category-arrow" class:rotated={expandedCategories.cbasic} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
-            {/each}
-            </div>
+              </div>
+            </button>
+            
+            {#if expandedCategories.cbasic}
+              <div class="product-list" in:slide="{{ duration: 300 }}" out:slide="{{ duration: 200 }}">
+                {#each availableProducts.filter(p => p.type === 'cbasic') as product}
+                  <div class="product-row" class:selected={manualSelections[`${product.type}_${product.serialnummer}`].selected}>
+                    <label class="product-item">
+                      <input 
+                        type="checkbox" 
+                        bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        class="product-checkbox"
+                      />
+                      <div class="product-content">
+                        <span class="product-name">{product.artikel_bezeichnung}</span>
+                        <span class="product-serial">SN: {product.serialnummer}</span>
+                      </div>
+                    </label>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
 
         <!-- KK Products -->
         {#if availableProducts.filter(p => p.type === 'kk').length > 0}
-            <div class="category-container">
-            <h3 class="category-title">Kamerakopf</h3>
-            {#each availableProducts.filter(p => p.type === 'kk') as product}
-                <div class="product-item">
-                <label class="product-label">
-                    <input 
-                    type="checkbox" 
-                    bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
-                    />
-                    {product.artikel_bezeichnung} - {product.serialnummer}
-                </label>
+          <div class="category-container">
+            <button 
+              type="button" 
+              class="category-header"
+              class:expanded={expandedCategories.kk}
+              on:click={() => toggleCategory('kk')}
+            >
+              <div class="category-header-content">
+                <h3 class="category-title">Kamerakopf</h3>
+                <div class="category-info">
+                  <span class="category-count">
+                    {getSelectedCount('kk')} / {availableProducts.filter(p => p.type === 'kk').length} ausgewählt
+                  </span>
+                  <svg class="category-arrow" class:rotated={expandedCategories.kk} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
-            {/each}
-            </div>
+              </div>
+            </button>
+            
+            {#if expandedCategories.kk}
+              <div class="product-list" in:slide="{{ duration: 300 }}" out:slide="{{ duration: 200 }}">
+                {#each availableProducts.filter(p => p.type === 'kk') as product}
+                  <div class="product-row" class:selected={manualSelections[`${product.type}_${product.serialnummer}`].selected}>
+                    <label class="product-item">
+                      <input 
+                        type="checkbox" 
+                        bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        class="product-checkbox"
+                      />
+                      <div class="product-content">
+                        <span class="product-name">{product.artikel_bezeichnung}</span>
+                        <span class="product-serial">SN: {product.serialnummer}</span>
+                      </div>
+                    </label>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
 
         <!-- Zubehör Products -->
         {#if availableZubehoer.length > 0}
-            <div class="category-container">
-            <h3 class="category-title">Zubehör</h3>
-            {#each availableZubehoer as zubehoer}
-                <div class="product-item">
-                <label class="product-label">
-                    <input 
-                    type="checkbox" 
-                    bind:checked={manualSelections[`zubehoer_${zubehoer.id}`].selected}
-                    />
-                    Zubehör Etikett #{zubehoer.id} ({zubehoer.entries?.length || 0} Artikel)
-                </label>
+          <div class="category-container">
+            <button 
+              type="button" 
+              class="category-header"
+              class:expanded={expandedCategories.zubehoer}
+              on:click={() => toggleCategory('zubehoer')}
+            >
+              <div class="category-header-content">
+                <h3 class="category-title">Zubehör</h3>
+                <div class="category-info">
+                  <span class="category-count">
+                    {getSelectedCount('zubehoer')} / {availableZubehoer.length} ausgewählt
+                  </span>
+                  <svg class="category-arrow" class:rotated={expandedCategories.zubehoer} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </div>
-            {/each}
-            </div>
+              </div>
+            </button>
+            
+            {#if expandedCategories.zubehoer}
+              <div class="product-list" in:slide="{{ duration: 300 }}" out:slide="{{ duration: 200 }}">
+                {#each availableZubehoer as zubehoer}
+                  <div class="product-row" class:selected={manualSelections[`zubehoer_${zubehoer.id}`].selected}>
+                    <label class="product-item">
+                      <input 
+                        type="checkbox" 
+                        bind:checked={manualSelections[`zubehoer_${zubehoer.id}`].selected}
+                        class="product-checkbox"
+                      />
+                      <div class="product-content">
+                        <span class="product-name">Zubehör Etikett #{zubehoer.id}</span>
+                        <span class="product-serial">({zubehoer.entries?.length || 0} Artikel)</span>
+                      </div>
+                    </label>
+                  </div>
+                {/each}
+              </div>
+            {/if}
+          </div>
         {/if}
-        </div>
+      </div>
     </div>
     {/if}
 
     {#if groupedEntries.length > 0}
     <div class="preview-section">
-        <h3 class="section-title">Vorschau:</h3>
-        <div class="table-container">
+      <h3 class="section-title">
+        Vorschau
+      </h3>
+      <div class="table-container">
         <table class="preview-table">
-            <thead>
+          <thead>
             <tr>
-                <th>Artikelnummer</th>
-                <th>Artikelbezeichnung</th>
-                <th>Menge</th>
-                <th>Seriennummer</th>
+              <th>Artikelnummer</th>
+              <th>Artikelbezeichnung</th>
+              <th>Menge</th>
+              <th>Seriennummer</th>
             </tr>
-            </thead>
-            <tbody>
+          </thead>
+          <tbody>
             {#each groupedEntries as entry}
-                <tr>
-                <td>{entry.artikelnummer}</td>
-                <td>{entry.artikelbezeichnung}</td>
-                <td>{entry.menge}</td>
-                <td>{entry.serialnummer || '-'}</td>
-                </tr>
+              <tr>
+                <td class="table-cell">{entry.artikelnummer}</td>
+                <td class="table-cell">{entry.artikelbezeichnung}</td>
+                <td class="table-cell numeric">{entry.menge}</td>
+                <td class="table-cell">{entry.serialnummer || '-'}</td>
+              </tr>
             {/each}
-            </tbody>
+          </tbody>
         </table>
-        </div>
+      </div>
 
-        <button class="create-button">
+      <button type="submit" class="create-button">
         Etikett erstellen
-        </button>
+      </button>
     </div>
     {/if}
 
     {#if submitSuccess}
-    <p class="success">Etikett erfolgreich gespeichert und gedruckt!</p>
+      <div class="alert success">
+        Etikett erfolgreich gespeichert und gedruckt!
+      </div>
     {/if}
 
     {#if error}
-    <p class="error">Fehler: {error}</p>
+      <div class="alert error">
+        Fehler: {error}
+      </div>
     {/if}
-</form>
+  </form>
+</div>
 
 <style>
+  .form-container {
+    min-height: 100vh;
+    padding: var(--spacing-lg) var(--spacing-md);
+    /* background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%); */
+  }
 
-	form.outer-karton-form {
-		max-width: 600px;
-		margin: 70px auto;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		padding: 1rem 3rem;
-		border-radius: 8px;
-		background: #fff;
-		box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-	}
+  .form {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-medium);
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  }
 
   .page-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .mode-switcher {
     display: flex;
-    gap: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xl);
+    background: var(--bg-light);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
   }
 
   .mode-button {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    background: #f9f9f9;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 2px solid var(--border-light);
+    background: var(--white);
+    color: var(--text-secondary);
+    border-radius: var(--border-radius-md);
     cursor: pointer;
-    border-radius: 4px;
+    transition: all var(--transition-smooth);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    min-height: 50px;
+  }
+
+  .mode-button:hover {
+    border-color: var(--primary-color);
+    background: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 
   .mode-button.active {
-    background: #123345;
-    color: white;
-    border-color: #123345;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--white);
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-md);
+  }
+
+  .scan-section {
+    background: var(--bg-light);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--border-light);
   }
 
   .input-section {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-xl);
   }
 
   .input-label {
     display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+    margin-bottom: var(--spacing-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+  }
+
+  .input-wrapper {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: stretch;
   }
 
   .scan-input {
-    width: 100%;
-    border: 1px solid #ccc;
-    padding: 0.5rem;
-    border-radius: 4px;
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 2px solid var(--border-medium);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-smooth);
+    background: var(--white);
+    min-height: 50px;
+    box-sizing: border-box;
   }
 
-  .results-section {
-    padding: 1rem;
-    margin-bottom: 1rem;
+  .scan-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    background: var(--bg-light);
+  }
+
+  .scan-button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    font-weight: var(--font-weight-semibold);
+    min-height: 50px;
+    white-space: nowrap;
+  }
+
+  .scan-button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
   }
 
   .section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--border-light);
+    padding-bottom: var(--spacing-md);
   }
 
-  .scan-list {
-    list-style: disc;
-    padding-left: 1.5rem;
+  .results-section {
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .scan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+  }
+
+  .scan-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, var(--bg-light), var(--white));
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-smooth);
+  }
+
+  .scan-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-light);
+  }
+
+  .scan-number {
+    font-weight: var(--font-weight-semibold);
+    color: var(--primary-color);
+  }
+
+  .remove-button {
+    background: var(--danger-color);
+    color: var(--white);
+    border: none;
+    border-radius: var(--border-radius-full);
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-smooth);
+    font-size: var(--font-size-sm);
+  }
+
+  .remove-button:hover {
+    background: var(--danger-hover);
+    transform: scale(1.1);
   }
 
   .manual-section {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    background: var(--bg-light);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    border: 1px solid var(--border-light);
   }
 
   .product-categories {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    display: grid;
+    gap: var(--spacing-xl);
   }
 
   .category-container {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-    background: #f9f9f9;
+    background: var(--white);
+    border: 2px solid var(--border-light);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+  }
+
+  .category-container:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-light);
+  }
+
+  .category-header {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all var(--transition-smooth);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    margin: calc(-1 * var(--spacing-md));
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .category-header:hover {
+    background: var(--primary-light);
+  }
+
+  .category-header.expanded {
+    background: linear-gradient(135deg, var(--primary-light), var(--white));
+    border-bottom: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+    margin-bottom: 0;
+  }
+
+  .category-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .category-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #333;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    margin: 0;
+  }
+
+  .category-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+  }
+
+  .category-count {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
+    background: var(--bg-light);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--border-light);
+  }
+
+  .category-arrow {
+    width: 20px;
+    height: 20px;
+    color: var(--primary-color);
+    transition: transform var(--transition-smooth);
+    flex-shrink: 0;
+  }
+
+  .category-arrow.rotated {
+    transform: rotate(180deg);
+  }
+
+  .product-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    background: var(--white);
+    border-top: 1px solid var(--border-light);
+    padding-top: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+  }
+
+  .product-row {
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-smooth);
+    border: 1px solid transparent;
+  }
+
+  .product-row:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateX(4px);
+  }
+
+  .product-row.selected {
+    background: linear-gradient(135deg, var(--primary-light), var(--white));
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
   }
 
   .product-item {
-    margin-bottom: 0.75rem;
-  }
-
-  .product-label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    width: 100%;
+    border-radius: var(--border-radius-md);
+    transition: all var(--transition-smooth);
   }
 
-  .product-label:hover {
-    background: #f0f0f0;
+  .product-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
   }
 
-  .product-label input[type="checkbox"] {
-    width: 1rem;
-    height: 1rem;
+  .product-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .product-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    font-size: var(--font-size-base);
+    line-height: 1.4;
+  }
+
+  .product-serial {
+    font-size: var(--font-size-sm);
+    color: var(--text-muted);
+    font-weight: var(--font-weight-medium);
+    font-family: monospace;
   }
 
   .preview-section {
-    padding: 1rem;
-    margin-bottom: 1rem;
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-xl);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-xl);
   }
 
   .table-container {
-    margin: 1rem 0;
+    margin: var(--spacing-lg) 0;
     overflow-x: auto;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
   }
 
   .preview-table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid #ddd;
-  }
-
-  .preview-table th,
-  .preview-table td {
-    border: 1px solid #ddd;
-    padding: 0.5rem;
-    text-align: left;
+    background: var(--white);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
   }
 
   .preview-table th {
-    background: #f5f5f5;
-    font-weight: 600;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-base);
+    border: none;
+  }
+
+  .preview-table .table-cell {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--border-light);
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    transition: background-color var(--transition-smooth);
+  }
+
+  .preview-table tr:hover .table-cell {
+    background: var(--bg-light);
+  }
+
+  .preview-table tr:last-child .table-cell {
+    border-bottom: none;
+  }
+
+  .table-cell.numeric {
+    text-align: center;
+    font-weight: var(--font-weight-semibold);
   }
 
   .create-button {
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
-    background: #28a745;
-    color: white;
+    width: 100%;
+    max-width: 400px;
+    margin: var(--spacing-xl) auto 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+    color: var(--white);
     border: none;
-    border-radius: 4px;
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
     cursor: pointer;
-    font-size: 1rem;
+    transition: all var(--transition-smooth);
+    min-height: 60px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .create-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .create-button:hover::before {
+    left: 100%;
   }
 
   .create-button:hover {
-    background: #218838;
+    background: linear-gradient(135deg, var(--success-hover), var(--success-color));
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
   }
 
-  .error {
-    color: #dc3545;
-    background: #f8d7da;
-    border: 1px solid #f5c6cb;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin: 1rem;
+  .create-button:active {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
-  .success {
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    border-radius: var(--border-radius-md);
+    font-weight: var(--font-weight-medium);
+    margin: var(--spacing-lg) 0;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .alert.success {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
     color: #155724;
-    background: #d4edda;
-    border: 1px solid #c3e6cb;
-    padding: 0.75rem;
-    border-radius: 4px;
-    margin: 1rem;
+    border: 2px solid #c3e6cb;
   }
 
+  .alert.error {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+  }
+
+  /* Responsive Design */
   @media (max-width: 768px) {
+    .form-container {
+      padding: var(--spacing-md) var(--spacing-sm);
+    }
+
+    .form {
+      padding: var(--spacing-lg);
+    }
+
     .page-title {
-      font-size: 1.25rem;
-      padding: 0.75rem;
+      font-size: var(--font-size-xl);
+      margin-bottom: var(--spacing-lg);
     }
 
     .mode-switcher {
-      padding: 0.75rem;
+      flex-direction: column;
+      gap: var(--spacing-sm);
     }
 
     .mode-button {
-      padding: 0.375rem 0.75rem;
-      font-size: 0.875rem;
+      flex: none;
     }
 
-    .input-section,
-    .results-section,
+    .input-wrapper {
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .scan-button {
+      justify-content: center;
+    }
+
+    .scan-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .scan-section,
     .manual-section,
     .preview-section {
-      padding: 0.75rem;
+      padding: var(--spacing-lg);
     }
 
-    .product-categories {
-      gap: 1rem;
-    }
-
-    .category-container {
-      padding: 0.75rem;
-    }
-
-    .category-title {
-      font-size: 1rem;
+    .table-container {
+      font-size: var(--font-size-sm);
     }
 
     .preview-table th,
-    .preview-table td {
-      padding: 0.375rem;
-      font-size: 0.875rem;
+    .preview-table .table-cell {
+      padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .create-button {
+      font-size: var(--font-size-base);
+      padding: var(--spacing-md) var(--spacing-lg);
+      min-height: 50px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .form-container {
+      padding: var(--spacing-sm);
+    }
+
+    .form {
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+    }
+
+    .page-title {
+      font-size: var(--font-size-lg);
+    }
+
+    .section-title {
+      font-size: var(--font-size-lg);
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      text-align: center;
+    }
+
+    .category-container {
+      padding: var(--spacing-md);
+    }
+
+    .category-header {
+      margin: calc(-1 * var(--spacing-md));
+      margin-bottom: var(--spacing-md);
+      padding: var(--spacing-sm);
+    }
+
+    .category-header.expanded {
+      margin-bottom: 0;
+    }
+
+    .category-info {
+      flex-direction: column;
+      gap: var(--spacing-xs);
+      align-items: flex-end;
+    }
+
+    .product-item {
+      padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .preview-table th,
+    .preview-table .table-cell {
+      padding: var(--spacing-xs) var(--spacing-sm);
+      font-size: var(--font-size-xs);
+    }
+
+    .create-button {
+      min-height: 48px;
     }
   }
 </style>

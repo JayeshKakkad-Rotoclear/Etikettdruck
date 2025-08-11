@@ -131,47 +131,50 @@ export async function PUT({ request }) {
             }
         });
 
-        const readableQRKK = [
-            `Serialnummer: ${body.serialnummer}`,
-            `Artikel: ${body.artikel_bezeichnung}`,
-            `Elektronik: ${body.seriennummer_elektronik}`,
-            `Optik1: ${body.seriennummer_optik1}`,
-            body.seriennummer_optik2 ? `Optik2: ${body.seriennummer_optik2}` : null,
-            `FW-Version: ${body.firmware_version}`,
-            `Verpackungsdatum: ${body.datum}`,
-        ].filter(Boolean).join('\n');
+        // Only print if skipPrint is not true
+        if (!body.skipPrint) {
+            const readableQRKK = [
+                `Serialnummer: ${body.serialnummer}`,
+                `Artikel: ${body.artikel_bezeichnung}`,
+                `Elektronik: ${body.seriennummer_elektronik}`,
+                `Optik1: ${body.seriennummer_optik1}`,
+                body.seriennummer_optik2 ? `Optik2: ${body.seriennummer_optik2}` : null,
+                `FW-Version: ${body.firmware_version}`,
+                `Verpackungsdatum: ${body.datum}`,
+            ].filter(Boolean).join('\n');
 
-        const zpl = `
-        ^XA
+            const zpl = `
+            ^XA
 
-        ^CF0,40
-        ^FO50,30^FDKamerakopf^FS
+            ^CF0,40
+            ^FO50,30^FDKamerakopf^FS
 
-        ^FO50,100^BQN,2,4^FDMA${readableQRKK}^FS
+            ^FO50,100^BQN,2,4^FDMA${readableQRKK}^FS
 
-        ^CF0,30
-        ^FO320,110^FDArtikelnummer: ${body.artikel_nummer}^FS
-        ^FO320,150^FDArtikelbezeichnung: ${body.artikel_bezeichnung}^FS
-        ^FO320,190^FDSeriennummer: ${body.serialnummer}^FS
-        ^FO320,230^FDVerpackungsdatum: ${body.datum}^FS
+            ^CF0,30
+            ^FO320,110^FDArtikelnummer: ${body.artikel_nummer}^FS
+            ^FO320,150^FDArtikelbezeichnung: ${body.artikel_bezeichnung}^FS
+            ^FO320,190^FDSeriennummer: ${body.serialnummer}^FS
+            ^FO320,230^FDVerpackungsdatum: ${body.datum}^FS
 
-        ^CF0,30
-        ^FO50,390^FDRotoclear GmbH^FS
-        ^FO50,420^FDCarl-Benz-Strasse 10-12^FS
-        ^FO50,450^FD69115 Heidelberg^FS
-        ^FO50,480^FDGermany^FS
+            ^CF0,30
+            ^FO50,390^FDRotoclear GmbH^FS
+            ^FO50,420^FDCarl-Benz-Strasse 10-12^FS
+            ^FO50,450^FD69115 Heidelberg^FS
+            ^FO50,480^FDGermany^FS
 
-        ^CF0,25
-        ^FO50,550^FDwww.rotoclear.com^FS
-        ^FO750,550^FDDesigned and made in Germany^FS
+            ^CF0,25
+            ^FO50,550^FDwww.rotoclear.com^FS
+            ^FO750,550^FDDesigned and made in Germany^FS
 
-        ^XZ`
-        ;
+            ^XZ`
+            ;
 
-        const tempPath = path.join(os.tmpdir(), `etikettKK-${Date.now()}.zpl`);
-        await fs.writeFile(tempPath, zpl);
-        await execAsync(`notepad /p "${tempPath}"`);
-        await fs.unlink(tempPath);
+            const tempPath = path.join(os.tmpdir(), `etikettKK-${Date.now()}.zpl`);
+            await fs.writeFile(tempPath, zpl);
+            await execAsync(`notepad /p "${tempPath}"`);
+            await fs.unlink(tempPath);
+        }
 
         return json({ success: true });
     } catch (error) {

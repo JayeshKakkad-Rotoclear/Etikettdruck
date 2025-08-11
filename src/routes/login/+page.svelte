@@ -66,7 +66,6 @@
           id="identifier"
           type="text"
           bind:value={identifier}
-          placeholder="Benutzername oder E-Mail eingeben"
           disabled={isLoading}
           on:keypress={handleKeyPress}
           required
@@ -79,7 +78,6 @@
           id="password"
           type="password"
           bind:value={password}
-          placeholder="Passwort eingeben"
           disabled={isLoading}
           on:keypress={handleKeyPress}
           required

@@ -111,47 +111,50 @@ export async function PUT({ request }) {
 			}
 		});
 
-		const readableQRCpro = [
-			`Serialnummer: ${body.serialnummer}`,
-			`Artikel: ${body.artikel_bezeichnung}`,
-			`Elektronik: ${body.seriennummer_elektronik}`,
-			`MAC: ${body.mac_adresse}`,
-			`HDD-Seriennr: ${body.seriennummer_festplatte}`,
-			`SW-Version: ${body.software_version}`,
-			`FDVerpackungsdatum: ${body.datum}`,
-		].join('\n');
+		// Only print if skipPrint is not true
+		if (!body.skipPrint) {
+			const readableQRCpro = [
+				`Serialnummer: ${body.serialnummer}`,
+				`Artikel: ${body.artikel_bezeichnung}`,
+				`Elektronik: ${body.seriennummer_elektronik}`,
+				`MAC: ${body.mac_adresse}`,
+				`HDD-Seriennr: ${body.seriennummer_festplatte}`,
+				`SW-Version: ${body.software_version}`,
+				`FDVerpackungsdatum: ${body.datum}`,
+			].join('\n');
 
-		const zpl = `
-		^XA
+			const zpl = `
+			^XA
 
-		^CF0,40
-		^FO50,30^FDRotoclear C Pro^FS
+			^CF0,40
+			^FO50,30^FDRotoclear C Pro^FS
 
-		^FO50,100^BQN,2,4^FDMA${readableQRCpro}^FS
+			^FO50,100^BQN,2,4^FDMA${readableQRCpro}^FS
 
-		^CF0,30
-		^FO320,110^FDArtikelnummer: ${body.artikel_nummer}^FS
-		^FO320,150^FDArtikelbezeichnung: ${body.artikel_bezeichnung}^FS
-		^FO320,190^FDSeriennummer: ${body.serialnummer}^FS
-		^FO320,230^FDVerpackungsdatum: ${body.verpackungsdatum}^FS
+			^CF0,30
+			^FO320,110^FDArtikelnummer: ${body.artikel_nummer}^FS
+			^FO320,150^FDArtikelbezeichnung: ${body.artikel_bezeichnung}^FS
+			^FO320,190^FDSeriennummer: ${body.serialnummer}^FS
+			^FO320,230^FDVerpackungsdatum: ${body.verpackungsdatum}^FS
 
-		^CF0,30
-		^FO50,390^FDRotoclear GmbH^FS
-		^FO50,420^FDCarl-Benz-Strasse 10-12^FS
-		^FO50,450^FD69115 Heidelberg^FS
-		^FO50,480^FDGermany^FS
+			^CF0,30
+			^FO50,390^FDRotoclear GmbH^FS
+			^FO50,420^FDCarl-Benz-Strasse 10-12^FS
+			^FO50,450^FD69115 Heidelberg^FS
+			^FO50,480^FDGermany^FS
 
-		^CF0,25
-		^FO50,550^FDwww.rotoclear.com^FS
-		^FO750,550^FDDesigned and made in Germany^FS
+			^CF0,25
+			^FO50,550^FDwww.rotoclear.com^FS
+			^FO750,550^FDDesigned and made in Germany^FS
 
-		^XZ`
-		;
+			^XZ`
+			;
 
-		const tempPath = path.join(os.tmpdir(), `etikettCpro-${Date.now()}.zpl`);
-		await fs.writeFile(tempPath, zpl);
-		await execAsync(`notepad /p "${tempPath}"`);
-		await fs.unlink(tempPath);
+			const tempPath = path.join(os.tmpdir(), `etikettCpro-${Date.now()}.zpl`);
+			await fs.writeFile(tempPath, zpl);
+			await execAsync(`notepad /p "${tempPath}"`);
+			await fs.unlink(tempPath);
+		}
 
 		return json({ success: true });
 	} catch (error) {
