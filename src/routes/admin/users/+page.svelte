@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { authStore } from '$lib/stores/auth.js';
   import { goto } from '$app/navigation';
+  import { Icon } from '$lib';
 
   interface User {
     id: number;
@@ -251,6 +252,7 @@
   <div class="header">
     <h1>Benutzerverwaltung</h1>
     <button class="create-button" on:click={() => showCreateForm = true}>
+      <Icon name="plus" size={16} />
       Neuen Benutzer erstellen
     </button>
   </div>
@@ -260,13 +262,16 @@
   {/if}
 
   <div class="search-section">
-    <input
-      type="text"
-      placeholder="Benutzer suchen..."
-      bind:value={searchQuery}
-      on:input={loadUsers}
-      class="search-input"
-    />
+    <div class="search-container">
+      <Icon name="search" size={16} className="search-icon" />
+      <input
+        type="text"
+        placeholder="Benutzer suchen..."
+        bind:value={searchQuery}
+        on:input={loadUsers}
+        class="search-input"
+      />
+    </div>
   </div>
 
   {#if loading}
@@ -311,7 +316,7 @@
                     on:click={() => openPasswordReset(user)}
                     title="Passwort zurücksetzen"
                   >
-                    🔑
+                    <Icon name="key" size={16} />
                   </button>
                   <button 
                     class="action-btn delete-btn"
@@ -319,7 +324,7 @@
                     title="Benutzer löschen"
                     disabled={currentUser && user.id === currentUser.id}
                   >
-                    🗑️
+                    <Icon name="delete" size={16} />
                   </button>
                 </div>
               </td>
@@ -495,7 +500,7 @@
           </div>
 
           <div class="password-info">
-            <p>⚠️ Das neue Passwort wird sofort wirksam.</p>
+            <p><Icon name="warning" size={16} /> Das neue Passwort wird sofort wirksam.</p>
             <p>Teilen Sie dem Benutzer das neue Passwort sicher mit.</p>
           </div>
 
@@ -544,7 +549,9 @@
 
       <div class="modal-body">
         <div class="delete-warning">
-          <div class="warning-icon">⚠️</div>
+          <div class="warning-icon">
+            <Icon name="warning" size={24} color="#f59e0b" />
+          </div>
           <div class="warning-content">
             <h3>Sind Sie sicher?</h3>
             <p>
@@ -557,7 +564,7 @@
         </div>
 
         <div class="danger-info">
-          <p><strong>⚠️ Diese Aktion kann nicht rückgängig gemacht werden!</strong></p>
+          <p><strong><Icon name="warning" size={16} /> Diese Aktion kann nicht rückgängig gemacht werden!</strong></p>
           <ul>
             <li>Der Benutzer wird sofort aus dem System entfernt</li>
             <li>Alle Zugangsberechtigungen werden entzogen</li>
@@ -652,10 +659,25 @@
     border: 1px solid var(--border-color);
   }
 
-  .search-input {
+  .search-container {
+    position: relative;
     width: 100%;
     max-width: 400px;
-    padding: var(--spacing-md);
+  }
+
+  .search-container :global(.search-icon) {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-md) var(--spacing-md) 40px;
     border: 2px solid var(--border-color);
     border-radius: var(--border-radius-md);
     font-size: var(--font-size-base);
@@ -1001,7 +1023,7 @@
   }
 
   .reset-btn {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     color: var(--white);
   }
 

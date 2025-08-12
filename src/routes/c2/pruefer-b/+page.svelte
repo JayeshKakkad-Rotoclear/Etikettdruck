@@ -1,6 +1,7 @@
 <script lang="ts">
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
 	import SelectRadio from '$lib/components/selectRadio.svelte';
+	import { Icon } from '$lib';
 
     $: {
 		if (form.konfiguration === 'DMG') {
@@ -377,7 +378,7 @@
 					<div class="file-input-wrapper">
 						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadC2} />
 						<div class="file-input-display">
-							<span class="file-icon">📁</span>
+							<Icon name="folder" size={16} className="file-icon" />
 							<span class="file-text">SVG-Datei auswählen</span>
 						</div>
 					</div>
@@ -750,10 +751,6 @@
 		border-color: var(--primary-color);
 		background: var(--white);
 		box-shadow: var(--shadow-sm);
-	}
-
-	.file-icon {
-		font-size: var(--font-size-xl);
 	}
 
 	.file-text {

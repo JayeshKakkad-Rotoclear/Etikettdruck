@@ -1,6 +1,7 @@
 <script lang="ts">
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
 	import SelectRadio from '$lib/components/selectRadio.svelte';
+	import { Icon } from '$lib';
 
     $: {
         if (form.festplattengroesse === 'GB_256') {
@@ -245,7 +246,7 @@
 			</div>
 			{#if serialErrorCpro}
 				<div class="error-message">
-					<span class="error-icon">⚠</span>
+					<Icon name="warning" size={16} className="error-icon" />
 					{serialErrorCpro}
 				</div>
 			{/if}
@@ -417,7 +418,7 @@
 					<div class="file-input-wrapper">
 						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadCpro} />
 						<div class="file-input-display">
-							<span class="file-icon">📁</span>
+							<Icon name="folder" size={16} className="file-icon" />
 							<span class="file-text">SVG-Datei auswählen</span>
 						</div>
 					</div>
@@ -615,10 +616,6 @@
 		}
 	}
 
-	.error-icon {
-		font-size: var(--font-size-lg);
-	}
-
 	.main-form {
 		animation: fadeIn 0.5s ease-out;
 	}
@@ -778,10 +775,6 @@
 		border-color: var(--primary-color);
 		background: var(--white);
 		box-shadow: var(--shadow-sm);
-	}
-
-	.file-icon {
-		font-size: var(--font-size-xl);
 	}
 
 	.file-text {

@@ -73,6 +73,16 @@
 							</th>
 							<th class="table-header">
 								<div class="header-content">
+									<span class="header-label">Lieferschein Nr.</span>
+								</div>
+							</th>
+							<th class="table-header">
+								<div class="header-content">
+									<span class="header-label">Artikelbezeichnung</span>
+								</div>
+							</th>
+							<th class="table-header">
+								<div class="header-content">
 									<span class="header-label">Artikelnummer</span>
 								</div>
 							</th>
@@ -87,7 +97,11 @@
 						{#each data as item (item.id)}
 							<tr class="group-header-row">
 								<td class="group-header-cell">{item.id}</td>
-								<td class="group-header-cell">{formatDate(item.created_at)}</td>
+								<td class="group-header-cell">{formatDate(item.createdAt)}</td>
+								<td class="group-header-cell">{item.lieferscheinNumber || '-'}</td>
+								<td class="group-header-cell" colspan="2">
+									<span class="article-count">{item.entries.length} Artikel</span>
+								</td>
 								<td class="group-header-cell" colspan="2">
 									<span class="article-count">{item.entries.length} Artikel</span>
 								</td>
@@ -96,6 +110,8 @@
 								<tr class="data-row entry-row">
 									<td class="data-cell empty-cell"></td>
 									<td class="data-cell empty-cell"></td>
+									<td class="data-cell empty-cell"></td>
+									<td class="data-cell">{entry.artikelbezeichnung}</td>
 									<td class="data-cell">{entry.artikelnummer}</td>
 									<td class="data-cell">{entry.menge}</td>
 								</tr>

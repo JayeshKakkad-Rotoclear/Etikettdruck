@@ -4,7 +4,6 @@
 
   // Scanning mode variables
   let scannedQRs: string[] = [];
-  let groupedEntries: any[] = [];
   let scanInput = '';
   
   // Manual selection mode variables
@@ -12,7 +11,8 @@
   let availableProducts: any[] = [];
   let availableZubehoer: any[] = [];
   let manualSelections: Record<string, { selected: boolean; serialNumber: string; etikettId: string }> = {};
-  let manualEntries: any[] = [];
+  let expandedManualEntries: any[] = [];
+  let isExpandingZubehoer = false;
   
   // Collapsible categories state
   let expandedCategories: Record<string, boolean> = {
@@ -26,6 +26,8 @@
   // Common variables
   let submitSuccess = false;
   let error: string | null = null;
+  let lieferscheinNumber = '';  // New field for Lieferschein number
+  let finalGroupedEntries: any[] = [];  // Combined entries for display and submission
 
   onMount(async () => {
     await loadAvailableProducts();
@@ -90,78 +92,194 @@
 
   function parseQRContent(qr: string): any[] {
     const lines = qr.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
-    const entry: any = {
-      artikelnummer: '',
-      artikelbezeichnung: '',
-      serialnummer: '',
-      menge: 1
-    };
-
-    for (const line of lines) {
-      if (line.startsWith('Artikelnummer:')) {
-        entry.artikelnummer = line.replace('Artikelnummer:', '').trim();
-      } else if (line.startsWith('Artikelbezeichnung:')) {
-        entry.artikelbezeichnung = line.replace('Artikelbezeichnung:', '').trim();
-      } else if (line.startsWith('Seriennummer:')) {
-        entry.serialnummer = line.replace('Seriennummer:', '').trim();
-      } else {
-        // fallback format: artikelnummer bezeichnung - menge
-        const fallbackMatch = line.match(/^(.*?)\s+-\s+(\d+)$/);
-        if (fallbackMatch) {
-          entry.artikelnummer = fallbackMatch[1];
-          entry.menge = parseInt(fallbackMatch[2]);
+    
+    // Check if this is a Zubehör QR code
+    const lieferscheinLine = lines.find(line => line.startsWith('Lieferschein:'));
+    if (lieferscheinLine) {
+      // This is a Zubehör QR code, parse individual items
+      const entries = [];
+      
+      for (const line of lines) {
+        // Look for individual product lines: "artikelnummer - artikelbezeichnung - menge"
+        const productMatch = line.match(/^(\S+)\s+-\s+(.*?)\s+-\s+(\d+)$/);
+        if (productMatch) {
+          const [, artikelnummer, artikelbezeichnung, menge] = productMatch;
+          entries.push({
+            artikelnummer: artikelnummer.trim(),
+            artikelbezeichnung: artikelbezeichnung.trim(),
+            serialnummer: null,
+            menge: parseInt(menge)
+          });
         }
       }
-    }
+      
+      return entries.length > 0 ? entries : [{ 
+        artikelnummer: 'UNKNOWN', 
+        artikelbezeichnung: 'Zubehör Etikett (Parsing Error)', 
+        serialnummer: null, 
+        menge: 1 
+      }];
+    } else {
+      // Regular product QR code
+      const entry: any = {
+        artikelnummer: '',
+        artikelbezeichnung: '',
+        serialnummer: '',
+        menge: 1
+      };
 
-    return [entry];
+      for (const line of lines) {
+        if (line.startsWith('Artikelnummer:')) {
+          entry.artikelnummer = line.replace('Artikelnummer:', '').trim();
+        } else if (line.startsWith('Artikelbezeichnung:')) {
+          entry.artikelbezeichnung = line.replace('Artikelbezeichnung:', '').trim();
+        } else if (line.startsWith('Seriennummer:')) {
+          entry.serialnummer = line.replace('Seriennummer:', '').trim();
+        } else {
+          // fallback format: artikelnummer bezeichnung - menge
+          const fallbackMatch = line.match(/^(.*?)\s+-\s+(\d+)$/);
+          if (fallbackMatch) {
+            entry.artikelnummer = fallbackMatch[1];
+            entry.menge = parseInt(fallbackMatch[2]);
+          }
+        }
+      }
+
+      return [entry];
+    }
   }
 
-  $: groupedEntries = manualMode ? manualEntries : scannedQRs.flatMap((qr) => parseQRContent(qr));
-
-  $: manualEntries = Object.entries(manualSelections)
-    .filter(([_, selection]) => selection.selected)
-    .map(([key, selection]) => {
-      if (key.startsWith('zubehoer_')) {
-        const zubehoer = availableZubehoer.find(z => z.id.toString() === selection.etikettId);
-        return {
-          artikelnummer: `ZUBEHOER-${zubehoer?.id}`,
-          artikelbezeichnung: `Zubehör Etikett #${zubehoer?.id}`,
-          serialnummer: null,
-          menge: zubehoer?.entries?.length || 1,
-          etikettId: selection.etikettId
-        };
-      } else {
-        const product = availableProducts.find(p => 
-          `${p.type}_${p.serialnummer}` === key
-        );
-        return {
-          artikelnummer: product?.artikel_nummer || '',
-          artikelbezeichnung: product?.artikel_bezeichnung || '',
-          serialnummer: selection.serialNumber,
-          menge: 1
-        };
+  async function expandZubehoerToIndividualProducts(zubehoerId: string): Promise<any[]> {
+    try {
+      const response = await fetch(`/api/zubehoer/${zubehoerId}`);
+      const data = await response.json();
+      
+      if (data.success && data.item && data.item.entries) {
+        // data.item.entries should be the JSON array of individual products
+        return data.item.entries.map((entry: any) => ({
+          artikelnummer: entry.artikelnummer,
+          artikelbezeichnung: entry.artikelbezeichnung,
+          serialnummer: null, // Zubehör products don't have individual serial numbers
+          menge: entry.menge || 1
+        }));
       }
-    });
+      
+      return [];
+    } catch (err) {
+      console.error('Error expanding Zubehör:', err);
+      return [];
+    }
+  }
+
+  // Function to update manual entries when selections change
+  async function updateManualEntries() {
+    console.log('updateManualEntries called, manualMode:', manualMode, 'isExpandingZubehoer:', isExpandingZubehoer);
+    
+    if (isExpandingZubehoer || !manualMode) return; // Prevent concurrent updates
+    
+    isExpandingZubehoer = true;
+    
+    try {
+      const selectedEntries = Object.entries(manualSelections)
+        .filter(([_, selection]) => selection.selected);
+
+      console.log('selectedEntries:', selectedEntries);
+
+      const results = await Promise.all(
+        selectedEntries.map(async ([key, selection]) => {
+          if (key.startsWith('zubehoer_')) {
+            console.log('Expanding Zubehör:', selection.etikettId);
+            // Expand Zubehör into individual products
+            return await expandZubehoerToIndividualProducts(selection.etikettId);
+          } else {
+            // Regular product
+            const product = availableProducts.find(p => 
+              `${p.type}_${p.serialnummer}` === key
+            );
+            console.log('Adding regular product:', product);
+            return [{
+              artikelnummer: product?.artikel_nummer || '',
+              artikelbezeichnung: product?.artikel_bezeichnung || '',
+              serialnummer: selection.serialNumber,
+              menge: 1
+            }];
+          }
+        })
+      );
+
+      expandedManualEntries = results.flat();
+      console.log('Updated expandedManualEntries:', expandedManualEntries);
+    } catch (err) {
+      console.error('Error updating manual entries:', err);
+      expandedManualEntries = [];
+    } finally {
+      isExpandingZubehoer = false;
+    }
+  }
+
+  // Function to handle checkbox changes
+  function handleManualSelection() {
+    if (!manualMode) return;
+    
+    // Use setTimeout to handle async update outside reactive context
+    setTimeout(() => {
+      updateManualEntries();
+    }, 0);
+  }
+
+  // Handle mode switching
+  function switchMode() {
+    manualMode = !manualMode;
+    error = null;
+    submitSuccess = false;
+    
+    if (manualMode) {
+      // When switching to manual mode, update entries immediately
+      setTimeout(() => {
+        updateManualEntries();
+      }, 0);
+    }
+  }
+
+  // Use expanded entries when in manual mode
+  $: {
+    finalGroupedEntries = manualMode ? expandedManualEntries : scannedQRs.flatMap((qr) => parseQRContent(qr));
+    console.log('finalGroupedEntries updated:', finalGroupedEntries, 'manualMode:', manualMode);
+  }
 
   async function submitOuterKarton() {
     try {
-      const enriched = groupedEntries.map((e) => ({
-        artikelnummer: e.artikelnummer,
-        artikelbezeichnung: e.artikelbezeichnung,
-        menge: e.menge,
+      console.log('finalGroupedEntries:', finalGroupedEntries);
+      
+      if (!finalGroupedEntries || finalGroupedEntries.length === 0) {
+        error = 'Keine Einträge zum Speichern vorhanden';
+        return;
+      }
+      
+      const enriched = finalGroupedEntries.map((e) => ({
+        artikelnummer: e.artikelnummer || 'UNKNOWN',
+        artikelbezeichnung: e.artikelbezeichnung || 'Unknown Item',
+        menge: e.menge || 1,
         serialnummer: e.serialnummer || null
       }));
+
+      console.log('enriched entries:', enriched);
 
       const res = await fetch('/api/outerkarton', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entries: enriched })
+        body: JSON.stringify({ 
+          entries: enriched,
+          lieferscheinNumber: lieferscheinNumber.trim() || null
+        })
       });
 
       const result = await res.json();
+      console.log('Server response:', result);
+      
       if (result.success) {
         submitSuccess = true;
+        lieferscheinNumber = '';  // Clear Lieferschein number on success
         if (manualMode) {
           // Reset manual selections
           Object.keys(manualSelections).forEach(key => {
@@ -174,14 +292,9 @@
         error = result.error || 'Error while saving';
       }
     } catch (err) {
+      console.error('Submit error:', err);
       error = err instanceof Error ? err.message : 'Connection error';
     }
-  }
-
-  function switchMode() {
-    manualMode = !manualMode;
-    error = null;
-    submitSuccess = false;
   }
 
   function toggleCategory(category: string) {
@@ -215,7 +328,7 @@
         type="button"
         class="mode-button" 
         class:active={!manualMode}
-        on:click={() => manualMode = false}
+        on:click={() => { manualMode = false; error = null; submitSuccess = false; }}
       >
         Scan-Modus
       </button>
@@ -223,10 +336,21 @@
         type="button"
         class="mode-button" 
         class:active={manualMode}
-        on:click={() => manualMode = true}
+        on:click={switchMode}
       >
         Manuelle Auswahl
       </button>
+    </div>
+
+    <!-- Lieferschein Number Input -->
+    <div class="lieferschein-section">
+      <label for="lieferscheinInput" class="input-label">Lieferschein Nummer:</label>
+      <input 
+        id="lieferscheinInput" 
+        type="text" 
+        bind:value={lieferscheinNumber}
+        class="lieferschein-input"
+      />
     </div>
 
     {#if !manualMode}
@@ -267,14 +391,12 @@
       {/if}
     </div>
     {:else}
-    <!-- Manual Selection Mode -->
     <div class="manual-section">
       <h2 class="section-title">
         Produkte manuell auswählen
       </h2>
       
       <div class="product-categories">
-        <!-- C Pro Products -->
         {#if availableProducts.filter(p => p.type === 'cpro').length > 0}
           <div class="category-container">
             <button 
@@ -304,6 +426,7 @@
                       <input 
                         type="checkbox" 
                         bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        on:change={handleManualSelection}
                         class="product-checkbox"
                       />
                       <div class="product-content">
@@ -348,6 +471,7 @@
                       <input 
                         type="checkbox" 
                         bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        on:change={handleManualSelection}
                         class="product-checkbox"
                       />
                       <div class="product-content">
@@ -392,6 +516,7 @@
                       <input 
                         type="checkbox" 
                         bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        on:change={handleManualSelection}
                         class="product-checkbox"
                       />
                       <div class="product-content">
@@ -436,6 +561,7 @@
                       <input 
                         type="checkbox" 
                         bind:checked={manualSelections[`${product.type}_${product.serialnummer}`].selected}
+                        on:change={handleManualSelection}
                         class="product-checkbox"
                       />
                       <div class="product-content">
@@ -480,6 +606,7 @@
                       <input 
                         type="checkbox" 
                         bind:checked={manualSelections[`zubehoer_${zubehoer.id}`].selected}
+                        on:change={handleManualSelection}
                         class="product-checkbox"
                       />
                       <div class="product-content">
@@ -497,7 +624,7 @@
     </div>
     {/if}
 
-    {#if groupedEntries.length > 0}
+    {#if finalGroupedEntries.length > 0}
     <div class="preview-section">
       <h3 class="section-title">
         Vorschau
@@ -513,7 +640,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each groupedEntries as entry}
+            {#each finalGroupedEntries as entry}
               <tr>
                 <td class="table-cell">{entry.artikelnummer}</td>
                 <td class="table-cell">{entry.artikelbezeichnung}</td>
@@ -668,6 +795,33 @@
   }
 
   .scan-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--primary-light);
+    background: var(--bg-light);
+  }
+
+  .lieferschein-section {
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg);
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-md);
+  }
+
+  .lieferschein-input {
+    width: 100%;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 2px solid var(--border-medium);
+    border-radius: var(--border-radius-md);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-smooth);
+    background: var(--white);
+    min-height: 50px;
+    box-sizing: border-box;
+  }
+
+  .lieferschein-input:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px var(--primary-light);

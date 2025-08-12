@@ -13,47 +13,36 @@ const execAsync = util.promisify(exec);
 export async function POST({ request }: RequestEvent) {
 	try {
 		const body = await request.json();
-		const { entries, lieferscheinNumber } = body;
+		const { outerKartonId } = body;
 
-		console.log('Received POST data:', { entries, lieferscheinNumber });
-
-		if (!entries || !Array.isArray(entries) || entries.length === 0) {
-			console.log('No entries provided');
-			return json({ success: false, error: 'No entries provided' }, { status: 400 });
+		if (!outerKartonId) {
+			return json({ success: false, error: 'outerKartonId is required' }, { status: 400 });
 		}
 
-		console.log('Creating outer karton with entries:', entries.length);
-
-		// Save to database
-		const outerKarton = await prisma.outerKarton.create({
-			data: {
-				lieferscheinNumber: lieferscheinNumber || null,
-				entries: {
-					create: entries
-				}
-			},
+		const outerKarton = await prisma.outerKarton.findUnique({
+			where: { id: outerKartonId },
 			include: { entries: true }
 		});
 
-		// Build table text for ZPL
+		if (!outerKarton) {
+			return json({ success: false, error: 'Outer Karton not found' }, { status: 404 });
+		}
+
 		const tableText = outerKarton.entries.map((item) => {
 			const mengeText = `Menge: ${item.menge}`;
 			const snText = item.serialnummer ? ` SN: ${item.serialnummer}` : '';
 			return `${item.artikelnummer.padEnd(10)} ${item.artikelbezeichnung.padEnd(40)} ${mengeText}${snText}`;
 		}).join('\n');
 
-		// Build QR code content
 		const qrContent = outerKarton.entries.map((item) =>
-			`${item.artikelnummer} - ${item.artikelbezeichnung} - ${item.menge}${item.serialnummer ? ` (${item.serialnummer})` : ''}`
+			`${item.artikelnummer} - ${item.menge}${item.serialnummer ? ` (${item.serialnummer})` : ''}`
 		).join('\n');
 
-		// Format current date
-		const date = new Date();
+		const date = new Date(outerKarton.createdAt);
 		const verpackungsdatum = `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1)
 			.toString()
 			.padStart(2, '0')}.${date.getFullYear()}`;
 
-		// Add Lieferschein number to ZPL if available
 		const lieferscheinText = outerKarton.lieferscheinNumber 
 			? `^FO50,320^FDLieferschein: ${outerKarton.lieferscheinNumber}^FS` 
 			: '';
@@ -87,35 +76,14 @@ ${lieferscheinText}
 		`.trim();
 
 		// Print ZPL via temp file
-		const tempPath = path.join(os.tmpdir(), `etikett-outerkarton-${Date.now()}.zpl`);
+		const tempPath = path.join(os.tmpdir(), `etikett-outerkarton-reprint-${Date.now()}.zpl`);
 		await fs.writeFile(tempPath, zpl);
 		await execAsync(`notepad /p "${tempPath}"`);
 		await fs.unlink(tempPath);
 
 		return json({ success: true });
 	} catch (err) {
-		console.error('OuterKarton POST error:', err);
-		console.error('Error details:', {
-			name: err instanceof Error ? err.name : 'Unknown',
-			message: err instanceof Error ? err.message : 'Unknown error',
-			stack: err instanceof Error ? err.stack : 'No stack trace'
-		});
-		return json({ 
-			success: false, 
-			error: err instanceof Error ? err.message : 'Internal server error' 
-		}, { status: 500 });
-	}
-}
-
-export async function GET({ }: RequestEvent) {
-	try {
-		const items = await prisma.outerKarton.findMany({
-			orderBy: { createdAt: 'desc' },
-			include: { entries: true }
-		});
-		return json({ success: true, items });
-	} catch (err) {
-		console.error('OuterKarton GET error:', err);
+		console.error('OuterKarton print error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

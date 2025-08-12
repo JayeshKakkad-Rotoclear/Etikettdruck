@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
+	import { Icon } from '$lib';
 
 	let form = getEmptyFormCbasicA();
 
@@ -125,7 +126,7 @@
 		</div>
 
 		<button type="submit" class="submit-button">
-			<!-- <span class="button-icon">💾</span> -->
+			<Icon name="save" size={16} />
 			Speichern
 		</button>
 	</form>

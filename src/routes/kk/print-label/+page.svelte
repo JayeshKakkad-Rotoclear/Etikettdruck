@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { Icon } from '$lib';
+	
 	let serialnummer = '';
 	let isLoading = false;
 	let message = '';
@@ -187,7 +189,7 @@
 							<div class="loading-spinner"></div>
 							Druckt...
 						{:else}
-							🖨️ Etikett Drucken
+							<Icon name="printer" size={16} /> Etikett Drucken
 						{/if}
 					</button>
 					<button 

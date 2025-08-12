@@ -231,9 +231,10 @@ model ZubehoerEtikett {
 }
 
 model OuterKarton {
-  id        Int                 @id @default(autoincrement())
-  createdAt DateTime           @default(now())
-  entries   OuterKartonEntry[]
+  id                 Int                 @id @default(autoincrement())
+  createdAt          DateTime           @default(now())
+  lieferscheinNumber String?
+  entries            OuterKartonEntry[]
 
   @@schema("outer_karton")
 }

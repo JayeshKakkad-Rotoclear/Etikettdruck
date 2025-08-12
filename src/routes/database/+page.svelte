@@ -269,15 +269,25 @@
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Serialnummer</th>
-                <th>Artikel Bezeichnung</th>
-                <th>Artikel Nummer</th>
-                <th>Konfiguration</th>
-                <th>Prüfer A</th>
-                <th>Prüfer B</th>
-                <th>Erstellt</th>
-                <th>Aktualisiert</th>
+                {#if selectedTable === 'karton_entries' || selectedTable === 'zubehoer' || selectedTable === 'kartons'}
+                  <th>ID</th>
+                  <th>Serialnummer</th>
+                  <th>Artikel Bezeichnung</th>
+                  <th>Artikel Nummer</th>
+                  <th>Konfiguration</th>
+                  <th>Erstellt</th>
+                  <th>Aktualisiert</th>
+                {:else}
+                  <th>ID</th>
+                  <th>Serialnummer</th>
+                  <th>Artikel Bezeichnung</th>
+                  <th>Artikel Nummer</th>
+                  <th>Konfiguration</th>
+                  <th>Prüfer A</th>
+                  <th>Prüfer B</th>
+                  <th>Erstellt</th>
+                  <th>Aktualisiert</th>
+                {/if}
               </tr>
             </thead>
             <tbody>
@@ -294,20 +304,22 @@
                       N/A
                     {/if}
                   </td>
-                  <td>
-                    {#if item.pruefer_a}
-                      <span class="pruefer-badge pruefer-a">{item.pruefer_a}</span>
-                    {:else}
-                      <span class="pruefer-empty">Noch nicht geprüft</span>
-                    {/if}
-                  </td>
-                  <td>
-                    {#if item.pruefer_b}
-                      <span class="pruefer-badge pruefer-b">{item.pruefer_b}</span>
-                    {:else}
-                      <span class="pruefer-empty">Noch nicht geprüft</span>
-                    {/if}
-                  </td>
+                  {#if selectedTable !== 'karton_entries' && selectedTable !== 'zubehoer' && selectedTable !== 'kartons'}
+                    <td>
+                      {#if item.pruefer_a}
+                        <span class="pruefer-badge pruefer-a">{item.pruefer_a}</span>
+                      {:else}
+                        <span class="pruefer-empty">Noch nicht geprüft</span>
+                      {/if}
+                    </td>
+                    <td>
+                      {#if item.pruefer_b}
+                        <span class="pruefer-badge pruefer-b">{item.pruefer_b}</span>
+                      {:else}
+                        <span class="pruefer-empty">Noch nicht geprüft</span>
+                      {/if}
+                    </td>
+                  {/if}
                   <td>{formatDate(item.createdAt)}</td>
                   <td>{formatDate(item.updatedAt)}</td>
                 </tr>
