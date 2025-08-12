@@ -51,6 +51,7 @@
   let selectedCategories: Record<string, boolean | null> = {};
   let itemSelections: Record<string, { selected: boolean | null; menge: number }> = {};
   let serialnummer = '';
+  let lieferscheinnummer = '';
 
   onMount(() => {
     for (const block of initialItems) {
@@ -62,6 +63,14 @@
   });
 
 async function submitForm() {
+    await submitFormInternal(false);
+}
+
+async function saveOnlyForm() {
+    await submitFormInternal(true);
+}
+
+async function submitFormInternal(skipPrint: boolean = false) {
     const selectedItems = Object.entries(itemSelections)
         .filter(([_, v]) => v.selected === true)
         .map(([artikelnummer]) => {
@@ -81,6 +90,8 @@ async function submitForm() {
 
     const payload: any = {
         items: selectedItems,
+        lieferscheinnummer: lieferscheinnummer.trim() || null,
+        skipPrint: skipPrint
     };
 
     const res = await fetch('/api/zubehoer', {
@@ -93,8 +104,9 @@ async function submitForm() {
         alert('Fehler beim Speichern: ' + error.error);
         return;
     } else {
-            alert('Etikett erfolgreich erstellt!');
+            alert(skipPrint ? 'Formular gespeichert!' : 'Etikett erfolgreich erstellt!');
             serialnummer = '';
+            lieferscheinnummer = '';
             for (const block of initialItems) {
                     selectedCategories[block.category] = null;
                     for (const item of block.items) {
@@ -103,16 +115,18 @@ async function submitForm() {
             }
     }
 
-    const result = await res.json();
-    if (result.success) {
-        const zplBlob = new Blob([result.zpl], { type: 'text/plain' });
-        const zplUrl = URL.createObjectURL(zplBlob);
-        const a = document.createElement('a');
-        a.href = zplUrl;
-        a.download = `zubehoer-etikett-${Date.now()}.zpl`;
-        a.click();
-    } else {
-        alert('Fehler beim Senden: ' + result.error);
+    if (!skipPrint) {
+        const result = await res.json();
+        if (result.success) {
+            const zplBlob = new Blob([result.zpl], { type: 'text/plain' });
+            const zplUrl = URL.createObjectURL(zplBlob);
+            const a = document.createElement('a');
+            a.href = zplUrl;
+            a.download = `zubehoer-etikett-${Date.now()}.zpl`;
+            a.click();
+        } else {
+            alert('Fehler beim Senden: ' + result.error);
+        }
     }
 }
 </script>
@@ -123,7 +137,23 @@ async function submitForm() {
 
 <div class="form-container">
 	<form on:submit|preventDefault={submitForm} class="form">
-        <h1>Zubehör Etikett erstellen</h1>
+        <div class="header-section">
+            <h1>Zubehör Etikett erstellen</h1>
+            <a href="/zubehoer/print-label" class="print-link">
+                Etikett nachdrucken
+            </a>
+        </div>
+
+		<div class="lieferschein-section">
+			<label class="control-label" for="lieferscheinnummer">Lieferschein-Nummer:</label>
+			<input 
+				type="text" 
+				bind:value={lieferscheinnummer}
+				class="lieferschein-input" 
+				id="lieferscheinnummer"
+				required
+			/>
+		</div>
 
 		<div class="categories-grid">
 			{#each initialItems as categoryBlock}
@@ -208,9 +238,14 @@ async function submitForm() {
 			{/each}
 		</div>
 
-		<button type="submit" class="submit-button">
-			Speichern & Drucken
-		</button>
+		<div class="submit-section">
+			<button type="button" on:click={saveOnlyForm} class="submit-button save-only">
+				Nur Speichern
+			</button>
+			<button type="submit" class="submit-button">
+				Speichern & Drucken
+			</button>
+		</div>
 	</form>
 </div>
 
@@ -226,12 +261,38 @@ async function submitForm() {
 		font-weight: var(--font-weight-bold);
 		color: var(--text-primary);
 		text-align: center;
-		margin-bottom: var(--spacing-xl);
+		margin: 0;
 		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
+	}
+
+	.header-section {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: var(--spacing-xl);
+		flex-wrap: wrap;
+		gap: var(--spacing-md);
+	}
+
+	.print-link {
+		color: var(--primary-color);
+		text-decoration: none;
+		font-weight: var(--font-weight-medium);
+		padding: var(--spacing-sm) var(--spacing-md);
+		border: 1px solid var(--primary-color);
+		border-radius: var(--border-radius-sm);
+		transition: all var(--transition-smooth);
+		white-space: nowrap;
+		font-size: var(--font-size-sm);
+	}
+
+	.print-link:hover {
+		background: var(--primary-color);
+		color: var(--white);
 	}
 
 	.form {
@@ -254,6 +315,45 @@ async function submitForm() {
 		right: 0;
 		height: 4px;
 		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+	}
+
+	.lieferschein-section {
+		background: var(--bg-light);
+		border: 2px solid var(--border-light);
+		border-radius: var(--border-radius-lg);
+		padding: var(--spacing-lg);
+		margin-bottom: var(--spacing-xl);
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
+		transition: all var(--transition-smooth);
+	}
+
+	.lieferschein-section:hover {
+		border-color: var(--primary-light);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.lieferschein-input {
+		flex: 1;
+		padding: var(--spacing-md);
+		border: 2px solid var(--border-medium);
+		border-radius: var(--border-radius-md);
+		background: var(--white);
+		font-size: var(--font-size-base);
+		transition: all var(--transition-smooth);
+		min-height: 48px;
+	}
+
+	.lieferschein-input:focus {
+		outline: none;
+		border-color: var(--primary-color);
+		box-shadow: 0 0 0 3px var(--primary-light);
+	}
+
+	.lieferschein-input:hover:not(:focus) {
+		border-color: var(--border-color);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.categories-grid {
@@ -550,6 +650,28 @@ async function submitForm() {
 		box-shadow: var(--shadow-md);
 	}
 
+	.submit-section {
+		display: flex;
+		gap: var(--spacing-md);
+		justify-content: center;
+		margin: var(--spacing-xl) auto 0 auto;
+		max-width: 800px;
+	}
+
+	.submit-section .submit-button {
+		flex: 1;
+		max-width: 200px;
+		margin: 0;
+	}
+
+	.submit-button.save-only {
+		background: linear-gradient(135deg, var(--secondary-color), var(--secondary-hover));
+	}
+
+	.submit-button.save-only:hover {
+		background: linear-gradient(135deg, var(--secondary-hover), var(--secondary-color));
+	}
+
 	@media (max-width: 768px) {
 		.form-container {
 			padding: var(--spacing-md) var(--spacing-sm);
@@ -561,6 +683,16 @@ async function submitForm() {
 
 		h1 {
 			font-size: var(--font-size-xl);
+		}
+
+		.header-section {
+			flex-direction: column;
+			align-items: stretch;
+			text-align: center;
+		}
+
+		.print-link {
+			align-self: center;
 		}
 
 		.categories-grid {

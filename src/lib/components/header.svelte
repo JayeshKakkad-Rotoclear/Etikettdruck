@@ -125,6 +125,7 @@
 							{#if canViewDatabase}
 								<a href="/dashboard/cpro">Datenbank</a>
 							{/if}
+							<a href="/cpro/print-label">Etikett Drucken</a>
 						</div>
 					{/if}
 				</div>
@@ -154,6 +155,7 @@
 							{#if canViewDatabase}
 								<a href="/dashboard/c2">Datenbank</a>
 							{/if}
+							<a href="/c2/print-label">Etikett Drucken</a>
 						</div>
 					{/if}
 				</div>
@@ -180,6 +182,7 @@
 							{#if canViewDatabase}
 								<a href="/dashboard/cbasic">Datenbank</a>
 							{/if}
+							<a href="/cbasic/print-label">Etikett Drucken</a>
 						</div>
 					{/if}
 				</div>
@@ -209,6 +212,7 @@
 							{#if canViewDatabase}
 								<a href="/dashboard/kk">Datenbank</a>
 							{/if}
+							<a href="/kk/print-label">Etikett Drucken</a>
 						</div>
 					{/if}
 				</div>
@@ -227,6 +231,9 @@
 					{#if hoveredProduct === 'zubehoer'}
 						<div class="submenu" transition:fade>
 							<a href="/zubehoer">Formular</a>
+							{#if canViewProeferA || canViewProeferB}
+								<a href="/zubehoer/print-label">Etikett Drucken</a>
+							{/if}
 							{#if canViewDatabase}
 								<a href="/dashboard/zubehoer">Datenbank</a>
 							{/if}

@@ -16,6 +16,11 @@
 	let serialToFindC2 = '';
 	let serialErrorC2 = '';
 	let showFormC2 = false;
+	
+	// Confirmation dialog variables
+	let originalData: any = null;
+	let showConfirmDialog = false;
+	let currentAction: 'save' | 'saveAndPrint' = 'save';
 
 	function getEmptyFormC2B() {
         const today = new Date();
@@ -59,6 +64,7 @@
 				const data = await res.json();
 				if (data.found) {
 					form.serialnummer = serialToFindC2;
+					originalData = { ...data.data }; // Store original data for comparison
 					showFormC2 = true;
 				} else {
 					serialErrorC2 = 'Keine Daten mit dieser Seriennummer gefunden';
@@ -86,6 +92,100 @@
             alert('Bitte eine .svg Datei auswählen.');
         }
     }
+
+	// Confirmation dialog functions
+	function getFieldLabel(fieldName: string): string {
+		const labels: Record<string, string> = {
+			artikel_bezeichnung: 'Artikelbezeichnung',
+			hinweis: 'Hinweis',
+			ba_nummer: 'BA-Nummer',
+			artikel_nummer: 'Artikel-Nummer',
+			software_version: 'Software Version',
+			konfiguration: 'Konfiguration',
+			seriennummer_elektronik: 'Seriennummer Elektronik',
+			mac_adresse: 'MAC-Adresse',
+			datum: 'Datum',
+			produktionsjahr: 'Produktionsjahr',
+			pruefer_b: 'Prüfer B',
+			hardware_ok: 'Hardware OK',
+			hutschienenclip_montiert: 'Hutschienenclip montiert',
+			hdmi_ok: 'HDMI OK',
+			web_ok: 'Web OK',
+			zoom_ok: 'Zoom OK',
+			menue_bedienbar: 'Menü bedienbar',
+			ip_adresse: 'IP-Adresse',
+			kameraeingang_ok: 'Kameraeingang OK',
+			zustandsdaten_ok: 'Zustandsdaten OK',
+			zustandsdaten_fehler: 'Zustandsdaten Fehler',
+			automatiktest_ok: 'Automatiktest OK',
+			qr_code_automatiktest: 'QR-Code Automatiktest',
+			werkseinstellung: 'Werkseinstellung',
+			lp_verschraubt: 'Lüfterplatte verschraubt'
+		};
+		return labels[fieldName as keyof typeof labels] || fieldName;
+	}
+
+	function formatValue(value: any): string {
+		if (value === null || value === undefined) return 'Nicht gesetzt';
+		if (typeof value === 'boolean') return value ? 'Ja' : 'Nein';
+		if (value === '') return 'Leer';
+		return String(value);
+	}
+
+	function detectChanges() {
+		const changes = [];
+		const fieldsToCheck = [
+			'artikel_bezeichnung', 'hinweis', 'ba_nummer', 'artikel_nummer',
+			'software_version', 'konfiguration', 'seriennummer_elektronik', 'mac_adresse',
+			'produktionsjahr', 'pruefer_b', 'hardware_ok', 'hutschienenclip_montiert',
+			'hdmi_ok', 'web_ok', 'zoom_ok', 'menue_bedienbar', 'ip_adresse',
+			'kameraeingang_ok', 'zustandsdaten_ok', 'zustandsdaten_fehler',
+			'automatiktest_ok', 'qr_code_automatiktest', 'werkseinstellung', 'lp_verschraubt'
+		];
+
+		for (const field of fieldsToCheck) {
+			const oldValue = originalData?.[field as keyof typeof originalData];
+			const newValue = form[field as keyof typeof form];
+			
+			if (oldValue !== newValue) {
+				changes.push({
+					field,
+					oldValue,
+					newValue,
+					label: getFieldLabel(field)
+				});
+			}
+		}
+
+		return changes;
+	}
+
+	function showConfirmation(skipPrint: boolean = false) {
+		currentAction = skipPrint ? 'save' : 'saveAndPrint';
+		const changes = detectChanges();
+		if (changes.length > 0) {
+			showConfirmDialog = true;
+		} else {
+			if (skipPrint) {
+				saveOnlyC2B();
+			} else {
+				submitFormC2B();
+			}
+		}
+	}
+
+	function cancelConfirmation() {
+		showConfirmDialog = false;
+	}
+
+	function confirmAction() {
+		showConfirmDialog = false;
+		if (currentAction === 'save') {
+			saveOnlyC2B();
+		} else {
+			submitFormC2B();
+		}
+	}
 
 	async function submitFormC2B() {
 		const res = await fetch('/api/c2', {
@@ -146,7 +246,7 @@
 	</form>
 
 	{#if showFormC2}
-		<form on:submit|preventDefault={submitFormC2B} class="form main-form">
+		<form on:submit|preventDefault={() => showConfirmation(false)} class="form main-form">
 			<div class="form-header">
 				<h2>Prüfer B – C2 Steuerrechner</h2>
 				<div class="serial-info">
@@ -293,16 +393,62 @@
 			</div>
 
 			<div class="button-group">
-				<button type="button" class="save-button" on:click={saveOnlyC2B}>
+				<button type="button" class="save-button" on:click={() => showConfirmation(true)}>
 					Speichern
 				</button>
-				<button type="submit" class="submit-button">
+				<button type="button" class="submit-button" on:click={() => showConfirmation(false)}>
 					Speichern & Drucken
 				</button>
 			</div>
 		</form>
 	{/if}
 </div>
+
+{#if showConfirmDialog}
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<div class="dialog-overlay" role="dialog" aria-modal="true" tabindex="-1" on:click={cancelConfirmation}>
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<div class="dialog-content" on:click|stopPropagation>
+			<div class="dialog-header">
+				<h2>Änderungen bestätigen</h2>
+				<button class="dialog-close" on:click={cancelConfirmation}>✕</button>
+			</div>
+			<div class="dialog-body">
+				{#if detectChanges().length === 0}
+					<p class="no-changes">Keine Änderungen erkannt.</p>
+				{:else}
+					<p class="changes-intro">Die folgenden Änderungen wurden erkannt:</p>
+					<div class="changes-list">
+						{#each detectChanges() as change}
+							<div class="change-item">
+								<div class="change-field">{change.label}</div>
+								<div class="change-values">
+									<div class="old-value">
+										<div class="value-label">Vorher</div>
+										<div class="value">{formatValue(change.oldValue)}</div>
+									</div>
+									<div class="arrow">→</div>
+									<div class="new-value">
+										<div class="value-label">Nachher</div>
+										<div class="value">{formatValue(change.newValue)}</div>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+			<div class="dialog-footer">
+				<button class="cancel-button" on:click={cancelConfirmation}>Abbrechen</button>
+				<button class="confirm-button" on:click={confirmAction}>
+					{currentAction === 'save' ? 'Speichern' : 'Speichern & Drucken'}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.form-container {
@@ -789,6 +935,305 @@
 
 		.form-header h2 {
 			font-size: var(--font-size-lg);
+		}
+	}
+
+	/* Confirmation Dialog Styles */
+	.dialog-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1000;
+		padding: var(--spacing-lg);
+		backdrop-filter: blur(4px);
+		animation: fadeInOverlay 0.3s ease-out;
+	}
+
+	@keyframes fadeInOverlay {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	.dialog-content {
+		background: var(--white);
+		border-radius: var(--border-radius-lg);
+		box-shadow: var(--shadow-lg);
+		max-width: 600px;
+		width: 100%;
+		max-height: 80vh;
+		overflow-y: auto;
+		animation: slideInDialog 0.3s ease-out;
+		border: 1px solid var(--border-light);
+	}
+
+	@keyframes slideInDialog {
+		from {
+			opacity: 0;
+			transform: translateY(-20px) scale(0.95);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.dialog-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: var(--spacing-lg) var(--spacing-xl);
+		border-bottom: 2px solid var(--border-light);
+		background: linear-gradient(135deg, var(--bg-light), var(--white));
+	}
+
+	.dialog-header h2 {
+		font-size: var(--font-size-xl);
+		font-weight: var(--font-weight-bold);
+		color: var(--primary-color);
+		margin: 0;
+	}
+
+	.dialog-close {
+		background: none;
+		border: none;
+		font-size: var(--font-size-xl);
+		cursor: pointer;
+		color: var(--text-secondary);
+		width: 32px;
+		height: 32px;
+		border-radius: var(--border-radius-full);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all var(--transition-fast);
+	}
+
+	.dialog-close:hover {
+		background: var(--danger-color);
+		color: var(--white);
+		transform: scale(1.1);
+	}
+
+	.dialog-body {
+		padding: var(--spacing-xl);
+	}
+
+	.no-changes {
+		text-align: center;
+		color: var(--text-secondary);
+		font-size: var(--font-size-lg);
+		margin: 0;
+		padding: var(--spacing-lg);
+		background: var(--bg-light);
+		border-radius: var(--border-radius-md);
+		border: 1px solid var(--border-light);
+	}
+
+	.changes-intro {
+		font-size: var(--font-size-base);
+		color: var(--text-primary);
+		margin-bottom: var(--spacing-lg);
+		font-weight: var(--font-weight-medium);
+	}
+
+	.changes-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-md);
+	}
+
+	.change-item {
+		background: var(--bg-light);
+		border: 1px solid var(--border-light);
+		border-radius: var(--border-radius-md);
+		padding: var(--spacing-md);
+		transition: all var(--transition-fast);
+	}
+
+	.change-item:hover {
+		background: var(--white);
+		box-shadow: var(--shadow-sm);
+	}
+
+	.change-field {
+		font-weight: var(--font-weight-bold);
+		color: var(--primary-color);
+		margin-bottom: var(--spacing-sm);
+		font-size: var(--font-size-base);
+	}
+
+	.change-values {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		gap: var(--spacing-md);
+		align-items: center;
+	}
+
+	.old-value,
+	.new-value {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-xs);
+	}
+
+	.value-label {
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-semibold);
+		color: var(--text-secondary);
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.value {
+		font-size: var(--font-size-base);
+		color: var(--text-primary);
+		background: var(--white);
+		padding: var(--spacing-sm);
+		border-radius: var(--border-radius-sm);
+		border: 1px solid var(--border-light);
+		font-family: monospace;
+		word-break: break-word;
+	}
+
+	.old-value .value {
+		background: linear-gradient(135deg, #fef3c7, #fde68a);
+		border-color: #d97706;
+	}
+
+	.new-value .value {
+		background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+		border-color: #059669;
+	}
+
+	.arrow {
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-bold);
+		color: var(--primary-color);
+		text-align: center;
+	}
+
+	.dialog-footer {
+		display: flex;
+		gap: var(--spacing-md);
+		padding: var(--spacing-lg) var(--spacing-xl);
+		border-top: 2px solid var(--border-light);
+		background: var(--bg-light);
+		justify-content: flex-end;
+	}
+
+	.cancel-button {
+		padding: var(--spacing-md) var(--spacing-xl);
+		background: linear-gradient(135deg, var(--text-secondary), #6b7280);
+		color: var(--white);
+		border: none;
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-semibold);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+		min-height: 48px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.cancel-button::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		transition: left 0.6s ease;
+	}
+
+	.cancel-button:hover::before {
+		left: 100%;
+	}
+
+	.cancel-button:hover {
+		background: linear-gradient(135deg, #6b7280, #4b5563);
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-md);
+	}
+
+	.confirm-button {
+		padding: var(--spacing-md) var(--spacing-xl);
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+		color: var(--white);
+		border: none;
+		border-radius: var(--border-radius-md);
+		font-size: var(--font-size-base);
+		font-weight: var(--font-weight-semibold);
+		cursor: pointer;
+		transition: all var(--transition-smooth);
+		min-height: 48px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.confirm-button::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -100%;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+		transition: left 0.6s ease;
+	}
+
+	.confirm-button:hover::before {
+		left: 100%;
+	}
+
+	.confirm-button:hover {
+		background: linear-gradient(135deg, var(--primary-hover), var(--primary-active));
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-lg);
+	}
+
+	@media (max-width: 768px) {
+		.dialog-overlay {
+			padding: var(--spacing-md);
+		}
+
+		.dialog-content {
+			max-height: 90vh;
+		}
+
+		.dialog-header,
+		.dialog-body,
+		.dialog-footer {
+			padding: var(--spacing-lg);
+		}
+
+		.change-values {
+			grid-template-columns: 1fr;
+			gap: var(--spacing-sm);
+		}
+
+		.arrow {
+			transform: rotate(90deg);
+		}
+
+		.dialog-footer {
+			flex-direction: column-reverse;
+		}
+
+		.cancel-button,
+		.confirm-button {
+			width: 100%;
 		}
 	}
 </style>

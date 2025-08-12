@@ -18,6 +18,7 @@
     return entry.entries.map((product: any) => ({
       id: entry.id,
       created_at: formatDate(entry.created_at),
+      lieferscheinnummer: entry.lieferscheinnummer || 'N/A',
       artikelnummer: product.artikelnummer,
       artikelbezeichnung: product.artikelbezeichnung,
       menge: product.menge,
@@ -35,6 +36,7 @@
   const fieldLabels: Record<string, string> = {
     id: 'ID',
     created_at: 'Verpackungsdatum',
+    lieferscheinnummer: 'Lieferschein-Nr.',
     artikelnummer: 'Artikelnummer',
     artikelbezeichnung: 'Artikelbezeichnung',
     menge: 'Menge',
@@ -51,6 +53,7 @@
           const itemData: Record<string, any> = {
             id: group.id,
             created_at: formatDate(group.created_at),
+            lieferscheinnummer: group.lieferscheinnummer || 'N/A',
             artikelnummer: product.artikelnummer,
             artikelbezeichnung: product.artikelbezeichnung,
             menge: product.menge,
@@ -64,9 +67,11 @@
       if (!sortField) return 0;
       const aVal = sortField === 'id' ? a[sortField] : 
                    sortField === 'created_at' ? formatDate(a[sortField]) :
+                   sortField === 'lieferscheinnummer' ? (a[sortField] || 'N/A') :
                    a.entries[0]?.[sortField] ?? '';
       const bVal = sortField === 'id' ? b[sortField] : 
                    sortField === 'created_at' ? formatDate(b[sortField]) :
+                   sortField === 'lieferscheinnummer' ? (b[sortField] || 'N/A') :
                    b.entries[0]?.[sortField] ?? '';
       return sortAsc
         ? String(aVal).localeCompare(String(bVal))
@@ -248,7 +253,8 @@
 								</td>
 								<td class="group-header-cell">{group.id}</td>
 								<td class="group-header-cell">{formatDate(group.created_at)}</td>
-								<td class="group-header-cell" colspan="4">
+								<td class="group-header-cell">{group.lieferscheinnummer || 'N/A'}</td>
+								<td class="group-header-cell" colspan="3">
 									<span class="article-count">{group.entries.length} Artikel</span>
 								</td>
 							</tr>
@@ -260,6 +266,7 @@
 										</td>
 										<td class="data-cell">{group.id}</td>
 										<td class="data-cell">{formatDate(group.created_at)}</td>
+										<td class="data-cell">{group.lieferscheinnummer || 'N/A'}</td>
 										<td class="data-cell">{product.artikelnummer}</td>
 										<td class="data-cell">{product.artikelbezeichnung}</td>
 										<td class="data-cell">{product.menge}</td>

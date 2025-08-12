@@ -26,15 +26,33 @@ export async function GET() {
 export async function POST({ request }) {
 	try {
 		const body = await request.json();
-		const { serialnummer, items } = body;
+		const { lieferscheinnummer, items, skipPrint } = body;
 
 		if (!items || !Array.isArray(items) || items.length === 0) {
 			return json({ success: false, error: 'No items provided' }, { status: 400 });
 		}
 
+		if (!lieferscheinnummer || lieferscheinnummer.trim() === '') {
+			return json({ success: false, error: 'Lieferschein-Nummer ist erforderlich' }, { status: 400 });
+		}
+
+		// Check if Lieferschein number already exists
+		const existingEntry = await prisma.zubehoerEtikett.findFirst({
+			where: { lieferscheinnummer: lieferscheinnummer.trim() }
+		});
+
+		if (existingEntry) {
+			return json({ success: false, error: 'Lieferschein-Nummer bereits vorhanden' }, { status: 400 });
+		}
+
+		// Extract serialnummer from items if C-Extender is selected
+		const cExtenderItem = items.find(item => item.artikelnummer === '10370');
+		const serialnummer = cExtenderItem?.serialnummer || null;
+
 		await prisma.zubehoerEtikett.create({
 			data: {
-				serialnummer: serialnummer || null,
+				serialnummer: serialnummer,
+				lieferscheinnummer: lieferscheinnummer.trim(),
 				entries: items
 			}
 		});
@@ -44,6 +62,7 @@ export async function POST({ request }) {
 		).join('\n');
 
         const qrContent = [
+            `Lieferschein: ${lieferscheinnummer.trim()}`,
             ...(serialnummer ? [`Serialnummer: ${serialnummer}`] : []),
             ...items.map(i => `${i.artikelnummer} - ${i.artikelbezeichnung} - ${i.menge}`)
         ].join('\n');
@@ -66,12 +85,16 @@ export async function POST({ request }) {
 ^XZ
 		`.trim();
 
+		if (skipPrint) {
+			return json({ success: true, message: 'Data saved successfully' });
+		}
+
 		const tempPath = path.join(os.tmpdir(), `etikett-zubehoer-${Date.now()}.zpl`);
 		await fs.writeFile(tempPath, zpl);
 		await execAsync(`notepad /p "${tempPath}"`);
 		await fs.unlink(tempPath);
 
-		return json({ success: true });
+		return json({ success: true, zpl });
 	} catch (err) {
 		console.error('Zubehoer POST error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });

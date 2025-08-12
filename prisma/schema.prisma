@@ -221,10 +221,11 @@ model SingleItemKK {
 // --- Zubehoer SCHEMA ---
 
 model ZubehoerEtikett {
-  id           Int      @id @default(autoincrement())
-  created_at   DateTime @default(now())
-  serialnummer String?  
-  entries      Json     
+  id                Int      @id @default(autoincrement())
+  created_at        DateTime @default(now())
+  serialnummer      String?
+  lieferscheinnummer String?  
+  entries           Json     
 
   @@schema("zubehoer_etikett")
 }
