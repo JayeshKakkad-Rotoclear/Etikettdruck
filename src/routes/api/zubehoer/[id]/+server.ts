@@ -28,7 +28,6 @@ export async function GET({ params }: RequestEvent) {
 
 		return json({ success: true, item });
 	} catch (err) {
-		console.error('Zubehoer individual GET error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

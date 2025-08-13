@@ -21,7 +21,6 @@ export async function GET({ url }) {
 
         return json({ qr_code: item.qr_code_automatiktest });
     } catch (error) {
-        console.error('QR API Fehler:', error);
         return json({ error: 'Interner Fehler' }, { status: 500 });
     }
 }

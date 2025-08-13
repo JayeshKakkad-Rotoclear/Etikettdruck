@@ -7,13 +7,11 @@
   let debugInfo: any = {};
 
   onMount(async () => {
-    console.log('Debug page mounted');
     
     // Check auth first
     await AuthService.checkAuth();
     
     authStore.subscribe(state => {
-      console.log('Debug - Auth state changed:', state);
       authState = state;
       
       if (state.user) {
@@ -40,20 +38,16 @@
       const response = await fetch('/api/auth/me');
       const data = await response.json();
       debugInfo.apiResponse = data;
-      console.log('Debug - API response:', data);
     } catch (error) {
       debugInfo.apiError = (error as Error).message;
-      console.error('Debug - API error:', error);
     }
   });
 
   async function handleLogout() {
-    console.log('Debug - Logout button clicked');
     try {
       await AuthService.logout();
       window.location.href = '/login';
     } catch (error) {
-      console.error('Logout error:', error);
     }
   }
 </script>

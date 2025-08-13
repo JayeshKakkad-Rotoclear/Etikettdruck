@@ -15,14 +15,9 @@ export async function POST({ request }: RequestEvent) {
 		const body = await request.json();
 		const { entries, lieferscheinNumber } = body;
 
-		console.log('Received POST data:', { entries, lieferscheinNumber });
-
 		if (!entries || !Array.isArray(entries) || entries.length === 0) {
-			console.log('No entries provided');
 			return json({ success: false, error: 'No entries provided' }, { status: 400 });
 		}
-
-		console.log('Creating outer karton with entries:', entries.length);
 
 		// Save to database
 		const outerKarton = await prisma.outerKarton.create({
@@ -94,12 +89,6 @@ ${lieferscheinText}
 
 		return json({ success: true });
 	} catch (err) {
-		console.error('OuterKarton POST error:', err);
-		console.error('Error details:', {
-			name: err instanceof Error ? err.name : 'Unknown',
-			message: err instanceof Error ? err.message : 'Unknown error',
-			stack: err instanceof Error ? err.stack : 'No stack trace'
-		});
 		return json({ 
 			success: false, 
 			error: err instanceof Error ? err.message : 'Internal server error' 
@@ -115,7 +104,6 @@ export async function GET({ }: RequestEvent) {
 		});
 		return json({ success: true, items });
 	} catch (err) {
-		console.error('OuterKarton GET error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

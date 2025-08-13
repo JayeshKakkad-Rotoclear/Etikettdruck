@@ -23,8 +23,6 @@
   onMount(() => {
     // Subscribe to auth state
     const unsubscribe = authStore.subscribe(state => {
-      console.log('Auth state:', state); // Debug log
-      
       // Only redirect if authentication check is complete (not loading)
       if (!state.isLoading) {
         if (!state.isAuthenticated) {
@@ -34,7 +32,6 @@
       }
       
       user = state.user;
-      console.log('User data:', user); // Debug log
       if (user) {
         email = user.email || '';
         firstName = user.firstName || '';

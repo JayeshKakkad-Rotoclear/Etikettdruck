@@ -78,15 +78,12 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
       where: { id: userId }
     });
 
-    console.log(`✅ User deleted by admin ${adminUser.username}: ${targetUser.username} (ID: ${targetUser.id})`);
-
     return json({
       success: true,
       message: `Benutzer ${targetUser.username} wurde erfolgreich gelöscht`
     });
 
   } catch (error) {
-    console.error('Admin user deletion error:', error);
     return json({ 
       success: false, 
       error: 'Interner Serverfehler' 

@@ -65,7 +65,6 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
       }
     });
   } catch (error) {
-    console.error('Get users error:', error);
     return json({ success: false, error: 'Fehler beim Laden der Benutzer' }, { status: 500 });
   }
 };
@@ -138,7 +137,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
     return json({ success: true, data: user });
   } catch (error) {
-    console.error('Create user error:', error);
     return json({ success: false, error: 'Fehler beim Erstellen des Benutzers' }, { status: 500 });
   }
 };

@@ -43,7 +43,6 @@ export const GET: RequestHandler = async ({ cookies }) => {
       }
     });
   } catch (error) {
-    console.error('Me endpoint error:', error);
     return json({ 
       success: false, 
       error: 'Benutzerinformationen konnten nicht abgerufen werden' 

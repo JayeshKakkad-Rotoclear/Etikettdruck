@@ -84,8 +84,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       }
     });
 
-    console.log(`✅ Profile updated for user: ${updatedUser.username}`);
-
     return json({
       success: true,
       message: 'Profil erfolgreich aktualisiert',
@@ -95,7 +93,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     });
 
   } catch (error) {
-    console.error('Update profile error:', error);
     return json({ 
       success: false, 
       error: 'Interner Serverfehler' 

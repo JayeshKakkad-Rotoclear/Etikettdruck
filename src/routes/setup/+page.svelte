@@ -16,7 +16,6 @@
   let needsSetup = true;
 
   onMount(async () => {
-    // Check if setup is needed
     try {
       const response = await fetch('/api/setup/check');
       const data = await response.json();
@@ -26,7 +25,6 @@
         goto('/login');
       }
     } catch (err) {
-      console.error('Setup check failed:', err);
     }
   });
 

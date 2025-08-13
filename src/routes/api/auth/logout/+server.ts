@@ -16,7 +16,6 @@ export const POST: RequestHandler = async ({ cookies }) => {
 
     return json({ success: true });
   } catch (error) {
-    console.error('Logout error:', error);
     return json({ 
       success: false, 
       error: 'Abmeldung fehlgeschlagen' 

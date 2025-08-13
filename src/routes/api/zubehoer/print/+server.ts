@@ -66,7 +66,6 @@ export async function GET({ url }) {
 
 		return json({ success: true });
 	} catch (err) {
-		console.error('Zubehoer print error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

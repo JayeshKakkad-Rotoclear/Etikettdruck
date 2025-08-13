@@ -42,7 +42,6 @@ export async function POST({ request }) {
 
 		return json({ success: true, itemId: result.id });
 	} catch (error) {
-		console.error('Prüfer A error:', error);
 		return json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
 	}
 }
@@ -149,7 +148,6 @@ export async function PUT({ request }) {
 
         return json({ success: true });
     } catch (error) {
-        console.error('Update or Print error:', error);
         return json({ success: false, error: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
     }
 }

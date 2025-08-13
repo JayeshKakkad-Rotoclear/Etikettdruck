@@ -19,7 +19,6 @@ export async function GET() {
 
         return json({ prueferA: prueferAGroup, prueferB: prueferBGroup });
     } catch (error) {
-        console.error('CPro Stats Error:', error);
         return json({ error: 'Failed to fetch CPro stats' }, { status: 500 });
     }
 }

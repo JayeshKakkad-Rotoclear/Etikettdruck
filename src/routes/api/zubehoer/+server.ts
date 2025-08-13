@@ -17,7 +17,6 @@ export async function GET() {
 
 		return json({ success: true, items: allItems });
 	} catch (err) {
-		console.error('Zubehoer GET error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }
@@ -96,7 +95,6 @@ export async function POST({ request }) {
 
 		return json({ success: true, zpl });
 	} catch (err) {
-		console.error('Zubehoer POST error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

@@ -5,6 +5,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { canActAsProeferA, canActAsProeferB, canAccessDatabase } from '$lib/client-auth';
+	import NotificationCenter from './NotificationCenter.svelte';
 
 	let showSidebar = false;
 	let hoveredProduct = '';
@@ -33,7 +34,6 @@
 	}
 
 	async function logout() {
-		console.log('Header - Logout clicked');
 		await AuthService.logout();
 		goto('/login');
 	}
@@ -44,19 +44,6 @@
 		// Subscribe to auth state
 		authStore.subscribe(state => {
 			currentUser = state.user;
-			console.log('Header - Auth state changed:', { 
-				user: state.user, 
-				isAuthenticated: state.isAuthenticated,
-				isLoading: state.isLoading 
-			});
-			if (state.user) {
-				console.log('Header - Role checks:', {
-					role: state.user.role,
-					canViewProeferA: canActAsProeferA(state.user.role),
-					canViewProeferB: canActAsProeferB(state.user.role),
-					canViewDatabase: (state.user.role === 'MANAGEMENT' || state.user.role === 'ADMIN')
-				});
-			}
 		});
 
 		document.addEventListener('click', handleClickOutside);
@@ -68,20 +55,27 @@
 	<!-- add icon etikettendruck\src\assets\Logo.svg-->
 	<img src="/Logo.svg" alt="Rotoclear Logo" class="logo" />
 	<!-- <h1>Etikettendruck System</h1> -->
-	{#if $page.url.pathname !== '/login'}
+	
+	<div class="header-actions">
+		{#if $page.url.pathname !== '/login'}
+			<!-- Notification Center -->
+			<NotificationCenter />
+			
+			<!-- Burger Menu -->
 			<button
 				id="burger"
 				class="burger"
 				aria-label="Toggle sidebar"
 				on:click={() => (showSidebar = !showSidebar)}
 			>
-			<svg width="26" height="26" viewBox="0 0 100 80" aria-hidden="true">
-				<rect width="100" height="12"></rect>
-				<rect y="30" width="100" height="12"></rect>
-				<rect y="60" width="100" height="12"></rect>
-			</svg>
-		</button>
-	{/if}
+				<svg width="26" height="26" viewBox="0 0 100 80" aria-hidden="true">
+					<rect width="100" height="12"></rect>
+					<rect y="30" width="100" height="12"></rect>
+					<rect y="60" width="100" height="12"></rect>
+				</svg>
+			</button>
+		{/if}
+	</div>
 
 	{#if showSidebar}
 		<nav id="sidebar" class="sidebar">
@@ -323,6 +317,12 @@
 
 	.logo:hover {
 		transform: scale(1.05);
+	}
+
+	.header-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-md);
 	}
 
 	/* h1 {

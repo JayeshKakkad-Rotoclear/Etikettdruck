@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { slide } from 'svelte/transition';
+  import { notificationStore } from '$lib';
 
   // Scanning mode variables
   let scannedQRs: string[] = [];
@@ -24,10 +25,10 @@
   };
   
   // Common variables
-  let submitSuccess = false;
-  let error: string | null = null;
   let lieferscheinNumber = '';  // New field for Lieferschein number
   let finalGroupedEntries: any[] = [];  // Combined entries for display and submission
+  let error: string | null = null;
+  let submitSuccess = false;
 
   onMount(async () => {
     await loadAvailableProducts();
@@ -59,7 +60,7 @@
         manualSelections[key] = { selected: false, serialNumber: product.serialnummer, etikettId: '' };
       });
     } catch (err) {
-      console.error('Error loading products:', err);
+      notificationStore.error('Fehler beim Laden', 'Fehler beim Laden der verfügbaren Produkte.');
     }
   }
 
@@ -78,7 +79,7 @@
         });
       }
     } catch (err) {
-      console.error('Error loading Zubehör:', err);
+      notificationStore.error('Fehler beim Laden', 'Fehler beim Laden des verfügbaren Zubehörs.');
     }
   }
 
@@ -166,15 +167,13 @@
       
       return [];
     } catch (err) {
-      console.error('Error expanding Zubehör:', err);
+      notificationStore.error('Zubehör Fehler', 'Fehler beim Erweitern der Zubehör-Produkte.');
       return [];
     }
   }
 
   // Function to update manual entries when selections change
   async function updateManualEntries() {
-    console.log('updateManualEntries called, manualMode:', manualMode, 'isExpandingZubehoer:', isExpandingZubehoer);
-    
     if (isExpandingZubehoer || !manualMode) return; // Prevent concurrent updates
     
     isExpandingZubehoer = true;
@@ -183,20 +182,15 @@
       const selectedEntries = Object.entries(manualSelections)
         .filter(([_, selection]) => selection.selected);
 
-      console.log('selectedEntries:', selectedEntries);
-
       const results = await Promise.all(
         selectedEntries.map(async ([key, selection]) => {
           if (key.startsWith('zubehoer_')) {
-            console.log('Expanding Zubehör:', selection.etikettId);
-            // Expand Zubehör into individual products
             return await expandZubehoerToIndividualProducts(selection.etikettId);
           } else {
             // Regular product
             const product = availableProducts.find(p => 
               `${p.type}_${p.serialnummer}` === key
             );
-            console.log('Adding regular product:', product);
             return [{
               artikelnummer: product?.artikel_nummer || '',
               artikelbezeichnung: product?.artikel_bezeichnung || '',
@@ -208,9 +202,8 @@
       );
 
       expandedManualEntries = results.flat();
-      console.log('Updated expandedManualEntries:', expandedManualEntries);
     } catch (err) {
-      console.error('Error updating manual entries:', err);
+      notificationStore.error('Manuelle Einträge Fehler', 'Fehler beim Aktualisieren der manuellen Einträge.');
       expandedManualEntries = [];
     } finally {
       isExpandingZubehoer = false;
@@ -244,15 +237,12 @@
   // Use expanded entries when in manual mode
   $: {
     finalGroupedEntries = manualMode ? expandedManualEntries : scannedQRs.flatMap((qr) => parseQRContent(qr));
-    console.log('finalGroupedEntries updated:', finalGroupedEntries, 'manualMode:', manualMode);
   }
 
   async function submitOuterKarton() {
     try {
-      console.log('finalGroupedEntries:', finalGroupedEntries);
-      
       if (!finalGroupedEntries || finalGroupedEntries.length === 0) {
-        error = 'Keine Einträge zum Speichern vorhanden';
+        notificationStore.error('Validierung fehlgeschlagen', 'Keine Einträge zum Speichern vorhanden.');
         return;
       }
       
@@ -262,8 +252,6 @@
         menge: e.menge || 1,
         serialnummer: e.serialnummer || null
       }));
-
-      console.log('enriched entries:', enriched);
 
       const res = await fetch('/api/outerkarton', {
         method: 'POST',
@@ -275,10 +263,9 @@
       });
 
       const result = await res.json();
-      console.log('Server response:', result);
       
       if (result.success) {
-        submitSuccess = true;
+        notificationStore.success('Outer Karton gespeichert', 'Die Outer Karton Daten wurden erfolgreich gespeichert und das Etikett wurde gedruckt.');
         lieferscheinNumber = '';  // Clear Lieferschein number on success
         if (manualMode) {
           // Reset manual selections
@@ -289,11 +276,10 @@
           scannedQRs = [];
         }
       } else {
-        error = result.error || 'Error while saving';
+        notificationStore.error('Speicherfehler', result.error || 'Fehler beim Speichern der Outer Karton Daten.');
       }
     } catch (err) {
-      console.error('Submit error:', err);
-      error = err instanceof Error ? err.message : 'Connection error';
+      notificationStore.error('Verbindungsfehler', err instanceof Error ? err.message : 'Verbindungsfehler beim Speichern.');
     }
   }
 
@@ -656,18 +642,6 @@
         Etikett erstellen
       </button>
     </div>
-    {/if}
-
-    {#if submitSuccess}
-      <div class="alert success">
-        Etikett erfolgreich gespeichert und gedruckt!
-      </div>
-    {/if}
-
-    {#if error}
-      <div class="alert error">
-        Fehler: {error}
-      </div>
     {/if}
   </form>
 </div>
@@ -1195,40 +1169,6 @@
   .create-button:active {
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
-  }
-
-  .alert {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-md);
-    padding: var(--spacing-lg);
-    border-radius: var(--border-radius-md);
-    font-weight: var(--font-weight-medium);
-    margin: var(--spacing-lg) 0;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .alert.success {
-    background: linear-gradient(135deg, #d4edda, #c3e6cb);
-    color: #155724;
-    border: 2px solid #c3e6cb;
-  }
-
-  .alert.error {
-    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-    color: #721c24;
-    border: 2px solid #f5c6cb;
   }
 
   /* Responsive Design */

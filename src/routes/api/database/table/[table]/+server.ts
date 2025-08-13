@@ -277,7 +277,6 @@ export const GET = async ({ params, url, cookies }: any) => {
     });
 
   } catch (error) {
-    console.error('Database table error:', error);
     return json({
       success: false,
       error: 'Interner Serverfehler beim Laden der Tabellendaten'

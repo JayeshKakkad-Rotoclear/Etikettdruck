@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { notificationStore } from '$lib';
+	
 	let serialnummer = '';
-	let error = '';
 	let qrSVG = '';
 	let showPreview = false;
 	let isLoading = false;
@@ -8,7 +9,6 @@
 	async function loadQR() {
 		try {
 			// Reset state
-			error = '';
 			showPreview = false;
 			qrSVG = '';
 			isLoading = true;
@@ -29,12 +29,12 @@
 			if (data.qr_code) {
 				qrSVG = data.qr_code;
 				showPreview = true;
+				notificationStore.success('QR-Code geladen', 'QR-Code erfolgreich generiert und geladen.');
 			} else {
 				throw new Error('Kein QR-Code gefunden für diese Seriennummer.');
 			}
 		} catch (err) {
-			console.error('QR Code Generation Error:', err);
-			error = err instanceof Error ? err.message : 'Fehler beim Abrufen des QR-Codes.';
+			notificationStore.error('QR-Code Fehler', err instanceof Error ? err.message : 'Fehler beim Abrufen des QR-Codes.');
 		} finally {
 			isLoading = false;
 		}
@@ -79,12 +79,6 @@
 				</div>
 			</div>
 		</div>
-
-		{#if error}
-			<div class="alert error">
-				{error}
-			</div>
-		{/if}
 
 		{#if showPreview}
 			<div class="preview-section">
@@ -257,17 +251,6 @@
 		100% { transform: rotate(360deg); }
 	}
 
-	.alert {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-md);
-		padding: var(--spacing-lg);
-		border-radius: var(--border-radius-md);
-		font-weight: var(--font-weight-medium);
-		margin: var(--spacing-lg) 0;
-		animation: slideIn 0.3s ease-out;
-	}
-
 	@keyframes slideIn {
 		from {
 			opacity: 0;
@@ -277,12 +260,6 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
-	}
-
-	.alert.error {
-		background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-		color: #721c24;
-		border: 2px solid #f5c6cb;
 	}
 
 	.preview-section {

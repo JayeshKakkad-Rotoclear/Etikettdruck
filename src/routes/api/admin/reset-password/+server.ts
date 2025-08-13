@@ -81,15 +81,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       }
     });
 
-    console.log(`✅ Password reset by admin ${adminUser.username} for user: ${targetUser.username}`);
-
     return json({
       success: true,
       message: `Passwort für Benutzer ${targetUser.username} wurde erfolgreich zurückgesetzt`
     });
 
   } catch (error) {
-    console.error('Admin password reset error:', error);
     return json({ 
       success: false, 
       error: 'Interner Serverfehler' 

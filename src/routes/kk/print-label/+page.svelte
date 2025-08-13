@@ -1,28 +1,13 @@
 <script lang="ts">
-	import { Icon } from '$lib';
-	
+    import { Icon, notificationStore } from '$lib';
+
 	let serialnummer = '';
 	let isLoading = false;
-	let message = '';
-	let messageType: 'success' | 'error' = 'success';
 	let productData: any = null;
-
-	function clearMessage() {
-		message = '';
-		setTimeout(() => {
-			messageType = 'success';
-		}, 300);
-	}
-
-	function showMessage(text: string, type: 'success' | 'error' = 'success') {
-		messageType = type;
-		message = text;
-		setTimeout(clearMessage, 5000);
-	}
 
 	async function loadProductData() {
 		if (!serialnummer.trim()) {
-			showMessage('Bitte geben Sie eine Seriennummer ein.', 'error');
+			notificationStore.error('Validierungsfehler', 'Bitte geben Sie eine Seriennummer ein.');
 			return;
 		}
 
@@ -38,14 +23,13 @@
 			
 			if (data.found && data.item) {
 				productData = data.item;
-				showMessage('Produkt gefunden! Sie können jetzt das Etikett drucken.', 'success');
+				notificationStore.success('Produkt gefunden', 'Sie können jetzt das Etikett drucken.');
 			} else {
 				productData = null;
-				showMessage('Kein Produkt mit dieser Seriennummer gefunden.', 'error');
+				notificationStore.error('Produkt nicht gefunden', 'Kein Produkt mit dieser Seriennummer gefunden.');
 			}
 		} catch (err) {
-			console.error('Load Product Error:', err);
-			showMessage(err instanceof Error ? err.message : 'Fehler beim Laden des Produkts.', 'error');
+			notificationStore.error('Fehler beim Laden', err instanceof Error ? err.message : 'Fehler beim Laden des Produkts.');
 			productData = null;
 		} finally {
 			isLoading = false;
@@ -54,7 +38,7 @@
 
 	async function printLabel() {
 		if (!productData) {
-			showMessage('Kein Produkt geladen.', 'error');
+			notificationStore.error('Validierungsfehler', 'Kein Produkt geladen.');
 			return;
 		}
 
@@ -73,13 +57,12 @@
 			const result = await response.json();
 			
 			if (result.success) {
-				showMessage('Etikett erfolgreich gedruckt!', 'success');
+				notificationStore.success('Etikett gedruckt', 'Etikett erfolgreich gedruckt!');
 			} else {
 				throw new Error(result.error || 'Unbekannter Fehler beim Drucken');
 			}
 		} catch (err) {
-			console.error('Print Label Error:', err);
-			showMessage(err instanceof Error ? err.message : 'Fehler beim Drucken des Etiketts.', 'error');
+			notificationStore.error('Druckfehler', err instanceof Error ? err.message : 'Fehler beim Drucken des Etiketts.');
 		} finally {
 			isLoading = false;
 		}
@@ -88,11 +71,8 @@
 	function resetForm() {
 		serialnummer = '';
 		productData = null;
-		clearMessage();
 	}
-</script>
-
-<svelte:head>
+</script><svelte:head>
 	<title>KK Etikett Drucken</title>
 </svelte:head>
 
@@ -101,13 +81,6 @@
 		<h1 class="page-title">
 			KK Etikett Drucken
 		</h1>
-
-		{#if message}
-			<div class="alert {messageType}">
-				<span>{message}</span>
-				<button type="button" class="close-message" on:click={clearMessage}>✕</button>
-			</div>
-		{/if}
 
 		<div class="search-section">
 			<div class="field">
@@ -249,72 +222,6 @@
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
-	}
-
-	.description {
-		background: var(--bg-light);
-		border-radius: var(--border-radius-md);
-		padding: var(--spacing-lg);
-		margin-bottom: var(--spacing-xl);
-		border: 1px solid var(--border-light);
-		text-align: center;
-	}
-
-	.alert {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--spacing-md);
-		padding: var(--spacing-lg);
-		border-radius: var(--border-radius-md);
-		font-weight: var(--font-weight-medium);
-		margin-bottom: var(--spacing-lg);
-		animation: slideIn 0.3s ease-out;
-	}
-
-	@keyframes slideIn {
-		from {
-			opacity: 0;
-			transform: translateY(-10px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.alert.success {
-		background: linear-gradient(135deg, #d4edda, #c3e6cb);
-		color: #155724;
-		border: 2px solid #c3e6cb;
-	}
-
-	.alert.error {
-		background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-		color: #721c24;
-		border: 2px solid #f5c6cb;
-	}
-
-	.close-message {
-		background: none;
-		border: none;
-		font-size: var(--font-size-lg);
-		cursor: pointer;
-		color: inherit;
-		opacity: 0.7;
-		transition: all var(--transition-fast) ease;
-		width: 24px;
-		height: 24px;
-		border-radius: var(--border-radius-sm);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.close-message:hover {
-		opacity: 1;
-		background: rgba(0, 0, 0, 0.1);
-		transform: scale(1.1);
 	}
 
 	.search-section {

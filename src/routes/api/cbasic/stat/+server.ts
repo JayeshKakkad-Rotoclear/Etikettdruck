@@ -19,7 +19,6 @@ export async function GET() {
 
 		return json({ prueferA: prueferAGroup, prueferB: prueferBGroup });
 	} catch (error) {
-		console.error('CBasic Stats Error:', error);
 		return json({ error: 'Failed to fetch C Basic stats' }, { status: 500 });
 	}
 }

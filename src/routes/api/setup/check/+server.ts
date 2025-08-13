@@ -16,7 +16,6 @@ export const GET: RequestHandler = async () => {
       needsSetup: adminCount === 0
     });
   } catch (error) {
-    console.error('Setup check error:', error);
     return json({ 
       success: false, 
       error: 'Setup-Prüfung fehlgeschlagen' 

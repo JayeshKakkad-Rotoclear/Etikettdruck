@@ -64,7 +64,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
     return json({ 
       success: false, 
       error: 'Anmeldung fehlgeschlagen' 

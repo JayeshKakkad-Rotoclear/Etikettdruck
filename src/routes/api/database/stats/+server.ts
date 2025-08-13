@@ -63,7 +63,6 @@ export const GET = async ({ cookies }: any) => {
     });
 
   } catch (error) {
-    console.error('Database stats error:', error);
     return json({
       success: false,
       error: 'Interner Serverfehler beim Laden der Datenbankstatistiken'

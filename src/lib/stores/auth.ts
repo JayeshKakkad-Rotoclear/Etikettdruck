@@ -62,7 +62,6 @@ export class AuthService {
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Logout error:', error);
     }
 
     authStore.set({

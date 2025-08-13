@@ -69,8 +69,6 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     });
 
-    console.log('✅ Admin user created via setup:', adminUser.username);
-
     return json({
       success: true,
       message: 'Administrator erfolgreich erstellt',
@@ -84,7 +82,6 @@ export const POST: RequestHandler = async ({ request }) => {
       }
     });
   } catch (error) {
-    console.error('Admin creation error:', error);
     return json({ 
       success: false, 
       error: 'Fehler beim Erstellen des Administrators' 

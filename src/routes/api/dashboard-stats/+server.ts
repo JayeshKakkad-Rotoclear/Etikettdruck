@@ -152,7 +152,6 @@ export async function GET() {
             }
         });
     } catch (error) {
-        console.error('Dashboard Stats Error:', error);
         return json({ success: false, error: 'Failed to fetch dashboard statistics' }, { status: 500 });
     }
 }

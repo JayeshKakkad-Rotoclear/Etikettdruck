@@ -78,7 +78,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
       }
     });
 
-    console.log(`✅ Password changed for user: ${user.username}`);
 
     return json({
       success: true,
@@ -86,7 +85,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     });
 
   } catch (error) {
-    console.error('Change password error:', error);
     return json({ 
       success: false, 
       error: 'Interner Serverfehler' 

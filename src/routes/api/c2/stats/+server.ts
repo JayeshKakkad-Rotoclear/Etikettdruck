@@ -20,7 +20,6 @@ export async function GET() {
 
 		return json({ prueferA: prueferAGroup, prueferB: prueferBGroup });
 	} catch (error) {
-		console.error('C2 Stats Error:', error);
 		return json({ error: 'Failed to fetch C2 stats' }, { status: 500 });
 	}
 }

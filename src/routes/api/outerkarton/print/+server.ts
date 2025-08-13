@@ -83,7 +83,6 @@ ${lieferscheinText}
 
 		return json({ success: true });
 	} catch (err) {
-		console.error('OuterKarton print error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }

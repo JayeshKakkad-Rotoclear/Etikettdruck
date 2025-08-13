@@ -21,7 +21,6 @@ export async function GET({ url }: RequestEvent) {
 
 		return json({ success: true, item });
 	} catch (err) {
-		console.error('OuterKarton search error:', err);
 		return json({ success: false, error: 'Internal server error' }, { status: 500 });
 	}
 }
