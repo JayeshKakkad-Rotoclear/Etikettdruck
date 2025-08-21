@@ -14,7 +14,7 @@
       category: 'C-Extender',
       items: [
         { artikelnummer: '10370', artikelbezeichnung: 'Rotoclear C-Extender' },
-        { artikelnummer: '10413', artikelbezeichnung: 'Halterung für Rotoclear C-Extender' },
+        { artikelnummer: '10413', artikelbezeichnung: 'Halterung fuer Rotoclear C-Extender' },
       ],
     },
     {
@@ -24,7 +24,7 @@
         { artikelnummer: '10178', artikelbezeichnung: 'Flex-Armhalter (Vorwandmontage)' },
         { artikelnummer: '10222', artikelbezeichnung: 'Flex-Armhalter (Magnethalter)' },
         { artikelnummer: '10229', artikelbezeichnung: 'Kugelhalterung' },
-        { artikelnummer: '10147', artikelbezeichnung: 'Verlängerungsstück für Flex-Armhalterung' },
+        { artikelnummer: '10147', artikelbezeichnung: 'Verlängerungsstück fuer Flex-Armhalterung' },
       ],
     },
     {
@@ -39,11 +39,11 @@
       category: 'Extras',
       items: [
         { artikelnummer: '10091', artikelbezeichnung: 'Stromkabel (2m)' },
-		{ artikelnummer: '10343', artikelbezeichnung: 'Netzteil 230V -> 24V für Rotoclear Produkte' },
-		{ artikelnummer: '10344', artikelbezeichnung: 'Schutzschlauchsystem 1,5m für Flex-Armhalter' },
-		{ artikelnummer: '10086', artikelbezeichnung: 'Ersatzscheibe (rotierende Scheibe) für Kamerakopf' },
+		{ artikelnummer: '10343', artikelbezeichnung: 'Netzteil 230V -> 24V fuer Rotoclear Produkte' },
+		{ artikelnummer: '10344', artikelbezeichnung: 'Schutzschlauchsystem 1,5m fuer Flex-Armhalter' },
+		{ artikelnummer: '10086', artikelbezeichnung: 'Ersatzscheibe (rotierende Scheibe) fuer Kamerakopf' },
         { artikelnummer: '10038', artikelbezeichnung: 'Sperrluftleitung 5m (6x1mm)' },
-        { artikelnummer: '10299', artikelbezeichnung: 'Durchgangsventil für Sperrluftschlauch 6mm' },
+        { artikelnummer: '10299', artikelbezeichnung: 'Durchgangsventil fuer Sperrluftschlauch 6mm' },
       ],
     }
   ];
@@ -240,7 +240,7 @@ async function submitFormInternal(skipPrint: boolean = false) {
 
 		<div class="submit-section">
 			<button type="button" on:click={saveOnlyForm} class="submit-button save-only">
-				Nur Speichern
+				Speichern
 			</button>
 			<button type="submit" class="submit-button">
 				Speichern & Drucken
@@ -654,22 +654,20 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		display: flex;
 		gap: var(--spacing-md);
 		justify-content: center;
-		margin: var(--spacing-xl) auto 0 auto;
-		max-width: 800px;
+		margin: var(--spacing-xl) 0 0 0;
 	}
 
 	.submit-section .submit-button {
 		flex: 1;
-		max-width: 200px;
 		margin: 0;
 	}
 
 	.submit-button.save-only {
-		background: linear-gradient(135deg, var(--secondary-color), var(--secondary-hover));
+		background: linear-gradient(135deg, var(--success-color), var(--success-hover));
 	}
 
 	.submit-button.save-only:hover {
-		background: linear-gradient(135deg, var(--secondary-hover), var(--secondary-color));
+		background: linear-gradient(135deg, var(--success-hover), var(--success-color));
 	}
 
 	@media (max-width: 768px) {

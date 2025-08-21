@@ -2,6 +2,7 @@
   import { AuthService } from '$lib/stores/auth.js';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
+  import PasswordInput from '$lib/components/PasswordInput.svelte';
   
   let identifier = '';
   let password = '';
@@ -34,8 +35,9 @@
     isLoading = false;
   }
 
-  function handleKeyPress(event: KeyboardEvent) {
-    if (event.key === 'Enter') {
+  function handleKeyPress(event: CustomEvent | KeyboardEvent) {
+    const keyboardEvent = event instanceof CustomEvent ? event.detail : event;
+    if (keyboardEvent.key === 'Enter') {
       handleLogin();
     }
   }
@@ -65,6 +67,7 @@
         <input
           id="identifier"
           type="text"
+          autocomplete="username"
           bind:value={identifier}
           disabled={isLoading}
           on:keypress={handleKeyPress}
@@ -74,9 +77,9 @@
 
       <div class="field">
         <label for="password">Passwort</label>
-        <input
+        <PasswordInput
           id="password"
-          type="password"
+          autocomplete="current-password"
           bind:value={password}
           disabled={isLoading}
           on:keypress={handleKeyPress}

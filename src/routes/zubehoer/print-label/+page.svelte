@@ -13,7 +13,11 @@
     errorMessage = '';
 
     try {
-      const res = await fetch(`/api/zubehoer/print?lieferscheinnummer=${encodeURIComponent(lieferscheinnummer.trim())}`);
+      const res = await fetch('/api/zubehoer', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lieferscheinnummer: lieferscheinnummer.trim() })
+      });
       
       if (!res.ok) {
         const error = await res.json();
@@ -23,7 +27,6 @@
 
       const result = await res.json();
       if (result.success) {
-        alert('Etikett erfolgreich gedruckt!');
         lieferscheinnummer = '';
       } else {
         errorMessage = result.error || 'Fehler beim Drucken des Etiketts';

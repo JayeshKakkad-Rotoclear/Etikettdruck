@@ -1,8 +1,16 @@
 import { redirect } from '@sveltejs/kit';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET } from '$env/static/private';
 import type { Handle } from '@sveltejs/kit';
 import { canActAsProeferA, canActAsProeferB, canAccessDatabase } from '$lib/auth';
+
+// Use the same JWT secret logic as auth.ts
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production environment');
+  }
+  console.warn('WARNING: Using fallback JWT secret. Set JWT_SECRET environment variable for production.');
+  return 'fallback-secret-key-change-in-production';
+})();
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Get the token from cookies
@@ -31,7 +39,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   const url = event.url.pathname;
   
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/api/auth/login'];
+  const publicRoutes = ['/login', '/api/auth/login', '/api/auth/me', '/api/auth/logout'];
   
   if (publicRoutes.some(route => url.startsWith(route))) {
     // Allow access to public routes

@@ -31,18 +31,11 @@
 
 <style>
 	.field {
-		/* margin-bottom: var(--spacing-lg); */
 		padding: var(--spacing-sm) var(--spacing-md);
 		background: var(--white);
 		border-radius: var(--border-radius-md);
-		/* border: 1px solid var(--border-light); */
 		transition: all var(--transition-smooth);
 	}
-
-	/* .field:hover {
-		border-color: var(--border-medium);
-		box-shadow: var(--shadow-sm);
-	} */
 
 	.field-label {
 		display: block;

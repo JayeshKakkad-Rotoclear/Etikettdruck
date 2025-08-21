@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
+import { apiRequest } from '$lib/csrf';
 import type { UserRole } from '../../app.d.ts';
 
 export interface User {
@@ -57,9 +58,8 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
+      await apiRequest('/api/auth/logout', {
+        method: 'POST'
       });
     } catch (error) {
     }
@@ -75,9 +75,7 @@ export class AuthService {
     if (!browser) return;
 
     try {
-      const response = await fetch('/api/auth/me', {
-        credentials: 'include'
-      });
+      const response = await apiRequest('/api/auth/me');
       const data = await response.json();
 
       if (data.success) {

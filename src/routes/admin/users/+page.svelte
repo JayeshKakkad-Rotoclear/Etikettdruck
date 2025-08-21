@@ -3,6 +3,8 @@
   import { authStore } from '$lib/stores/auth.js';
   import { goto } from '$app/navigation';
   import { Icon } from '$lib';
+  import { apiRequest } from '$lib/csrf';
+  import PasswordInput from '$lib/components/PasswordInput.svelte';
 
   interface User {
     id: number;
@@ -55,7 +57,7 @@
 
   async function loadUsers() {
     try {
-      const response = await fetch(`/api/users?search=${encodeURIComponent(searchQuery)}`);
+      const response = await apiRequest(`/api/users?search=${encodeURIComponent(searchQuery)}`);
       const data = await response.json();
 
       if (data.success) {
@@ -72,11 +74,8 @@
 
   async function createUser() {
     try {
-      const response = await fetch('/api/users', {
+      const response = await apiRequest('/api/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
         body: JSON.stringify(newUser)
       });
 
@@ -94,7 +93,15 @@
         };
         loadUsers();
       } else {
-        error = data.error || 'Fehler beim Erstellen des Benutzers';
+        // Better error display for validation errors
+        if (data.errors && typeof data.errors === 'object') {
+          const errorMessages = Object.entries(data.errors)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join(', ');
+          error = `Validierungsfehler: ${errorMessages}`;
+        } else {
+          error = data.error || data.message || 'Fehler beim Erstellen des Benutzers';
+        }
       }
     } catch (err) {
       error = 'Verbindungsfehler';
@@ -173,12 +180,8 @@
     }
 
     try {
-      const response = await fetch('/api/admin/reset-password', {
+      const response = await apiRequest('/api/admin/reset-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
         body: JSON.stringify({
           userId: selectedUser.id,
           newPassword: newPassword
@@ -215,12 +218,8 @@
     }
 
     try {
-      const response = await fetch(`/api/admin/delete-user/${selectedUser.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
+      const response = await apiRequest(`/api/admin/delete-user/${selectedUser.id}`, {
+        method: 'DELETE'
       });
 
       const data = await response.json();
@@ -416,9 +415,8 @@
         <div class="form-row">
           <div class="field">
             <label for="password">Passwort</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               bind:value={newUser.password}
               required
             />
@@ -489,13 +487,12 @@
 
         <form on:submit|preventDefault={resetUserPassword}>
           <div class="field">
-            <input
+            <PasswordInput
               id="newPassword"
-              type="password"
               bind:value={newPassword}
               placeholder="Mindestens 6 Zeichen"
               required
-              minlength="6"
+              minlength={6}
             />
           </div>
 

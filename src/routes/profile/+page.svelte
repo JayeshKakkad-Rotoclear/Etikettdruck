@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { authStore } from '$lib/stores/auth.js';
   import { goto } from '$app/navigation';
+  import PasswordInput from '$lib/components/PasswordInput.svelte';
   
   let user: any = null;
   let isLoading = false;
@@ -309,9 +310,8 @@
           <form on:submit|preventDefault={updatePassword}>
             <div class="field">
               <label for="currentPassword">Aktuelles Passwort</label>
-              <input
+              <PasswordInput
                 id="currentPassword"
-                type="password"
                 bind:value={currentPassword}
                 disabled={isLoading}
                 required
@@ -319,24 +319,22 @@
             </div>
             <div class="field">
               <label for="newPassword">Neues Passwort</label>
-              <input
+              <PasswordInput
                 id="newPassword"
-                type="password"
                 bind:value={newPassword}
                 disabled={isLoading}
                 required
-                minlength="6"
+                minlength={6}
               />
             </div>
             <div class="field">
               <label for="confirmPassword">Neues Passwort bestätigen</label>
-              <input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 bind:value={confirmPassword}
                 disabled={isLoading}
                 required
-                minlength="6"
+                minlength={6}
               />
             </div>
             <div class="form-actions">

@@ -274,21 +274,26 @@ enum UserStatus {
 }
 
 model User {
-  id              Int         @id @default(autoincrement())
-  username        String      @unique
-  email           String      @unique
-  passwordHash    String
-  firstName       String
-  lastName        String
-  role            UserRole
-  status          UserStatus  @default(ACTIVE)
-  lastLoginAt     DateTime?
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  createdBy       String?
+  id                    Int         @id @default(autoincrement())
+  username              String      @unique
+  email                 String      @unique
+  passwordHash          String
+  firstName             String
+  lastName              String
+  role                  UserRole
+  status                UserStatus  @default(ACTIVE)
+  lastLoginAt           DateTime?
+  failedLoginAttempts   Int?        @default(0)
+  lockedUntil           DateTime?
+  passwordChangedAt     DateTime?
+  mustChangePassword    Boolean     @default(false)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+  createdBy             String?
 
   // Audit fields for tracking user activity
-  sessions        Session[]
+  sessions              Session[]
+  securityEvents        SecurityEvent[]
 
   @@schema("user_management")
 }
@@ -296,10 +301,28 @@ model User {
 model Session {
   id          String   @id @default(cuid())
   userId      Int
+  ipAddress   String?  // Made optional to allow migration
+  userAgent   String?  // Made optional to allow migration
   expiresAt   DateTime
   createdAt   DateTime @default(now())
+  isActive    Boolean  @default(true)
 
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@schema("user_management")
+}
+
+model SecurityEvent {
+  id          String    @id @default(cuid())
+  userId      Int?
+  type        String    // LOGIN_ATTEMPT, LOGIN_SUCCESS, etc.
+  ipAddress   String
+  userAgent   String
+  risk        String    // LOW, MEDIUM, HIGH, CRITICAL
+  details     Json?
+  createdAt   DateTime  @default(now())
+
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@schema("user_management")
 }

@@ -10,12 +10,10 @@
   $: isOpen = $notificationCenterOpen;
   $: unread = $unreadCount;
 
-  // Mobile detection
   let isMobile = false;
   let touchStartY = 0;
   let touchStartX = 0;
 
-  // Check if device is mobile on mount
   function checkMobile() {
     isMobile = window.innerWidth <= 480 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   }
@@ -23,7 +21,6 @@
   function toggleCenter() {
     notificationCenterOpen.update(open => !open);
     
-    // Mark all as read when opening
     if (!$notificationCenterOpen) {
       setTimeout(() => {
         notificationStore.markAllAsRead();
@@ -63,7 +60,6 @@
     });
   }
 
-  // Close notification center when clicking outside
   function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
     if (!target.closest('.notification-center') && !target.closest('.notification-trigger')) {
@@ -71,7 +67,6 @@
     }
   }
 
-  // Mobile touch handling for swipe-to-dismiss
   function handleTouchStart(event: TouchEvent, notificationId?: string) {
     touchStartY = event.touches[0].clientY;
     touchStartX = event.touches[0].clientX;
@@ -85,12 +80,10 @@
     const deltaY = touchStartY - touchEndY;
     const deltaX = touchStartX - touchEndX;
 
-    // Detect swipe down to close notification center (mobile only)
     if (isMobile && !notificationId && deltaY < -50 && Math.abs(deltaX) < 100) {
       notificationCenterOpen.set(false);
     }
     
-    // Detect swipe left to remove notification (mobile only)
     if (isMobile && notificationId && deltaX > 80 && Math.abs(deltaY) < 50) {
       notificationStore.remove(notificationId);
     }
@@ -99,7 +92,6 @@
     touchStartX = 0;
   }
 
-  // Handle escape key
   function handleKeydown(event: KeyboardEvent) {
     if (event.key === 'Escape' && isOpen) {
       notificationCenterOpen.set(false);

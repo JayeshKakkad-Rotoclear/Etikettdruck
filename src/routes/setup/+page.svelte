@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import PasswordInput from '$lib/components/PasswordInput.svelte';
 
   let setupForm = {
     username: 'admin',
@@ -134,21 +135,19 @@
         <div class="form-row">
           <div class="field">
             <label for="password">Passwort</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               bind:value={setupForm.password}
               required
               disabled={loading}
-              minlength="6"
+              minlength={6}
             />
           </div>
 
           <div class="field">
             <label for="confirmPassword">Passwort bestätigen</label>
-            <input
+            <PasswordInput
               id="confirmPassword"
-              type="password"
               bind:value={setupForm.confirmPassword}
               required
               disabled={loading}

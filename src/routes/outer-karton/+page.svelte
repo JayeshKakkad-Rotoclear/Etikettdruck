@@ -27,6 +27,7 @@
   // Common variables
   let lieferscheinNumber = '';  // New field for Lieferschein number
   let finalGroupedEntries: any[] = [];  // Combined entries for display and submission
+  let scannedEntries: any[] = [];  // Cached scanned entries with lookups
   let error: string | null = null;
   let submitSuccess = false;
 
@@ -87,8 +88,37 @@
     const value = scanInput.trim();
     if (value && !scannedQRs.includes(value)) {
       scannedQRs = [...scannedQRs, value];
+      // Trigger lookup for any new entries that need it
+      setTimeout(async () => {
+        await updateScannedEntries();
+      }, 100);
     }
     scanInput = '';
+  }
+
+  // Function to update scanned entries with lookup data
+  async function updateScannedEntries() {
+    const parsedEntries = scannedQRs.flatMap((qr) => parseQRContent(qr));
+    const updatedEntries = [];
+    
+    for (const entry of parsedEntries) {
+      if (entry.needsLookup && entry.serialnummer && !entry.artikelnummer) {
+        try {
+          const productData = await lookupProductBySerial(entry.serialnummer);
+          if (productData && productData.artikel_nummer) {
+            entry.artikelnummer = productData.artikel_nummer;
+            entry.needsLookup = false; // Mark as resolved
+            console.log(`Looked up artikel_nummer: ${productData.artikel_nummer} for serial: ${entry.serialnummer}`);
+          }
+        } catch (err) {
+          console.error(`Error looking up serial ${entry.serialnummer}:`, err);
+        }
+      }
+      updatedEntries.push(entry);
+    }
+    
+    // Force reactivity update
+    scannedEntries = updatedEntries;
   }
 
   function parseQRContent(qr: string): any[] {
@@ -121,7 +151,43 @@
         menge: 1 
       }];
     } else {
-      // Regular product QR code
+      // Check if this is a new format QR code (single line with space-separated key:value pairs)
+      const qrText = qr.trim();
+      
+      // New format: "SN: xxx ART: yyy ELE: zzz ..." (single line with key:value pairs)
+      if (qrText.includes('SN: ') && qrText.includes('ART: ')) {
+        const entry: any = {
+          artikelnummer: '',
+          artikelbezeichnung: '',
+          serialnummer: '',
+          menge: 1,
+          needsLookup: false // Will be set to true only if artikel_nummer is missing
+        };
+
+        // Parse the compact QR format
+        const snMatch = qrText.match(/SN:\s*([^\s]+)/);
+        // More robust regex for artikelbezeichnung - capture everything until the next field
+        const artMatch = qrText.match(/ART:\s*(.*?)(?=\s+[A-Z]{2,}:|$)/);
+
+        const artnMatch = qrText.match(/ARTN:\s*([^\s]+)/);
+
+        if (snMatch) {
+          entry.serialnummer = snMatch[1].trim();
+        }
+        if (artMatch) {
+          entry.artikelbezeichnung = artMatch[1].trim();
+        }
+        if (artnMatch) {
+          entry.artikelnummer = artnMatch[1].trim();
+        } else {
+          // Only set needsLookup if artikel_nummer is not found in QR
+          entry.needsLookup = true;
+        }
+
+        return [entry];
+      }
+      
+      // Legacy format - multiline with key: value
       const entry: any = {
         artikelnummer: '',
         artikelbezeichnung: '',
@@ -147,6 +213,40 @@
       }
 
       return [entry];
+    }
+  }
+
+  async function lookupProductBySerial(serialnummer: string): Promise<{artikel_nummer: string, type: string} | null> {
+    try {
+      // Try each product type API endpoint to find the product
+      const endpoints = [
+        { api: '/api/cpro', type: 'cpro' },
+        { api: '/api/c2', type: 'c2' },
+        { api: '/api/cbasic', type: 'cbasic' },
+        { api: '/api/kk', type: 'kk' }
+      ];
+
+      for (const endpoint of endpoints) {
+        try {
+          const response = await fetch(`${endpoint.api}?serialnummer=${encodeURIComponent(serialnummer)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.found && data.item && data.item.artikel_nummer) {
+              return {
+                artikel_nummer: data.item.artikel_nummer,
+                type: endpoint.type
+              };
+            }
+          }
+        } catch (err) {
+          console.warn(`Failed to lookup in ${endpoint.api}:`, err);
+          continue;
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('Error looking up product by serial:', err);
+      return null;
     }
   }
 
@@ -234,9 +334,14 @@
     }
   }
 
+  // Reactive statement to trigger lookup when scannedQRs changes
+  $: if (scannedQRs.length > 0 && !manualMode) {
+    updateScannedEntries();
+  }
+
   // Use expanded entries when in manual mode
   $: {
-    finalGroupedEntries = manualMode ? expandedManualEntries : scannedQRs.flatMap((qr) => parseQRContent(qr));
+    finalGroupedEntries = manualMode ? expandedManualEntries : scannedEntries.length > 0 ? scannedEntries : scannedQRs.flatMap((qr) => parseQRContent(qr));
   }
 
   async function submitOuterKarton() {
@@ -246,12 +351,36 @@
         return;
       }
       
-      const enriched = finalGroupedEntries.map((e) => ({
-        artikelnummer: e.artikelnummer || 'UNKNOWN',
-        artikelbezeichnung: e.artikelbezeichnung || 'Unknown Item',
-        menge: e.menge || 1,
-        serialnummer: e.serialnummer || null
-      }));
+      // Process entries and lookup missing artikel_nummer when needed
+      const enriched = [];
+      
+      for (const e of finalGroupedEntries) {
+        let entry = {
+          artikelnummer: e.artikelnummer || 'UNKNOWN',
+          artikelbezeichnung: e.artikelbezeichnung || 'Unknown Item',
+          menge: e.menge || 1,
+          serialnummer: e.serialnummer || null
+        };
+
+        // If this entry needs lookup (from new QR format), try to get artikel_nummer from database
+        if (e.needsLookup && e.serialnummer) {
+          try {
+            const productData = await lookupProductBySerial(e.serialnummer);
+            if (productData && productData.artikel_nummer) {
+              entry.artikelnummer = productData.artikel_nummer;
+              console.log(`Successfully looked up artikel_nummer: ${productData.artikel_nummer} for serial: ${e.serialnummer}`);
+            } else {
+              console.warn(`Could not find artikel_nummer for serial: ${e.serialnummer}`);
+              notificationStore.warning('Warnung', `Artikel-Nummer für Seriennummer ${e.serialnummer} konnte nicht gefunden werden. Verwende 'UNKNOWN'.`);
+            }
+          } catch (err) {
+            console.error(`Error looking up serial ${e.serialnummer}:`, err);
+            notificationStore.warning('Warnung', `Fehler beim Nachschlagen der Seriennummer ${e.serialnummer}. Verwende 'UNKNOWN'.`);
+          }
+        }
+
+        enriched.push(entry);
+      }
 
       const res = await fetch('/api/outerkarton', {
         method: 'POST',
@@ -274,6 +403,7 @@
           });
         } else {
           scannedQRs = [];
+          scannedEntries = [];
         }
       } else {
         notificationStore.error('Speicherfehler', result.error || 'Fehler beim Speichern der Outer Karton Daten.');
@@ -367,7 +497,7 @@
             {#each scannedQRs as qr, index}
               <div class="scan-item">
                 <span class="scan-number">QR {index + 1}</span>
-                <button type="button" class="remove-button" on:click={() => scannedQRs = scannedQRs.filter((_, i) => i !== index)}>
+                <button type="button" class="remove-button" on:click={() => { scannedQRs = scannedQRs.filter((_, i) => i !== index); scannedEntries = []; }}>
                   ✕
                 </button>
               </div>
@@ -628,7 +758,15 @@
           <tbody>
             {#each finalGroupedEntries as entry}
               <tr>
-                <td class="table-cell">{entry.artikelnummer}</td>
+                <td class="table-cell">
+                  {#if entry.needsLookup}
+                    <span class="lookup-needed">
+                      {entry.artikelnummer || 'Wird nachgeschlagen...'}
+                    </span>
+                  {:else}
+                    {entry.artikelnummer}
+                  {/if}
+                </td>
                 <td class="table-cell">{entry.artikelbezeichnung}</td>
                 <td class="table-cell numeric">{entry.menge}</td>
                 <td class="table-cell">{entry.serialnummer || '-'}</td>
@@ -1118,6 +1256,12 @@
   .table-cell.numeric {
     text-align: center;
     font-weight: var(--font-weight-semibold);
+  }
+
+  .lookup-needed {
+    color: var(--orange);
+    font-style: italic;
+    font-size: 0.9em;
   }
 
   .create-button {
