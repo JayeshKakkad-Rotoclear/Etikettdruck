@@ -1,6 +1,9 @@
 # Etikettdrucker - Quality Control & Label Printing System
 
-![Version](https://img.shields.io/badge/version-0.0.1-blue.svg)
+## Major Update: v0.1.0
+This release includes a comprehensive refactor, new notification system, mobile-first UI/UX, unified label printing APIs, advanced database/dashboard features, and extensive documentation. See Version History below for details.
+
+![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
 ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?logo=Prisma&logoColor=white)
@@ -16,6 +19,10 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 
 - **Role-Based Access Control (RBAC)** - Comprehensive 6-level user role system with secure authentication
 - **User Management** - Complete user administration with profile management and role assignment
+- **Professional Notification Center** - Centralized, mobile-friendly notification system with swipe gestures, accessibility, and localStorage persistence
+- **SVG Icon System** - Consistent, professional icons across all interfaces
+- **Mobile-First Responsive Design** - Optimized layouts, accessibility improvements, and touch gesture support
+- **Comprehensive Documentation** - Architecture, security, deployment, and development standards
 - **Multi-Product Quality Control** - Standardized testing protocols for C Pro, C2, C Basic, and Kamerakopf product lines
 - **Dual-Inspector Workflow** - Sequential testing by Prüfer A and Prüfer B with comprehensive validation
 - **Comprehensive Dashboard** - Real-time statistics, production metrics, and performance analytics
@@ -79,6 +86,15 @@ The system implements a comprehensive 6-level role hierarchy:
 - **Role Assignment** - Flexible role-based permission assignment
 - **Profile Management** - User profile editing and password change functionality
 - **Initial Setup** - First-time setup wizard for creating the initial admin user
+
+## New Features in v0.1.0
+- Unified and modernized label printing APIs for all product types
+- PUT endpoints for reprinting labels with original ZPL formatting
+- QR code image generation using qrcode and pngjs
+- Dynamic footer positioning and improved table formatting in ZPL output
+- Dual workflow for Zubehör (save-only and save-and-print)
+- Lieferschein tracking for Zubehör and outer karton
+- Database frontend improvements (Lieferschein column, advanced filtering, CSV export)
 
 ## Product Lines
 
@@ -204,6 +220,9 @@ Precision camera systems with optical components.
 - **Validation Rules** - Strict data validation for all inputs
 - **Referential Integrity** - Consistent relationships across schemas
 - **Backup & Recovery** - Automated backup and recovery procedures
+
+## Documentation & Architecture
+- Extensive docs in `docs/architecture/` covering system overview, technical, data, security, deployment, and development standards
 
 ## Getting Started
 
@@ -333,6 +352,10 @@ etikettendruck/
 │   │   ├── outer-karton/         # Outer carton labeling
 │   │   ├── +layout.svelte        # Main application layout with auth
 │   │   └── +page.svelte          # Dashboard home page
+│   │   ├── print-label/          # Reprint label pages for all product types
+│   │   ├── qr-preview/           # QR code preview pages
+│   │   ├── debug/icons/          # Icon preview and testing
+│   │   ├── admin/+layout.svelte  # Admin layout with role protection
 │   ├── hooks.server.ts           # SvelteKit server hooks for auth
 │   ├── app.html                  # HTML template
 │   └── app.d.ts                  # TypeScript definitions with auth types
@@ -465,7 +488,14 @@ This project is proprietary software developed for Rotoclear GmbH. All rights re
 
 ## Version History
 
-### v0.0.1 (Current)
+### v0.1.0 (Current)
+- Major refactor, bug fixes, and feature enhancements across the entire project
+- Notification center, SVG icon system, mobile-first design, accessibility, and comprehensive documentation
+- Unified label printing APIs, PUT endpoints for reprinting, QR code image generation, dynamic ZPL formatting
+- Database and dashboard improvements, Lieferschein tracking, and advanced search/filter/export
+- All changes tested and validated for production use
+
+### v0.0.1
 - **Authentication System** - Complete JWT-based authentication with HTTP-only cookies
 - **Role-Based Access Control** - 6-level user hierarchy (VIEWER → PRUEFER_B → PRUEFER_A → PRUEFER_AB → MANAGEMENT → ADMIN)
 - **User Management** - Comprehensive user administration with role assignment and profile management
@@ -479,7 +509,3 @@ This project is proprietary software developed for Rotoclear GmbH. All rights re
 - **Outer Carton Labeling** - Dual-mode (scan/manual) product selection system
 - **Accessory Management** - Zubehör label creation and tracking
 - **Enhanced UI/UX** - Comprehensive page titles and improved navigation
-
----
-
-**Built for Rotoclear GmbH Quality Assurance**
