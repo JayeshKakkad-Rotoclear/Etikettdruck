@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { getPrinterIp } from '$lib/printer.js';
 
   type Item = {
     id: string;
@@ -91,12 +92,14 @@ async function submitFormInternal(skipPrint: boolean = false) {
     const payload: any = {
         items: selectedItems,
         lieferscheinnummer: lieferscheinnummer.trim() || null,
-        skipPrint: skipPrint
+        skipPrint: skipPrint,
+        printerIp: getPrinterIp()
     };
 
     const res = await fetch('/api/zubehoer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload)
     });
     if (!res.ok) {

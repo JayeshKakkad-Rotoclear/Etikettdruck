@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
+	import { getPrinterIp } from '$lib/printer.js';
 
 	let form = getEmptyFormCbasicB();
 	let serialToFindCbasic = '';
@@ -63,7 +64,8 @@
 		const res = await fetch('/api/cbasic', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(form)
+			credentials: 'include',
+			body: JSON.stringify({ ...form, printerIp: getPrinterIp() })
 		});
 		if (res.ok) {
 			alert('Formular aktualisiert und Etikett gedruckt!');
@@ -79,7 +81,8 @@
 		const res = await fetch('/api/cbasic', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...form, skipPrint: true })
+			credentials: 'include',
+			body: JSON.stringify({ ...form, skipPrint: true, printerIp: getPrinterIp() })
 		});
 		if (res.ok) {
 			alert('Formular gespeichert!');

@@ -104,6 +104,7 @@
             {#if canViewProeferA || canViewProeferB}
               <a href="/cpro/qr-preview" class="nav-link">QR-Code Vorschau</a>
             {/if}
+            <a href="/cpro/print-label" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/cpro" class="nav-link dashboard">Datenbank</a>
             {/if}
@@ -122,6 +123,7 @@
             {#if canViewProeferA || canViewProeferB}
               <a href="/c2/qr-preview" class="nav-link">QR-Code Vorschau</a>
             {/if}
+            <a href="/c2/print-label" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/c2" class="nav-link dashboard">Datenbank</a>
             {/if}
@@ -137,6 +139,7 @@
             {#if canViewProeferB}
               <a href="/cbasic/pruefer-b" class="nav-link">Prüfer B Formular</a>
             {/if}
+            <a href="/cbasic/print-label" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/cbasic" class="nav-link dashboard">Datenbank</a>
             {/if}
@@ -155,6 +158,7 @@
             {#if canViewProeferA || canViewProeferB}
               <a href="/kk/qr-preview" class="nav-link">QR-Code Vorschau</a>
             {/if}
+            <a href="/kk/print-label" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/kk" class="nav-link dashboard">Datenbank</a>
             {/if}
@@ -165,6 +169,7 @@
           <h3 class="category-title">Zubehör</h3>
           <div class="nav-links">
             <a href="/zubehoer" class="nav-link">Zubehör Etikett</a>
+            <a href="/zubehoer/print" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/zubehoer" class="nav-link dashboard">Zubehör Datenbank</a>
             {/if}
@@ -175,6 +180,7 @@
           <h3 class="category-title">Verpackung</h3>
           <div class="nav-links">
             <a href="/outer-karton" class="nav-link">Außenkarton Etikett</a>
+            <a href="/outer-karton/print" class="nav-link">Etikettendruck</a>
             {#if canViewDatabase}
               <a href="/dashboard/outer-karton" class="nav-link dashboard">Außenkarton Datenbank</a>
             {/if}

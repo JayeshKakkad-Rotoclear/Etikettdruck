@@ -2,6 +2,7 @@
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
 	import SelectRadio from '$lib/components/selectRadio.svelte';
 	import { Icon } from '$lib';
+	import { getPrinterIp } from '$lib/printer.js';
 
     $: {
 		if (form.konfiguration === 'DMG') {
@@ -192,7 +193,8 @@
 		const res = await fetch('/api/c2', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(form)
+			credentials: 'include',
+			body: JSON.stringify({ ...form, printerIp: getPrinterIp() })
 		});
 		if (res.ok) {
 			alert('Formular aktualisiert und Etikett gedruckt!');
@@ -208,7 +210,8 @@
 		const res = await fetch('/api/c2', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ ...form, skipPrint: true })
+			credentials: 'include',
+			body: JSON.stringify({ ...form, skipPrint: true, printerIp: getPrinterIp() })
 		});
 		if (res.ok) {
 			alert('Formular gespeichert!');

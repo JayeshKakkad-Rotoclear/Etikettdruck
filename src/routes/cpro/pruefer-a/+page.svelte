@@ -1,6 +1,7 @@
 <script lang="ts">
   import BooleanRadio from '$lib/components/booleanRadio.svelte';
   import SelectRadio from '$lib/components/selectRadio.svelte';
+  import { getPrinterIp } from '$lib/printer.js';
 
   let form = getEmptyFormCproA();
 
@@ -55,7 +56,8 @@
     const res = await fetch('/api/cpro', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
+      credentials: 'include',
+      body: JSON.stringify({ ...form, printerIp: getPrinterIp() })
     });
     if (res.ok) {
       alert('Form gespeichert. Bitte Prüfer B informieren.');

@@ -155,6 +155,16 @@
     copy: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="${color}" stroke-width="2"/>
       <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="${color}" stroke-width="2"/>
+    </svg>`,
+    
+    // WiFi/Network
+    wifi: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1.42 9C3.28 6.8 5.98 5.45 8.95 5.05C11.92 4.65 14.95 5.21 17.58 6.65C18.85 7.35 20 8.25 21 9.35M5 13C6.24 11.61 7.97 10.68 9.86 10.39C11.75 10.1 13.68 10.46 15.36 11.42C16.2 11.9 16.97 12.53 17.64 13.29M8.53 16.11C9.37 15.66 10.32 15.42 11.28 15.42C12.24 15.42 13.19 15.66 14.03 16.11M12 20L12.01 19.99" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    
+    // Rotate Counter-Clockwise/Reset
+    'rotate-ccw': `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M1 4V10H7M23 20V14H17M20.49 9C19.05 5.81 15.92 3.69 12.34 3.69C9.77 3.69 7.39 4.87 5.75 6.75L1 10M23 14L18.25 17.25C16.61 19.13 14.23 20.31 11.66 20.31C8.08 20.31 4.95 18.19 3.51 15" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`
   };
 

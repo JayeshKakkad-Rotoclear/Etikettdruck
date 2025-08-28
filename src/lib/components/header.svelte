@@ -278,6 +278,10 @@
 					{/if}
 					
 					<div class="sidebar-item">
+						<a href="/printer-settings">Drucker-Einstellungen</a>
+					</div>
+					
+					<div class="sidebar-item">
 						<a href="/profile">Mein Profil</a>
 					</div>
 					

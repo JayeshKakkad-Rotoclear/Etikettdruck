@@ -9,3 +9,6 @@ export { default as NotificationCenter } from './components/NotificationCenter.s
 
 // Stores
 export { notificationStore } from './stores/notifications.js';
+
+// Printer utilities
+export { getPrinterIp, setPrinterIp, resetPrinterIp, isValidIp, getDefaultPrinterIp } from './printer.js';

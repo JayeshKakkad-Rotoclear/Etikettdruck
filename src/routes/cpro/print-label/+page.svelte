@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Icon, notificationStore } from '$lib';
+    import { getPrinterIp } from '$lib/printer.js';
 
 	let serialnummer = '';
 	let isLoading = false;
@@ -17,6 +18,11 @@
 			
 			if (!response.ok) {
 				throw new Error(`Server Error: ${response.status} ${response.statusText}`);
+			}
+
+			if (response.status === 401) {
+			notificationStore.error('Nicht angemeldet', 'Bitte melden Sie sich erneut an.');
+			return;
 			}
 
 			const data = await response.json();
@@ -47,11 +53,17 @@
 			const response = await fetch('/api/cpro', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(productData)
+				credentials: 'include',
+				body: JSON.stringify({ ...productData, printerIp: getPrinterIp() })
 			});
 
 			if (!response.ok) {
 				throw new Error(`Server Error: ${response.status} ${response.statusText}`);
+			}
+			
+			if (response.status === 401) {
+			notificationStore.error('Nicht angemeldet', 'Bitte melden Sie sich erneut an.');
+			return;
 			}
 
 			const result = await response.json();

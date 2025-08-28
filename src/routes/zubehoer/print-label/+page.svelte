@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { getPrinterIp } from '$lib/printer.js';
+  
   let lieferscheinnummer = '';
   let errorMessage = '';
   let isLoading = false;
@@ -16,7 +18,8 @@
       const res = await fetch('/api/zubehoer', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lieferscheinnummer: lieferscheinnummer.trim() })
+        credentials: 'include',
+        body: JSON.stringify({ lieferscheinnummer: lieferscheinnummer.trim(), printerIp: getPrinterIp() })
       });
       
       if (!res.ok) {

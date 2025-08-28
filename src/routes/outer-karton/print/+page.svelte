@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { getPrinterIp } from '$lib/printer.js';
+  
   let lieferscheinNumber = '';
   let loading = false;
   let error: string | null = null;
@@ -35,7 +37,8 @@
       const printRes = await fetch('/api/outerkarton/print', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ outerKartonId: outerKartonData.id })
+        credentials: 'include',
+        body: JSON.stringify({ outerKartonId: outerKartonData.id, printerIp: getPrinterIp() })
       });
 
       const printResult = await printRes.json();

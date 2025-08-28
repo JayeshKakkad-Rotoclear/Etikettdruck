@@ -1,0 +1,10 @@
+node_modules
+.svelte-kit
+build
+.vscode
+.git
+.gitignore
+*.log
+Dockerfile
+docker-compose*.yml
+.env*

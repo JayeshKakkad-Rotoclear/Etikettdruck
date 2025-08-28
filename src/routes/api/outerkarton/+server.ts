@@ -56,15 +56,15 @@ function pngToZplGFA(pngBuf: Buffer): { gfa: string; widthBytes: number; totalBy
 const prisma = new PrismaClient();
 
 // Zebra printer configuration
-const PRINTER_IP = '10.50.8.113';
+const DEFAULT_PRINTER_IP = '10.50.8.113';
 const PRINTER_PORT = 9100; // Standard ZPL port
 
-async function sendToPrinter(zplData: string): Promise<boolean> {
+async function sendToPrinter(zplData: string, printerIp?: string): Promise<boolean> {
+	const targetIp = printerIp || DEFAULT_PRINTER_IP;
 	return new Promise((resolve, reject) => {
 		const client = new net.Socket();
 		
-		client.connect(PRINTER_PORT, PRINTER_IP, () => {
-			console.log('Connected to printer');
+		client.connect(PRINTER_PORT, targetIp, () => {
 			client.write(zplData);
 			
 			// Close connection immediately after sending data
@@ -76,25 +76,21 @@ async function sendToPrinter(zplData: string): Promise<boolean> {
 		});
 		
 		client.on('data', (data) => {
-			console.log('Printer response:', data.toString());
 			client.destroy();
 			resolve(true);
 		});
 		
 		client.on('close', () => {
-			console.log('Connection to printer closed');
 			resolve(true);
 		});
 		
 		client.on('error', (err) => {
-			console.error('Printer connection error:', err);
 			client.destroy();
 			reject(err);
 		});
 		
 		// Reduce timeout and handle it better
 		client.setTimeout(5000, () => {
-			console.log('Printer timeout - closing connection (data likely sent successfully)');
 			client.destroy();
 			resolve(true); // Resolve instead of reject since data was likely sent
 		});
@@ -121,12 +117,9 @@ export async function POST({ request }: RequestEvent) {
 			include: { entries: true }
 		});
 
-		// Build table text for ZPL with better formatting
+		// Build table text for professional ZPL formatting (matching Zubehör style)
 		const tableLines = outerKarton.entries.map((item) => {
-			const artikel = `${item.artikelnummer} - ${item.artikelbezeichnung}`;
-			const menge = `Menge: ${item.menge}`;
-			const sn = item.serialnummer ? `  SN: ${item.serialnummer}` : '';
-			return `${artikel}  ${menge}${sn}`;
+			return `${item.menge} - ${item.artikelbezeichnung} - ${item.artikelnummer}${item.serialnummer ? ` (SN: ${item.serialnummer})` : ''}`;
 		});
 
 		// Build QR code content
@@ -144,80 +137,117 @@ export async function POST({ request }: RequestEvent) {
 		const qrPng = await makeQrPng(qrContent, 350);
 		const { gfa } = pngToZplGFA(qrPng);
 
-		// Calculate dynamic positions
-		const baseY = 500;
-		const lieferscheinY = outerKarton.lieferscheinNumber ? baseY + 100 : baseY;
-		const inhaltY = outerKarton.lieferscheinNumber ? lieferscheinY + 50 : baseY + 50;
-		const tableY = outerKarton.lieferscheinNumber ? inhaltY + 50 : baseY + 100;
-		
-		// Calculate footer position based on actual table content length
-		// const tableLines = outerKarton.entries.length;
-		const lineHeight = 30; // Approximate height per line in ZPL units
-		const tableContentHeight = tableLines.length * lineHeight;
-		const marginBetweenTableAndFooter = 100; // Fixed margin between table end and footer
-		const footerStartY = tableY + tableContentHeight + marginBetweenTableAndFooter;
+		// Helper function to convert mm to ZPL dots (8 dots per mm)
+		const mm = (millimeters: number) => Math.round(millimeters * 8);
 
-		// Footer content as variable
-		const footer = [
-			'^CF0,25',
-			`^FO50,${footerStartY}^FDwww.rotoclear.com^FS`,
-			`^FO650,${footerStartY}^FDDesigned and made in Germany^FS`
+		// Professional label dimensions and spacing (matching Zubehör style)
+		const W = 1181; // Width
+		const H = 1772; // Height  
+		const M = mm(6); // Margin
+
+		// Typography sizes
+		const H12PT = 50;
+		const H6PT = 25;
+
+		// Professional spacing
+		const sp6_67 = mm(9.67);
+		const sp3_17 = mm(3.17);
+		const sp3_295 = mm(3.295);
+		const sp11_3 = mm(11.3);
+		const sp2 = mm(2);
+		const rowGap = mm(3.2);
+		const tableTopGap = sp11_3;
+
+		// Content positioning
+		const X = M;
+		let y = M;
+
+		// Table column setup
+		const rightColW = mm(28);
+		const rightColX = W - M - rightColW + mm(5);
+		const leftAreaW = rightColX - X;
+		const qtyColW = mm(6);
+		const rightGutter = mm(1);
+		const descColX = X + qtyColW + mm(3);
+		const descColW = leftAreaW - qtyColW - mm(3) - rightGutter;
+
+		const zplParts: string[] = [
+			'^XA', '^CI28', '^PON', '^FWN',
+			'^LH0,0',
+			`^PW${W}`, `^LL${H}`, '^LS0',
+			'^CWZ,E:TT0003M_.TTF'
 		];
 
-		// Add Lieferschein number to ZPL if available
-		const lieferscheinText = outerKarton.lieferscheinNumber 
-			? `^FO50,${lieferscheinY}^FDLieferschein: ${outerKarton.lieferscheinNumber}^FS` 
-			: '';
+		// Header with professional styling
+		zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear Outer Karton^FS`);
+		y += sp6_67;
 
-		// Generate ZPL with QR image
-		const zpl = [
-			'^XA',
-			'^CI28',
-			'^PON',
-			'^FWN',
-			'^LH0,0',
-			'^LT0',
-			'^LS0',
-			'^PW1181',
-			'^LL1772',
+		// Company address block
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDRotoclear GmbH^FS`); y += sp2;
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDCarl-Benz-Strasse 10–12^FS`); y += sp2;
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FD69115 Heidelberg^FS`); y += sp2;
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDGermany^FS`); y += sp3_17;
 
-			'^CF0,40',
-			'^FO50,30^FDOuter Karton Etikett^FS',
+		// Website
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDwww.rotoclear.com^FS`);
+		y += sp3_295;
 
-			// QR code as image
-			'^FO50,100',
-			gfa + '^FS',
+		// Verpackungsdatum
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDVerpackungsdatum: ${verpackungsdatum}^FS`);
+		y += sp3_17;
 
-			'^CF0,30',
-			`^FO50,${baseY}^FDVerpackungsdatum: ${verpackungsdatum}^FS`,
+		// Lieferschein if available
+		if (outerKarton.lieferscheinNumber) {
+			zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDLieferschein: ${outerKarton.lieferscheinNumber}^FS`);
+			y += sp3_17;
+		}
 
-			'^CF0,25',
-			lieferscheinText,
+		// QR code positioning (right side to match Zubehör layout)
+		const qrSize = 320;
+		const qrXRight = W - M - qrSize;
+		const qrY = M + mm(9);
+		zplParts.push(`^FO${qrXRight},${qrY}`, gfa + '^FS');
 
-			'^CF0,25',
-			`^FO50,${inhaltY}^FDInhalt:^FS`,
+		// Tagline
+		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDDesigned and made in Germany^FS`);
+		y += tableTopGap;
 
-			'^CF0,25',
-			...tableLines.map((line, i) =>
-			`^FO50,${tableY + i * lineHeight}^FB1000,1,0,L,0^FD${line}^FS`
-			),
+		// Professional table header
+		zplParts.push(
+			`^AZN,${H6PT},${H6PT}`,
+			`^FO${X},${y}^FB${qtyColW},1,0,L,0^FDMenge^FS`,
+			`^FO${descColX},${y}^FB${descColW},1,0,L,0^FDArtikel^FS`,
+			`^FO${rightColX},${y}^FB${rightColW},1,0,L,0^FDArtikelnummer^FS`,
+			`^FO${X},${y + mm(3)}^GB${W - 2 * M},2,2^FS` // Header underline
+		);
+		y += mm(6);
 
-			'^CF0,30',
-			'^FO450,100^FDRotoclear GmbH^FS',
-			'^FO450,140^FDCarl-Benz-Strasse 10-12^FS',
-			'^FO450,180^FD69115 Heidelberg^FS',
-			'^FO450,220^FDGermany^FS',
+		// Table content with proper formatting
+		zplParts.push(`^AZN,${H6PT},${H6PT}`);
+		tableLines.forEach((line, i) => {
+			const ry = y + i * rowGap;
+			const parts = line.split(' - ');
+			if (parts.length >= 3) {
+				const menge = parts[0];
+				const bezeichnung = parts[1];
+				const artikelnummer = parts[2];
+				
+				zplParts.push(
+					`^FO${X},${ry}^FB${qtyColW},1,0,L,0^FD${menge}^FS`,
+					`^FO${descColX},${ry}^FB${descColW},1,0,L,0^FD${bezeichnung}^FS`,
+					`^FO${rightColX},${ry}^FB${rightColW},1,0,L,0^FD${artikelnummer}^FS`
+				);
+			} else {
+				// Fallback for lines that don't follow expected format
+				zplParts.push(`^FO${descColX},${ry}^FB${descColW + rightColW},1,0,L,0^FD${line}^FS`);
+			}
+		});
 
-			// Dynamic footer
-			...footer,
+		zplParts.push('^XZ');
+		const zpl = zplParts.join('\r\n');
 
-			'^XZ'
-		].join('\r\n');
-
-		// Send to Zebra printer
 		try {
-			await sendToPrinter(zpl);
-			console.log('Outer karton label sent to printer successfully');
+			await sendToPrinter(zpl, body.printerIp);
 		} catch (error) {
 			console.error('Failed to send outer karton label to printer:', error);
 			throw error;

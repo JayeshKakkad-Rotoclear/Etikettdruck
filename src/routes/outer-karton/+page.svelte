@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { slide } from 'svelte/transition';
   import { notificationStore } from '$lib';
+  import { getPrinterIp } from '$lib/printer.js';
 
   // Scanning mode variables
   let scannedQRs: string[] = [];
@@ -107,11 +108,28 @@
           const productData = await lookupProductBySerial(entry.serialnummer);
           if (productData && productData.artikel_nummer) {
             entry.artikelnummer = productData.artikel_nummer;
-            entry.needsLookup = false; // Mark as resolved
-            console.log(`Looked up artikel_nummer: ${productData.artikel_nummer} for serial: ${entry.serialnummer}`);
+            entry.needsLookup = false;
           }
         } catch (err) {
           console.error(`Error looking up serial ${entry.serialnummer}:`, err);
+        }
+      } else if (entry.needsLookup && entry.lieferscheinNummer && entry.artikelnummer === 'ZUBEHOER_LOOKUP') {
+        // Handle Zubehör lookup by Lieferschein number
+        try {
+          const zubehoerEntries = await lookupZubehoerByLieferschein(entry.lieferscheinNummer);
+          if (zubehoerEntries && zubehoerEntries.length > 0) {
+            // Replace the lookup entry with the actual Zubehör entries
+            updatedEntries.push(...zubehoerEntries);
+            continue; // Skip adding the original entry
+          } else {
+            // If lookup failed, keep the entry but mark it
+            entry.artikelbezeichnung = `Zubehör (Lieferschein: ${entry.lieferscheinNummer}) - Lookup Failed`;
+            entry.needsLookup = false;
+          }
+        } catch (err) {
+          console.error(`Error looking up Zubehör Lieferschein ${entry.lieferscheinNummer}:`, err);
+          entry.artikelbezeichnung = `Zubehör (Lieferschein: ${entry.lieferscheinNummer}) - Lookup Error`;
+          entry.needsLookup = false;
         }
       }
       updatedEntries.push(entry);
@@ -125,26 +143,266 @@
     const lines = qr.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     
     // Check if this is a Zubehör QR code
-    const lieferscheinLine = lines.find(line => line.startsWith('Lieferschein:'));
-    if (lieferscheinLine) {
-      // This is a Zubehör QR code, parse individual items
-      const entries = [];
+    if (qr.includes('ZUBEHOER:') || lines.some(line => line.startsWith('ZUBEHOER:'))) {
+      // Extract Lieferschein number for potential lookup
+      let lieferscheinNummer = '';
+      const lieferscheinMatch = qr.match(/ZUBEHOER:\s*(\d+)/);
+      if (lieferscheinMatch) {
+        lieferscheinNummer = lieferscheinMatch[1].trim();
+      }
       
-      for (const line of lines) {
-        // Look for individual product lines: "artikelnummer - artikelbezeichnung - menge"
-        const productMatch = line.match(/^(\S+)\s+-\s+(.*?)\s+-\s+(\d+)$/);
-        if (productMatch) {
-          const [, artikelnummer, artikelbezeichnung, menge] = productMatch;
-          entries.push({
-            artikelnummer: artikelnummer.trim(),
-            artikelbezeichnung: artikelbezeichnung.trim(),
-            serialnummer: null,
-            menge: parseInt(menge)
-          });
+      // Try to parse the complete QR data first (original multi-line format)
+      if (lines.length > 1) {
+        const entries = [];
+        
+        for (const line of lines) {
+          // Skip the ZUBEHOER header line
+          if (line.startsWith('ZUBEHOER:')) continue;
+          
+          // Parse lines in format: "artikelnummer - artikelbezeichnung - menge"
+          const productMatch = line.match(/^(.+?)\s*[-–—]\s*(.+?)\s*[-–—]\s*(\d+)$/);
+          if (productMatch) {
+            const [, artikelnummer, artikelbezeichnung, menge] = productMatch;
+            entries.push({
+              artikelnummer: artikelnummer.trim(),
+              artikelbezeichnung: artikelbezeichnung.trim(),
+              serialnummer: null,
+              menge: parseInt(menge),
+              needsLookup: false
+            });
+          }
+        }
+        
+        if (entries.length > 0) {
+          return entries;
         }
       }
       
-      return entries.length > 0 ? entries : [{ 
+      // Fallback: Use lookup approach if parsing fails or data is corrupted
+      if (lieferscheinNummer) {
+        return [{
+          artikelnummer: 'ZUBEHOER_LOOKUP',
+          artikelbezeichnung: `Zubehör (Lieferschein: ${lieferscheinNummer})`,
+          serialnummer: null,
+          menge: 1,
+          needsLookup: true,
+          lieferscheinNummer: lieferscheinNummer
+        }];
+      }
+      
+      // Final fallback
+      return [{ 
+        artikelnummer: 'UNKNOWN', 
+        artikelbezeichnung: 'Zubehör Etikett (Parsing Error)', 
+        serialnummer: null, 
+        menge: 1 
+      }];
+    }
+    
+    // Check if this is a simple Zubehör QR code (just ZUBEHOER:number) - for backward compatibility
+    const simpleZubehoerMatch = qr.match(/^ZUBEHOER:(\d+)$/);
+    if (simpleZubehoerMatch) {
+      const lieferscheinNummer = simpleZubehoerMatch[1];
+      return [{
+        artikelnummer: 'ZUBEHOER_LOOKUP',
+        artikelbezeichnung: `Zubehör (Lieferschein: ${lieferscheinNummer})`,
+        serialnummer: null,
+        menge: 1,
+        needsLookup: true,
+        lieferscheinNummer: lieferscheinNummer
+      }];
+    }
+    
+    // Check if this is a Zubehör QR code (new compact format with pipes)
+    if (qr.includes('ZUBEHOER:') && qr.includes('||')) {
+      const zubehoerMatch = qr.match(/ZUBEHOER:(\d+)/);
+
+      
+      // Split by double pipes to get individual items
+      const parts = qr.split('||').filter(part => part.trim().length > 0);
+      
+      const entries = [];
+      
+      for (let i = 0; i < parts.length; i++) {
+        let part = parts[i].trim();
+        
+        part = part.replace(/^ZUBEHOER:\d+\|/, '');
+        
+        if (!part || part.startsWith('ZUBEHOER:')) {
+          continue;
+        }
+        
+        
+        if (part.includes('SN:') && part.includes('ART:') && part.includes('ARTN:')) {
+          const entry: any = {
+            artikelnummer: '',
+            artikelbezeichnung: '',
+            serialnummer: null,
+            menge: 1,
+            needsLookup: false
+          };
+
+          const fields = part.split('|');
+          
+          for (const field of fields) {
+            if (field.startsWith('SN:')) {
+              const sn = field.replace('SN:', '').trim();
+              if (sn !== 'N/A') {
+                entry.serialnummer = sn;
+              }
+            } else if (field.startsWith('ART:')) {
+              entry.artikelbezeichnung = field.replace('ART:', '').trim();
+            } else if (field.startsWith('ARTN:')) {
+              entry.artikelnummer = field.replace('ARTN:', '').trim();
+            } else if (field.startsWith('MENGE:')) {
+              entry.menge = parseInt(field.replace('MENGE:', '').trim()) || 1;
+            }
+          }
+          
+          if (entry.artikelnummer && entry.artikelbezeichnung) {
+            entries.push(entry);
+          }
+        }
+      }
+      
+      if (entries.length > 0) {
+        return entries;
+      }
+    }
+    
+    const zubehoerLine = lines.find(line => line.startsWith('ZUBEHOER:'));
+    if (zubehoerLine || qr.includes('ZUBEHOER:')) {
+      
+      let qrText = qr;
+      
+      if (lines.length === 1 && qr.includes('ZUBEHOER:')) {
+        
+        const zubehoerMatch = qr.match(/ZUBEHOER:\s*(\d+)/);
+        
+        const parts = qr.split(/(?=SN:)/).filter(part => part.trim().length > 0);
+        
+        const entries = [];
+        
+        for (let i = 0; i < parts.length; i++) {
+          const part = parts[i].trim();
+          
+          if (part.startsWith('ZUBEHOER:') && !part.includes('SN:')) {
+            continue;
+          }
+          
+          // Remove ZUBEHOER prefix if it exists in this part
+          let cleanPart = part.replace(/^ZUBEHOER:\s*\d+\s*/, '');
+          
+          // Parse this part if it contains the required fields
+          if (cleanPart.includes('SN:') && cleanPart.includes('ART:') && cleanPart.includes('ARTN:')) {
+            
+            const entry: any = {
+              artikelnummer: '',
+              artikelbezeichnung: '',
+              serialnummer: null,
+              menge: 1,
+              needsLookup: false
+            };
+
+            // Parse the compact QR format
+            const snMatch = cleanPart.match(/SN:\s*([^\s]+)/);
+            const artMatch = cleanPart.match(/ART:\s*(.*?)\s+ARTN:/);
+            const artnMatch = cleanPart.match(/ARTN:\s*([^\s]+)/);
+            const mengeMatch = cleanPart.match(/MENGE:\s*(\d+)/);
+
+            if (snMatch && snMatch[1] !== 'N/A') {
+              entry.serialnummer = snMatch[1].trim();
+            }
+            if (artMatch) {
+              entry.artikelbezeichnung = artMatch[1].trim();
+            }
+            if (artnMatch) {
+              entry.artikelnummer = artnMatch[1].trim();
+            }
+            if (mengeMatch) {
+              entry.menge = parseInt(mengeMatch[1]);
+            }
+
+            entries.push(entry);
+          } else {
+          }
+        }
+        
+        if (entries.length > 0) {
+          return entries;
+        }
+      } else {
+        
+        const entries = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          
+          // Skip the header line
+          if (line.startsWith('ZUBEHOER:')) {
+            continue;
+          }
+          
+          // Parse each line in the standard format: SN: xxx ART: yyy ARTN: zzz MENGE: nnn
+          if (line.includes('SN: ') && line.includes('ART: ') && line.includes('ARTN: ')) {
+            
+            const entry: any = {
+              artikelnummer: '',
+              artikelbezeichnung: '',
+              serialnummer: null,
+              menge: 1,
+              needsLookup: false
+            };
+
+            // Parse the compact QR format with more precise regex
+            const snMatch = line.match(/SN:\s*([^\s]+)/);
+            // More robust regex for artikelbezeichnung - capture everything between ART: and ARTN:
+            const artMatch = line.match(/ART:\s*(.*?)\s+ARTN:/);
+            const artnMatch = line.match(/ARTN:\s*([^\s]+)/);
+            const mengeMatch = line.match(/MENGE:\s*(\d+)/);
+
+            if (snMatch && snMatch[1] !== 'N/A') {
+              entry.serialnummer = snMatch[1].trim();
+            }
+            if (artMatch) {
+              entry.artikelbezeichnung = artMatch[1].trim();
+            }
+            if (artnMatch) {
+              entry.artikelnummer = artnMatch[1].trim();
+            }
+            if (mengeMatch) {
+              entry.menge = parseInt(mengeMatch[1]);
+            }
+            entries.push(entry);
+          } else {
+          }
+        }
+        
+        if (entries.length > 0) {
+          return entries;
+        }
+      }
+    }
+    
+    // Check if this is an old format Zubehör QR code
+    const lieferscheinLine = lines.find(line => line.startsWith('Lieferschein:'));
+    if (lieferscheinLine) {
+      
+      // Extract Lieferschein number for lookup
+      const lieferscheinMatch = qr.match(/Lieferschein:\s*(\d+)/);
+      if (lieferscheinMatch) {
+        const lieferscheinNummer = lieferscheinMatch[1].trim();
+        return [{
+          artikelnummer: 'ZUBEHOER_LOOKUP',
+          artikelbezeichnung: `Zubehör (Lieferschein: ${lieferscheinNummer})`,
+          serialnummer: null,
+          menge: 1,
+          needsLookup: true,
+          lieferscheinNummer: lieferscheinNummer
+        }];
+      }
+      
+      return [{ 
         artikelnummer: 'UNKNOWN', 
         artikelbezeichnung: 'Zubehör Etikett (Parsing Error)', 
         serialnummer: null, 
@@ -246,6 +504,35 @@
       return null;
     } catch (err) {
       console.error('Error looking up product by serial:', err);
+      return null;
+    }
+  }
+
+  async function lookupZubehoerByLieferschein(lieferscheinNummer: string): Promise<any[] | null> {
+    try {
+      const response = await fetch(`/api/zubehoer?lieferscheinnummer=${encodeURIComponent(lieferscheinNummer)}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        if (data.success && data.found && data.item) {
+          // Return the entries from the found Zubehör
+          const zubehoerItem = data.item;
+          if (zubehoerItem.entries) {
+            const entries = zubehoerItem.entries.map((entry: any) => ({
+              artikelnummer: entry.artikelnummer,
+              artikelbezeichnung: entry.artikelbezeichnung,
+              serialnummer: entry.serialnummer || null,
+              menge: entry.menge || 1,
+              needsLookup: false
+            }));
+            return entries;
+          }
+        }
+      }
+      return null;
+    } catch (err) {
+      console.error('Error looking up Zubehör by Lieferschein:', err);
       return null;
     }
   }
@@ -368,14 +655,34 @@
             const productData = await lookupProductBySerial(e.serialnummer);
             if (productData && productData.artikel_nummer) {
               entry.artikelnummer = productData.artikel_nummer;
-              console.log(`Successfully looked up artikel_nummer: ${productData.artikel_nummer} for serial: ${e.serialnummer}`);
             } else {
-              console.warn(`Could not find artikel_nummer for serial: ${e.serialnummer}`);
               notificationStore.warning('Warnung', `Artikel-Nummer für Seriennummer ${e.serialnummer} konnte nicht gefunden werden. Verwende 'UNKNOWN'.`);
             }
           } catch (err) {
-            console.error(`Error looking up serial ${e.serialnummer}:`, err);
             notificationStore.warning('Warnung', `Fehler beim Nachschlagen der Seriennummer ${e.serialnummer}. Verwende 'UNKNOWN'.`);
+          }
+        } else if (e.needsLookup && e.lieferscheinNummer && e.artikelnummer === 'ZUBEHOER_LOOKUP') {
+          // Handle Zubehör lookup by Lieferschein number
+          try {
+            const zubehoerEntries = await lookupZubehoerByLieferschein(e.lieferscheinNummer);
+            if (zubehoerEntries && zubehoerEntries.length > 0) {
+              // Add all Zubehör entries instead of the lookup entry
+              for (const zEntry of zubehoerEntries) {
+                enriched.push({
+                  artikelnummer: zEntry.artikelnummer || 'UNKNOWN',
+                  artikelbezeichnung: zEntry.artikelbezeichnung || 'Unknown Item',
+                  menge: zEntry.menge || 1,
+                  serialnummer: null
+                });
+              }
+              continue; // Skip adding the original entry
+            } else {
+              entry.artikelbezeichnung = `Zubehör (Lieferschein: ${e.lieferscheinNummer}) - Not Found`;
+              notificationStore.warning('Warnung', `Zubehör für Lieferschein ${e.lieferscheinNummer} konnte nicht gefunden werden.`);
+            }
+          } catch (err) {
+            entry.artikelbezeichnung = `Zubehör (Lieferschein: ${e.lieferscheinNummer}) - Error`;
+            notificationStore.warning('Warnung', `Fehler beim Nachschlagen der Lieferschein ${e.lieferscheinNummer}.`);
           }
         }
 
@@ -385,9 +692,11 @@
       const res = await fetch('/api/outerkarton', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ 
           entries: enriched,
-          lieferscheinNumber: lieferscheinNumber.trim() || null
+          lieferscheinNumber: lieferscheinNumber.trim() || null,
+          printerIp: getPrinterIp()
         })
       });
 
