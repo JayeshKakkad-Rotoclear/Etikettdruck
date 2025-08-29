@@ -489,11 +489,63 @@ This project is proprietary software developed for Rotoclear GmbH. All rights re
 ## Version History
 
 ### v0.1.0 (Current)
-- Major refactor, bug fixes, and feature enhancements across the entire project
-- Notification center, SVG icon system, mobile-first design, accessibility, and comprehensive documentation
-- Unified label printing APIs, PUT endpoints for reprinting, QR code image generation, dynamic ZPL formatting
-- Database and dashboard improvements, Lieferschein tracking, and advanced search/filter/export
-- All changes tested and validated for production use
+
+## What's New in v1.0.0-beta
+
+### Major Features & Improvements
+
+- **Professional Label Formatting**
+	- Unified ZPL label design for Zubehör and Outer Karton
+	- Consistent margins, typography, and table layouts
+	- Company branding and QR code improvements
+
+- **Robust QR Code Parsing**
+	- Hybrid QR/data lookup for reliability
+	- Individual article display for Zubehör
+	- Error handling for corrupted or incomplete QR scans
+
+- **Modernized UI**
+	- Printer settings page redesigned with global styles
+	- New icons (wifi, rotate-ccw) added to icon library
+
+- **Docker & Deployment**
+	- Multi-stage Dockerfile for production builds
+	- Environment variable support via `.env.production`
+	- Port mapping and restart policies for stable operation
+
+- **Security & Automation**
+	- JWT authentication with secure secret management
+	- Code scanning (CodeQL) and dependency updates (Dependabot) ready for integration
+	- GitHub Actions workflow templates for CI/CD, linting, and build
+
+### Updated Setup & Deployment
+
+- **Environment Variables:**  
+	All values in `.env.production` should be unquoted (no `"..."`), e.g.:
+	```
+	JWT_SECRET=your_secret
+	DATABASE_URL=your_database_url
+	SESSION_DURATION=7d
+	```
+
+- **BODY_SIZE_LIMIT:**  
+	Should be a plain number (e.g., `1048576` for 1MB).
+
+- **Docker Deployment:**  
+	Use:
+	```
+	docker build -t etikettendruck .
+	docker run -d -p 4000:4000 --env-file .env.production --restart unless-stopped --name etikettendruck etikettendruck
+	```
+
+- **GitHub Integrations:**  
+	- CI/CD, linting, and build via GitHub Actions
+	- Automated dependency updates with Dependabot
+	- Security scanning with CodeQL
+
+### Release Notes
+
+See the latest release on GitHub for a full changelog and deployment instructions.
 
 ### v0.0.1
 - **Authentication System** - Complete JWT-based authentication with HTTP-only cookies
