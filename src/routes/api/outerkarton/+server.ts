@@ -117,10 +117,10 @@ export async function POST({ request }: RequestEvent) {
 			include: { entries: true }
 		});
 
-		// Build table text for professional ZPL formatting (matching Zubehör style)
-		const tableLines = outerKarton.entries.map((item) => {
-			return `${item.menge} - ${item.artikelbezeichnung} - ${item.artikelnummer}${item.serialnummer ? ` (SN: ${item.serialnummer})` : ''}`;
-		});
+	// ====== three-column data ======
+		const qtyCol = outerKarton.entries.map((it) => `${it.menge}×`);
+		const descCol = outerKarton.entries.map((it) => `${it.artikelbezeichnung}`);
+		const rightCol = outerKarton.entries.map((it) => `${it.artikelnummer}`);
 
 		// Build QR code content
 		const qrContent = outerKarton.entries.map((item) =>
@@ -138,109 +138,118 @@ export async function POST({ request }: RequestEvent) {
 		const { gfa } = pngToZplGFA(qrPng);
 
 		// Helper function to convert mm to ZPL dots (8 dots per mm)
-		const mm = (millimeters: number) => Math.round(millimeters * 8);
+		const mm = (n: number) => Math.round(n * 12);
 
-		// Professional label dimensions and spacing (matching Zubehör style)
-		const W = 1181; // Width
-		const H = 1772; // Height  
-		const M = mm(6); // Margin
+		const iconWdots = Math.round(3.395 * 12); // ≈41 dots
+		const iconHdots = Math.round(3.295 * 12); // ≈39 dots
+		const HEAD_WDOTS = 6 * 8;
+		const HEAD_HDOTS = 39;
 
-		// Typography sizes
-		const H12PT = 50;
-		const H6PT = 25;
+		const HEAD_GFA =
+		'^GFA,246,246,6,0001FFC00000000FFFF80000003FFFFE0000007F80FF000001FC001FC00003F00007E00007C00001F0000F800000F8000F00000078001E0000003C003C0000001E003C0000001E00780000000F00780000000F00700000000700F00000000780F00000000780E0001C000380E0003E000380E0007F000380E0007F000380E0007F000380E0003E000380E0001C000380F00000000780F00000000780700000000700780000000F00780000000F003C0000001E003C0000001E001E0000003C000F00000078000F800000F80007C00001F00003F00007E00001FC001FC000007F80FF0000003FFFFE0000000FFFF800000001FFC00000';
 
-		// Professional spacing
-		const sp6_67 = mm(9.67);
-		const sp3_17 = mm(3.17);
-		const sp3_295 = mm(3.295);
-		const sp11_3 = mm(11.3);
-		const sp2 = mm(2);
-		const rowGap = mm(3.2);
-		const tableTopGap = sp11_3;
+		const CE_GFA =
+		'^GFA,480,480,8,0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FF0000001FF00007FF0000007FF0001FFF000001FFF0003FFF000007FFF000FFFF00000FFFF001FFFF00001FFFF003FFFA00003FFFF007FF0000007FF8000FFC000000FFC0000FF8000001FF80001FE0000001FF00003FC0000003FE00003FC0000003FC00003F80000003F800007F00000007F000007F00000007F000007F00000007F00000FE00000007E00000FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE00000007FFFE00FF00000007E000007F00000007F000007F00000007F000007F80000003F800003FC0000003FC00003FE0000001FC00001FE0000001FE00001FF8000000FF80000FFC000000FFC00007FF0000007FF00003FFFE00003FFFA001FFFF00001FFFF000FFFF00000FFFF0007FFF000007FFF0001FFF000001FFF00007FF0000007FF00001FF0000001FF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
 
-		// Content positioning
-		const X = M;
-		let y = M;
+		const INFO_GFA =
+		'^GFA,480,480,8,000000000000000000100000000080000018000000018000000C0000000300000004003F80060000000207F0F80C000000010FDFC79800000000BDFFFFF0000000003FFFFFF0000000000FFFFFE0000000000E0003C0000000000E0003C0000000000600034000000000060007C00000000007000E0000000000059FF6000000000004FFF60000000000046026000000000004704600000000000438860000000000021D060000000000020E040000000000020E040000000000021F04000000000002398C00000000000270CC000000000002606C000000000002C03C000000000003801C000000000003000C000000000007003E00000000000F007300000000001B006180000000003300618000000000630061C000000000C1FFF3500000000180C01E100000000100000018000000020000000C00000004000000060000000800000003000000180000000100000010000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFC0000';
 
-		// Table column setup
-		const rightColW = mm(28);
-		const rightColX = W - M - rightColW + mm(5);
-		const leftAreaW = rightColX - X;
-		const qtyColW = mm(6);
-		const rightGutter = mm(1);
-		const descColX = X + qtyColW + mm(3);
-		const descColW = leftAreaW - qtyColW - mm(3) - rightGutter;
+    const M = mm(6);
+    const W = 1181;
+    const H = 1772;
 
-		const zplParts: string[] = [
-			'^XA', '^CI28', '^PON', '^FWN',
-			'^LH0,0',
-			`^PW${W}`, `^LL${H}`, '^LS0',
-			'^CWZ,E:TT0003M_.TTF'
-		];
+    const qrSize = 350;
+    const qrX = W - M - qrSize;
+    const qrY = M + mm(9);
 
-		// Header with professional styling
-		zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear Outer Karton^FS`);
-		y += sp6_67;
+    const X = M;
+    let y = M;
 
-		// Company address block
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDRotoclear GmbH^FS`); y += sp2;
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDCarl-Benz-Strasse 10–12^FS`); y += sp2;
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FD69115 Heidelberg^FS`); y += sp2;
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDGermany^FS`); y += sp3_17;
+    const H12PT = 50;
+    const H6PT = 25;
 
-		// Website
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDwww.rotoclear.com^FS`);
-		y += sp3_295;
+    const sp6_67 = mm(9.67);
+    const sp3_17 = mm(3.17);
+    const sp3_295 = mm(3.295);
+    const sp11_3 = mm(11.3);
+    const sp2 = mm(2);
+    const sp2_54 = mm(2.54);
+    const sp6_54 = mm(6.54);
 
-		// Verpackungsdatum
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDVerpackungsdatum: ${verpackungsdatum}^FS`);
-		y += sp3_17;
+    const gapIcons = mm(3);
+    const gapQtyDesc = mm(3);
+    const rowGap = mm(3.2);
+    const tableTopGap = sp11_3;
 
-		// Lieferschein if available
-		if (outerKarton.lieferscheinNumber) {
-			zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDLieferschein: ${outerKarton.lieferscheinNumber}^FS`);
-			y += sp3_17;
-		}
+    const rightColW = mm(28);
+    const rightColX = W - M - rightColW + mm(5);
 
-		// QR code positioning (right side to match Zubehör layout)
-		const qrSize = 320;
-		const qrXRight = W - M - qrSize;
-		const qrY = M + mm(9);
-		zplParts.push(`^FO${qrXRight},${qrY}`, gfa + '^FS');
+    const leftAreaW = rightColX - X;
+    const qtyColW = mm(6);
+    const rightGutter = mm(1);
+    const descColX = X + qtyColW + gapQtyDesc;
+    const descColW = leftAreaW - qtyColW - gapQtyDesc - rightGutter;
 
-		// Tagline
-		zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDDesigned and made in Germany^FS`);
-		y += tableTopGap;
+    const zplParts: string[] = [
+      '^XA', '^CI28', '^PON', '^FWN',
+      '^LH0,0',
+      `^PW${W}`, `^LL${H}`, '^LS0',
+      '^CWZ,E:TT0003M_.TTF'
+    ];
 
-		// Professional table header
-		zplParts.push(
-			`^AZN,${H6PT},${H6PT}`,
-			`^FO${X},${y}^FB${qtyColW},1,0,L,0^FDMenge^FS`,
-			`^FO${descColX},${y}^FB${descColW},1,0,L,0^FDArtikel^FS`,
-			`^FO${rightColX},${y}^FB${rightColW},1,0,L,0^FDArtikelnummer^FS`,
-			`^FO${X},${y + mm(3)}^GB${W - 2 * M},2,2^FS` // Header underline
-		);
-		y += mm(6);
+    // Header
+    zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear Outer Karton^FS`);
+    {
+      const headIconX = W - M - HEAD_WDOTS; // within right margin
+      zplParts.push(`^FO${headIconX},${y}${HEAD_GFA}^FS`);
+    }
+    y += sp6_67;
 
-		// Table content with proper formatting
+    // Address
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDRotoclear GmbH^FS`); y += sp2_54;
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDCarl-Benz-Strasse 10–12^FS`); y += sp2_54;
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FD69115 Heidelberg^FS`); y += sp2_54;
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDGermany^FS`); y += sp3_17;
+
+    // Website
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDwww.rotoclear.com^FS`);
+    y += sp6_54;
+
+    // CE + INFO icons
+    {
+      let iconX = X;
+      zplParts.push(`^FO${iconX},${y}${CE_GFA}^FS`);
+      iconX += iconWdots + gapIcons;
+      zplParts.push(`^FO${iconX},${y}${INFO_GFA}^FS`);
+      y += iconHdots + sp3_295;
+    }
+
+    // Tagline
+    zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDDesigned and made in Germany^FS`);
+    y += tableTopGap;
+
+    // Header row
+    zplParts.push(
+      `^AZN,${H6PT},${H6PT}`,
+      `^FO${descColX},${y}^FB${descColW},1,0,C,0^FDArtikel^FS`,
+      `^AZN,${H6PT},${H6PT}`,
+      `^FO${rightColX},${y}^FB${rightColW},1,0,L,0^FDArtikelnummer^FS`,
+      `^FO${X},${y + mm(3)}^GB${W - 2 * M},2,2^FS`
+    );
+    y += mm(6);
+
+    // QR
+    zplParts.push(`^FO${qrX},${qrY}^GFA,${gfa}^FS`);
+
+		// Rows
 		zplParts.push(`^AZN,${H6PT},${H6PT}`);
-		tableLines.forEach((line, i) => {
-			const ry = y + i * rowGap;
-			const parts = line.split(' - ');
-			if (parts.length >= 3) {
-				const menge = parts[0];
-				const bezeichnung = parts[1];
-				const artikelnummer = parts[2];
-				
-				zplParts.push(
-					`^FO${X},${ry}^FB${qtyColW},1,0,L,0^FD${menge}^FS`,
-					`^FO${descColX},${ry}^FB${descColW},1,0,L,0^FD${bezeichnung}^FS`,
-					`^FO${rightColX},${ry}^FB${rightColW},1,0,L,0^FD${artikelnummer}^FS`
-				);
-			} else {
-				// Fallback for lines that don't follow expected format
-				zplParts.push(`^FO${descColX},${ry}^FB${descColW + rightColW},1,0,L,0^FD${line}^FS`);
-			}
+		outerKarton.entries.forEach((_, i) => {
+		const ry = y + i * rowGap;
+		zplParts.push(
+			`^AZN,${H6PT},${H6PT}`, `^FO${X},${ry}^FB${qtyColW},1,0,L,0^FD${qtyCol[i]}^FS`,
+			`^AZN,${H6PT},${H6PT}`, `^FO${descColX},${ry}^FB${descColW},1,0,L,0^FD${descCol[i]}^FS`,
+			`^AZN,${H6PT},${H6PT}`, `^FO${rightColX},${ry}^FB${rightColW},1,0,L,0^FD${rightCol[i]}^FS`
+		);
 		});
 
 		zplParts.push('^XZ');

@@ -233,114 +233,102 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       const HEAD_HDOTS = 39;
 
       const HEAD_GFA =
-        '^GFA,234,234,6,0047FFF10000003FFFFE0000027FFFFF200005FFC1FFD0000BFC7F1FE80017F3C1E7F4000FCC0019F8002FB00006FA001F6000037C007E800000BF003D0000005E00FE0000003F807A0000002F00FC0000001F80F0001C000780F80022000F80F0003E000780F0007F000780E0007F000380E0007F000380E0007F000380F0007F000780F0003E000780F80022000F80F0001C000780FC0000001F807A0000002F00FE0000003F803D0000005E007E800000BF001F6000037C002FB00006FA000FCC0019F80017F3C1E7F4000BFC7F1FE80005FFC1FFD000027FFFFF2000003FFFFE00000047FFF10000';
+        '^GFA,246,246,6,0001FFC00000000FFFF80000003FFFFE0000007F80FF000001FC001FC00003F00007E00007C00001F0000F800000F8000F00000078001E0000003C003C0000001E003C0000001E00780000000F00780000000F00700000000700F00000000780F00000000780E0001C000380E0003E000380E0007F000380E0007F000380E0007F000380E0003E000380E0001C000380F00000000780F00000000780700000000700780000000F00780000000F003C0000001E003C0000001E001E0000003C000F00000078000F800000F80007C00001F00003F00007E00001FC001FC000007F80FF0000003FFFFE0000000FFFF800000001FFC00000';
 
       const CE_GFA =
-        '^GFA,234,234,6,00BFA0005F8002FFA0017F8005FFA000FF8003FFA003FF8037FFA017FF802FFFA017FF805FFF802FFC003FE8005FE000BFD0005FD0007FA000BFA0007F4000BF4000FE80017F4000FE80017E4000FD00017E8000FD00007E8000FD00007D8000FD0000FFFE00FA0002FFFE80FA0002FFFE80FA0002FFFE80FA0002FFFE80FA0002FFFE80FB0000FFFE00FD00007E8000FD00007E8000FD00017E8000FE80017F4000FE80017F40007F4000BFA0007FA000BFD000BFD0005FE8003FE8005FF4005FFF802FFF802FFFA017FF8037FFA017FF8003FFA003FF8005FFA000FF8002FFA0017F8000BFA0005F80';
+        '^GFA,480,480,8,0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000FF0000001FF00007FF0000007FF0001FFF000001FFF0003FFF000007FFF000FFFF00000FFFF001FFFF00001FFFF003FFFA00003FFFF007FF0000007FF8000FFC000000FFC0000FF8000001FF80001FE0000001FF00003FC0000003FE00003FC0000003FC00003F80000003F800007F00000007F000007F00000007F000007F00000007F00000FE00000007E00000FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE0000000FFFFE00FE00000007FFFE00FF00000007E000007F00000007F000007F00000007F000007F80000003F800003FC0000003FC00003FE0000001FC00001FE0000001FE00001FF8000000FF80000FFC000000FFC00007FF0000007FF00003FFFE00003FFFA001FFFF00001FFFF000FFFF00000FFFF0007FFF000007FFF0001FFF000001FFF00007FF0000007FF00001FF0000001FF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000';
 
       const INFO_GFA =
-        '^GFA,234,234,6,C8003F800D80E60C000F13807973BFF0EF80BC8FFFFF1F004F7FFFFFFC8037FFFFFFFB0009FFFFFFE40006F80007F800013D805FE00000FE7FFF00000037FFFFE000001BFFCF0000001CF3BF0000001B7F4E000000193E9E0000001EF73E00000019CBDE0000001F94FF8000006E413E4000009D80FFA000037FFFFFD0000CEC00E3CC0013DFFFF3F600672FFFFFF9009EC3807E1E80790C7F81EF00F601007E1380C80000000D80B000000002004000000001808000000000003FFFFFFFFE000000000000003FFFFFFFFE003FFFFFFFFE003FFFFFFFFE003FFFFFFFFE003FFFFFFFFE003FFFFFFFFE00';
+        '^GFA,480,480,8,000000000000000000100000000080000018000000018000000C0000000300000004003F80060000000207F0F80C000000010FDFC79800000000BDFFFFF0000000003FFFFFF0000000000FFFFFE0000000000E0003C0000000000E0003C0000000000600034000000000060007C00000000007000E0000000000059FF6000000000004FFF60000000000046026000000000004704600000000000438860000000000021D060000000000020E040000000000020E040000000000021F04000000000002398C00000000000270CC000000000002606C000000000002C03C000000000003801C000000000003000C000000000007003E00000000000F007300000000001B006180000000003300618000000000630061C000000000C1FFF3200000000180C01E100000000100000018000000020000000C00000004000000060000000800000003000000180000000100000010000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFE00000007FFFFFFFC0000';
 
-      // --- geometry ---
-      const W = 1181;
-      const H = 1772;
-      const M = mm(6);
-      const X = M;
-      let y = M + mm(3);
-
-      const H12 = 50; // header font
-      const H6 = 25;  // body font
+      const M  = mm(6);
+      const W  = 1181;
+      const H  = 1772;
 
       const qrSize = 350;
       const qrX = W - M - qrSize;
       const qrY = M + mm(9);
 
-      const sp3 = mm(3);
-      const sp3_295 = mm(3.295);
-      const sp6_54 = mm(6.54);
-      const sp11_3 = mm(11.3);
-      const sp2 = mm(2);
-      const sp3_17 = mm(3.17);
-      const sp6_67 = mm(3.67);
+      const X = M;
+      let y = M;
 
-      const adv = (h = H6, gap = sp3_17) => { y += h + gap; };
+      const H12PT = 50;
+      const H6PT  = 25;
 
-      // --- ZPL ---
-      const zpl = [
-        '^XA',
-        '^CI28',
-        '^PON',
-        '^FWN',
-        '^LH0,0',
-        '^LS0',
-        `^PW${W}`,
-        `^LL${H}`,
-        '^CWZ,E:TT0003M_.TTF',
+      const sp6_67   = mm(9.67);
+      const sp3_17   = mm(3.17);
+      const sp3_295  = mm(3.295);
+      const sp11_3   = mm(11.3);
+      const sp2      = mm(2);
+      const sp3	  = mm(3);
+      const sp2_54   = mm(2.54);
+      const sp6_54   = mm(6.54);
 
-        // Header
-        `^AZN,${H12},${H12}`,
-        `^FT${X},${y}^FDRotoclear C2^FS`,
-        (() => {
-          const headIconX = W - M - HEAD_WDOTS;
-          const headIconY = y - H12;
-          return `^FO${headIconX},${headIconY}${HEAD_GFA}^FS`;
-        })(),
-        (() => { adv(H12, sp6_67); return ''; })(),
+      const gapIcons   = mm(3);
+      const gapQtyDesc = mm(3);   // reduced
+      const rowGap     = mm(3.2);
+      const tableTopGap = sp11_3;
 
-        // Address block
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDRotoclear GmbH^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDCarl-Benz-Strasse 10–12^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FD69115 Heidelberg^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDGermany^FS`,
-        (() => { adv(H6, sp3_17); return ''; })(),
+      const rightColW = mm(28);
+      const rightColX = W - M - rightColW + mm(5);
 
-        // Website
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDwww.rotoclear.com^FS`,
-        (() => { adv(H6, sp6_54); return ''; })(),
+      const leftAreaW   = rightColX - X;
+      const qtyColW     = mm(6);
+      const rightGutter = mm(1);
+      const descColX    = X + qtyColW + gapQtyDesc;
+      const descColW    = leftAreaW - qtyColW - gapQtyDesc - rightGutter;
 
-        // CE + INFO icons
-        (() => {
-          let out = '';
-          let iconX = X;
-          out += `^FO${iconX},${y}${CE_GFA}^FS\r\n`;
-          iconX += iconWdots + mm(2);
-          out += `^FO${iconX},${y}${INFO_GFA}^FS\r\n`;
-          y += iconHdots + sp3_295;
-          return out;
-        })(),
+      const zplParts: string[] = [
+      '^XA', '^CI28', '^PON', '^FWN',
+      '^LH0,0',
+      `^PW${W}`, `^LL${H}`, '^LS0',
+      '^CWZ,E:TT0003M_.TTF'
+      ];
 
-        // Tagline
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDDesigned and made in Germany^FS`,
-        (() => { adv(H6, sp11_3); return ''; })(),
+      // Header
+      zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear C2^FS`);
 
-        // QR on the right
-        `^FO${qrX},${qrY}`,
-        gfa + '^FS',
+      {
+      const headIconX = W - M - HEAD_WDOTS; // within right margin
+      zplParts.push(`^FO${headIconX},${y}${HEAD_GFA}^FS`);
+      }
 
-        // Details
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDArtikelnummer: ${normalizeAscii(body.artikel_nummer)}^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDArtikelbezeichnung: ${artikel_bezeichnung}^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDSeriennummer: ${serialnummer}^FS`,
-        (() => { adv(H6, sp2); return ''; })(),
-        `^AZN,${H6},${H6}`,
-        `^FT${X},${y}^FDVerpackungsdatum: ${formattedDate}^FS`,
+      y += sp6_67;
 
-        '^XZ'
-      ].join('\r\n');
+      // Address
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDRotoclear GmbH^FS`); y += sp2_54;
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDCarl-Benz-Strasse 10–12^FS`); y += sp2_54;
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FD69115 Heidelberg^FS`); y += sp2_54;
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDGermany^FS`); y += sp3_17;
+
+      // Website
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDwww.rotoclear.com^FS`);
+      y += sp6_54;
+
+      // CE + INFO icons (inline ^GFA)
+      {
+      let iconX = X;
+      zplParts.push(`^FO${iconX},${y}${CE_GFA}^FS`);
+      iconX += iconWdots + gapIcons; // 2 mm gap
+      zplParts.push(`^FO${iconX},${y}${INFO_GFA}^FS`);
+      y += iconHdots + sp3_295;      // advance by icon height + spacing
+      }
+
+      // Tagline
+      zplParts.push(`^AZN,${H6PT},${H6PT}`, `^FO${X},${y}^FDDesigned and made in Germany^FS`);
+      y += tableTopGap;
+
+      zplParts.push(`^FO${qrX},${qrY}^GFA,${gfa}^FS`);
+
+      // Item details (left column)
+      zplParts.push(`^FO${X},${y}^AZN,${H6PT},${H6PT}^FDArtikelnummer: ${normalizeAscii(body.artikel_nummer)}^FS`); y += sp3;
+      zplParts.push(`^FO${X},${y}^AZN,${H6PT},${H6PT}^FDArtikelbezeichnung: ${artikel_bezeichnung}^FS`);            y += sp3;
+      zplParts.push(`^FO${X},${y}^AZN,${H6PT},${H6PT}^FDSeriennummer: ${serialnummer}^FS`);                          y += sp3;
+      zplParts.push(`^FO${X},${y}^AZN,${H6PT},${H6PT}^FDVerpackungsdatum: ${formattedDate}^FS`);
+
+      zplParts.push('^XZ');
+
+      const zpl = zplParts.join('\r\n');
 
       try {
         await sendToPrinter(zpl, body.printerIp);
