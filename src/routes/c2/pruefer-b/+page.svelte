@@ -23,7 +23,8 @@
 	// Confirmation dialog variables
 	let originalData: any = null;
 	let showConfirmDialog = false;
-	let currentAction: 'save' | 'saveAndPrint' = 'save';
+	let pendingAction: 'save' | 'saveAndPrint' | null = null;
+	let changes: Array<{field: string, oldValue: any, newValue: any, label: string}> = [];
 
 	function validateForm(): boolean {
 		formErrors = [];
@@ -97,7 +98,7 @@
 				const data = await res.json();
 				if (data.found) {
 					form.serialnummer = serialToFindC2;
-					originalData = { ...data.data }; // Store original data for comparison
+					originalData = { ...data.item }; // Store original data for comparison
 					showFormC2 = true;
 				} else {
 					serialErrorC2 = 'Keine Daten mit dieser Seriennummer gefunden';
@@ -166,14 +167,15 @@
 	}
 
 	function detectChanges() {
-		const changes = [];
+		changes = [];
+		if (!originalData) return;
+
 		const fieldsToCheck = [
 			'artikel_bezeichnung', 'hinweis', 'ba_nummer', 'artikel_nummer',
 			'software_version', 'konfiguration', 'seriennummer_elektronik', 'mac_adresse',
-			'produktionsjahr', 'pruefer_b', 'hardware_ok', 'hutschienenclip_montiert',
+			'produktionsjahr', 'hardware_ok', 'hutschienenclip_montiert',
 			'hdmi_ok', 'web_ok', 'zoom_ok', 'menue_bedienbar', 'ip_adresse',
-			'kameraeingang_ok', 'zustandsdaten_ok', 'zustandsdaten_fehler',
-			'automatiktest_ok', 'qr_code_automatiktest', 'werkseinstellung', 'lp_verschraubt'
+			'kameraeingang_ok', 'zustandsdaten_ok', 'zustandsdaten_fehler'
 		];
 
 		for (const field of fieldsToCheck) {
@@ -189,35 +191,29 @@
 				});
 			}
 		}
-
-		return changes;
 	}
 
-	function showConfirmation(skipPrint: boolean = false) {
-		currentAction = skipPrint ? 'save' : 'saveAndPrint';
-		const changes = detectChanges();
-		if (changes.length > 0) {
-			showConfirmDialog = true;
-		} else {
-			if (skipPrint) {
-				saveOnlyC2B();
-			} else {
-				submitFormC2B();
-			}
-		}
+	function showConfirmation(action: 'save' | 'saveAndPrint') {
+		detectChanges();
+		pendingAction = action;
+		showConfirmDialog = true;
 	}
 
 	function cancelConfirmation() {
 		showConfirmDialog = false;
+		pendingAction = null;
+		changes = [];
 	}
 
-	function confirmAction() {
-		showConfirmDialog = false;
-		if (currentAction === 'save') {
-			saveOnlyC2B();
-		} else {
-			submitFormC2B();
+	async function confirmAction() {
+		if (pendingAction === 'save') {
+			await saveOnlyC2B();
+		} else if (pendingAction === 'saveAndPrint') {
+			await submitFormC2B();
 		}
+		showConfirmDialog = false;
+		pendingAction = null;
+		changes = [];
 	}
 
 	async function submitFormC2B() {
@@ -293,7 +289,7 @@
 	</form>
 
 	{#if showFormC2}
-		<form on:submit|preventDefault={() => showConfirmation(false)} class="form main-form">
+		<form class="form main-form">
 			<div class="form-header">
 				<h2>Prüfer B – C2 Steuerrechner</h2>
 				<div class="serial-info">
@@ -441,10 +437,10 @@
 			</div>
 
 			<div class="button-group">
-				<button type="button" class="save-button" on:click={() => showConfirmation(true)}>
+				<button type="button" class="save-button" on:click={() => showConfirmation('save')}>
 					Speichern
 				</button>
-				<button type="button" class="submit-button" on:click={() => showConfirmation(false)}>
+				<button type="button" class="submit-button" on:click={() => showConfirmation('saveAndPrint')}>
 					Speichern & Drucken
 				</button>
 			</div>
@@ -464,12 +460,12 @@
 				<button class="dialog-close" on:click={cancelConfirmation}>✕</button>
 			</div>
 			<div class="dialog-body">
-				{#if detectChanges().length === 0}
+				{#if changes.length === 0}
 					<p class="no-changes">Keine Änderungen erkannt.</p>
 				{:else}
 					<p class="changes-intro">Die folgenden Änderungen wurden erkannt:</p>
 					<div class="changes-list">
-						{#each detectChanges() as change}
+						{#each changes as change}
 							<div class="change-item">
 								<div class="change-field">{change.label}</div>
 								<div class="change-values">
@@ -491,7 +487,7 @@
 			<div class="dialog-footer">
 				<button class="cancel-button" on:click={cancelConfirmation}>Abbrechen</button>
 				<button class="confirm-button" on:click={confirmAction}>
-					{currentAction === 'save' ? 'Speichern' : 'Speichern & Drucken'}
+					{pendingAction === 'save' ? 'Speichern' : 'Speichern & Drucken'}
 				</button>
 			</div>
 		</div>
@@ -851,7 +847,7 @@
 	}
 
 	.submit-button:hover {
-		background: linear-gradient(135deg, var(--success-hover), #15803d);
+		background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
 		transform: translateY(-3px);
 		box-shadow: var(--shadow-lg);
 	}

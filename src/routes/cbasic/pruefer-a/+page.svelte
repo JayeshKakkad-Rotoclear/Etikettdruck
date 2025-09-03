@@ -1,6 +1,5 @@
 <script lang="ts">
 	import BooleanRadio from '$lib/components/booleanRadio.svelte';
-	import { Icon } from '$lib';
 	import { getPrinterIp } from '$lib/printer.js';
 
 	let form = getEmptyFormCbasicA();
@@ -37,7 +36,7 @@
 			serialnummer: '',
 			hinweis: '',
 			ba_nummer: '',
-			artikel_nummer: 10262,
+			artikel_nummer: '10262',
 			software_version: '',
 			seriennummer_elektronik: '',
 			datum: formattedDateCbasic,

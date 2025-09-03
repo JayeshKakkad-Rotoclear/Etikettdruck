@@ -94,7 +94,6 @@
 						class="serial-input"
 						disabled={isLoading}
 						on:keydown={(e) => e.key === 'Enter' && loadProductData()}
-						placeholder="z.B. RC340001"
 						required 
 					/>
 					<button 

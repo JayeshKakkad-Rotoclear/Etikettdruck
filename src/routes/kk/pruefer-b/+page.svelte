@@ -12,7 +12,8 @@
   // Confirmation dialog variables
   let originalData: any = null;
   let showConfirmDialog = false;
-  let currentAction: 'save' | 'saveAndPrint' = 'save';
+  let pendingAction: 'save' | 'saveAndPrint' | null = null;
+  let changes: Array<{field: string, oldValue: any, newValue: any, label: string}> = [];
 
   $: {
     if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F1') {
@@ -91,7 +92,7 @@
 				const data = await res.json();
 				if (data.found) {
 					form.serialnummer = serialToFindKK;
-					originalData = { ...data.data }; // Store original data for comparison
+					originalData = { ...data.item }; // Store original data for comparison
 					showFormKK = true;
 				} else {
 					serialErrorKK = 'Keine Daten mit dieser Seriennummer gefunden';
@@ -248,7 +249,9 @@
 	}
 
 	function detectChanges() {
-		const changes = [];
+		changes = [];
+		if (!originalData) return;
+
 		const fieldsToCheck = [
 			'artikel_bezeichnung', 'hinweis', 'ba_nummer', 'artikel_nummer',
 			'firmware_version', 'seriennummer_elektronik', 'seriennummer_optik1', 'seriennummer_optik2',
@@ -275,36 +278,30 @@
 				});
 			}
 		}
-
-		return changes;
 	}
 
-	function showConfirmation(skipPrint: boolean = false) {
-		currentAction = skipPrint ? 'save' : 'saveAndPrint';
-		const changes = detectChanges();
-		if (changes.length > 0) {
-			showConfirmDialog = true;
-		} else {
-			if (skipPrint) {
-				saveOnlyKKB();
-			} else {
-				submitFormKKB();
-			}
-		}
+	function showConfirmation(action: 'save' | 'saveAndPrint') {
+		detectChanges();
+		pendingAction = action;
+		showConfirmDialog = true;
 	}
 
 	function cancelConfirmation() {
 		showConfirmDialog = false;
+		pendingAction = null;
+		changes = [];
 	}
 
-	function confirmAction() {
-		showConfirmDialog = false;
-		if (currentAction === 'save') {
-			saveOnlyKKB();
-		} else {
-			submitFormKKB();
+	async function confirmAction() {
+		if (pendingAction === 'save') {
+			await saveOnlyKKB();
+		} else if (pendingAction === 'saveAndPrint') {
+			await submitFormKKB();
 		}
-	}  
+		showConfirmDialog = false;
+		pendingAction = null;
+		changes = [];
+	}
 </script>
 
 <svelte:head>
@@ -334,7 +331,7 @@
     </form>
 
 	{#if showFormKK}
-		<form on:submit|preventDefault={() => showConfirmation(false)} class="form main-form">
+		<form class="form main-form">
 			<div class="form-header">
 				<h2>Prüfprotokoll bearbeiten</h2>
 				<div class="serial-info">
@@ -554,10 +551,10 @@
 			</div>
 
 			<div class="button-group">
-				<button type="button" class="save-button" on:click={() => showConfirmation(true)}>
+				<button type="button" class="save-button" on:click={() => showConfirmation('save')}>
 					Speichern
 				</button>
-				<button type="button" class="submit-button" on:click={() => showConfirmation(false)}>
+				<button type="button" class="submit-button" on:click={() => showConfirmation('saveAndPrint')}>
 					Speichern & Drucken
 				</button>
 			</div>
@@ -577,12 +574,12 @@
 				<button class="dialog-close" on:click={cancelConfirmation}>✕</button>
 			</div>
 			<div class="dialog-body">
-				{#if detectChanges().length === 0}
+				{#if changes.length === 0}
 					<p class="no-changes">Keine Änderungen erkannt.</p>
 				{:else}
 					<p class="changes-intro">Die folgenden Änderungen wurden erkannt:</p>
 					<div class="changes-list">
-						{#each detectChanges() as change}
+						{#each changes as change}
 							<div class="change-item">
 								<div class="change-field">{change.label}</div>
 								<div class="change-values">
@@ -604,7 +601,7 @@
 			<div class="dialog-footer">
 				<button class="cancel-button" on:click={cancelConfirmation}>Abbrechen</button>
 				<button class="confirm-button" on:click={confirmAction}>
-					{currentAction === 'save' ? 'Speichern' : 'Speichern & Drucken'}
+					{pendingAction === 'save' ? 'Speichern' : 'Speichern & Drucken'}
 				</button>
 			</div>
 		</div>

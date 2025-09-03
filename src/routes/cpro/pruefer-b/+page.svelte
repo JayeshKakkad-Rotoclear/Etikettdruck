@@ -187,11 +187,10 @@
 		const fieldsToCheck = [
 			'artikel_bezeichnung', 'hinweis', 'ba_nummer', 'artikel_nummer', 'software_version',
 			'konfiguration', 'seriennummer_elektronik', 'mac_adresse', 'seriennummer_festplatte',
-			'festplattengroesse', 'datum', 'produktionsjahr', 'pruefer_b', 'hardware_ok',
+			'festplattengroesse', 'produktionsjahr', 'hardware_ok',
 			'hdmi_ok', 'web_ok', 'zoom_ok', 'menue_bedienbar', 'festplatte_angezeigt',
 			'freier_festplattenspeicher', 'ip_adresse', 'kameraeingang_ok', 'zustandsdaten_ok',
-			'zustandsdaten_fehler', 'automatiktest_ok', 'qr_code_automatiktest', 'werkseinstellung',
-			'lp_verschraubt', 'festplatte_leer'
+			'zustandsdaten_fehler', 'festplatte_leer'
 		];
 
 		for (const field of fieldsToCheck) {

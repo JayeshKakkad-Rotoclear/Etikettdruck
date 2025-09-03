@@ -40,9 +40,6 @@
 		if (form.ip_adresse === null) formErrors.push('IP-Adresse sichtbar muss bewertet werden');
 		if (form.kameraeingang_ok === null) formErrors.push('Kameraeingänge funktionieren muss bewertet werden');
 		if (form.zustandsdaten_ok === null) formErrors.push('Zustandsdaten i.O. muss bewertet werden');
-		if (form.automatiktest_ok === null) formErrors.push('Automatiktest durchgeführt muss bewertet werden');
-		if (form.werkseinstellung === null) formErrors.push('Werkseinstellung muss bewertet werden');
-		if (form.lp_verschraubt === null) formErrors.push('Lüfterplatte verschraubt muss bewertet werden');
 		
 		return formErrors.length === 0;
 	}
