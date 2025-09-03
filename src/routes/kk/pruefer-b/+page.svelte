@@ -120,7 +120,42 @@
         }
     }
 
+	function validateForm(): string[] {
+		const formErrors: string[] = [];
+		
+		if (!form.pruefer_b) formErrors.push('Prüfer B');
+		if (!form.anzahl_optiken) formErrors.push('Anzahl Optiken');
+		if (!form.optik_format) formErrors.push('Optik Format');
+		if (!form.KonfigurationKK) formErrors.push('Konfiguration');
+		if (!form.hardware_ok) formErrors.push('Hardware vollständig und unbeschädigt');
+		if (!form.optikglas_ok) formErrors.push('Optikglas Staub- und Fettfrei');
+		if (!form.rotor_ok) formErrors.push('Rotor dreht frei(von Hand)');
+		if (!form.klebung_rotor_ok) formErrors.push('Klebung Rotor i.O.');
+		if (!form.kleber_2k_ok) formErrors.push('2K-Kleber Lichtmodul i.O.');
+		if (!form.dichtring_datenkabel_eingelegt) formErrors.push('Dichtring(grün) für Datenkabel eingelegt');
+		if (!form.druckluftanscluss_montiert) formErrors.push('Fest Druckluftanschluss montiert');
+		if (!form.uberdrucktest_ok) formErrors.push('Überdrucktest durchgeführt');
+		if (!form.lichtmodul_ok) formErrors.push('10x Lichtmodul auf Funktion überprüft');
+		if (!form.motor_ok) formErrors.push('10x Motor auf Funktion überprüft');
+		if (!form.motor_dauerhaft_drehbar) formErrors.push('Motor im Dauerlauf überprüft(min. 30 Min.)');
+		if (!form.drucksensor_ok) formErrors.push('Drucksensor funktioniert');
+		if (!form.lagesensor_ok) formErrors.push('Lagesensor funktioniert');
+		if (!form.fokuslage_ok) formErrors.push('Fokuslage korrekt eingestellt');
+		if (form.anzahl_optiken === 'Zwei_Optiken' && !form.optik_wechseln_funktioniert) formErrors.push('Optik wechseln funktioniert');
+		if (!form.siegellack_aufgebracht) formErrors.push('Siegellack aufgebracht');
+		if (!form.automatiktest_ok) formErrors.push('Automatiktest durchgeführt');
+		if (!form.qr_code_automatiktest) formErrors.push('QR-Code Automatiktest');
+		
+		return formErrors;
+	}
+
 	async function submitFormKKB() {
+		const formErrors = validateForm();
+		if (formErrors.length > 0) {
+			alert(`Bitte füllen Sie folgende Pflichtfelder aus:\n\n${formErrors.join('\n')}`);
+			return;
+		}
+		
 		const res = await fetch('/api/kk', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -138,6 +173,12 @@
 	}
 
 	async function saveOnlyKKB() {
+		const formErrors = validateForm();
+		if (formErrors.length > 0) {
+			alert(`Bitte füllen Sie folgende Pflichtfelder aus:\n\n${formErrors.join('\n')}`);
+			return;
+		}
+		
 		const res = await fetch('/api/kk', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -304,8 +345,8 @@
 
 			<div class="form-grid">
 				<div class="field">
-					<label for="pruefer_b">Prüfer B</label>
-					<input id="pruefer_b" bind:value={form.pruefer_b} />
+					<label for="pruefer_b">Prüfer B<span class="required">*</span></label>
+					<input id="pruefer_b" bind:value={form.pruefer_b} required />
 				</div>
 
 				<div class="section-title">Konfiguration</div>
@@ -317,7 +358,8 @@
 						options={[
 							{ label: "1 Optik", value: "Ein_Optik" },
 							{ label: "2 Optiken", value: "Zwei_Optiken" }
-						]}        
+						]}
+						required={true}        
 					/>
 
 					<SelectRadio
@@ -334,7 +376,8 @@
 							{ label: "F1+TFT", value: "F1_TFT" },
 							{ label: "F2+TFT", value: "F2_TFT" }
 							]
-						}        
+						}
+						required={true}        
 					/>
 
 					<SelectRadio
@@ -344,36 +387,37 @@
 							{ label: "RC", value: "RC" },
 							{ label: "DMG", value: "DMG" }
 						]}
+						required={true}
 					/>
 				</div>
 
 				<div class="section-title">Hardware-Informationen</div>
 
 				<div class="field">
-					<label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+					<label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
 				</div>
 
 				<div class="field">
-					<label for="firmware_version">Firmware Version</label>
-					<input id="firmware_version" bind:value={form.firmware_version} />
+					<label for="firmware_version">Firmware Version <span class="required">*</span></label>
+					<input id="firmware_version" bind:value={form.firmware_version} required />
 				</div>
 
 				<div class="field">
-					<label for="seriennummer_optik1">Seriennummer Optik 1</label>
-					<input id="seriennummer_optik1" bind:value={form.seriennummer_optik1} />
+					<label for="seriennummer_optik1">Seriennummer Optik 1 <span class="required">*</span></label>
+					<input id="seriennummer_optik1" bind:value={form.seriennummer_optik1} required />
 				</div>
 
 				{#if form.anzahl_optiken === 'Zwei_Optiken'}
 					<div class="field">
-						<label for="seriennummer_optik2">Seriennummer Optik 2</label>
-						<input id="seriennummer_optik2" bind:value={form.seriennummer_optik2} />
+						<label for="seriennummer_optik2">Seriennummer Optik 2 <span class="required">*</span></label>
+						<input id="seriennummer_optik2" bind:value={form.seriennummer_optik2} required />
 					</div>
 				{/if}
 
 				<div class="field">
-					<label for="chargenummer">Chargenummer Lagereinheit</label>
-					<input id="chargenummer" bind:value={form.chargenummer} />
+					<label for="chargenummer">Chargenummer Lagereinheit <span class="required">*</span></label>
+					<input id="chargenummer" bind:value={form.chargenummer} required />
 				</div>
 
 				<div class="field field-full-width">
@@ -389,8 +433,8 @@
 				</div>
 
 				<div class="field">
-					<label for="ba_nummer">BA-Nummer</label>
-					<input id="ba_nummer" bind:value={form.ba_nummer} />
+					<label for="ba_nummer">BA-Nummer<span class="required">*</span></label>
+					<input id="ba_nummer" bind:value={form.ba_nummer} required />
 				</div>
 
 				<div class="field">
@@ -419,47 +463,47 @@
 				<div class="section-title">Funktionsprüfungen</div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.optikglas_ok} label="Optikglas Staub- und Fettfrei" />
+					<BooleanRadio bind:bindValue={form.optikglas_ok} label="Optikglas Staub- und Fettfrei" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.rotor_ok} label="Rotor dreht frei(von Hand)" />
+					<BooleanRadio bind:bindValue={form.rotor_ok} label="Rotor dreht frei(von Hand)" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.klebung_rotor_ok} label="Klebung Rotor i.O." />
+					<BooleanRadio bind:bindValue={form.klebung_rotor_ok} label="Klebung Rotor i.O." required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.kleber_2k_ok} label="2K-Kleber Lichtmodul i.O." />
+					<BooleanRadio bind:bindValue={form.kleber_2k_ok} label="2K-Kleber Lichtmodul i.O." required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.dichtring_datenkabel_eingelegt} label="Dichtring(grün) für Datenkabel eingelegt" />
+					<BooleanRadio bind:bindValue={form.dichtring_datenkabel_eingelegt} label="Dichtring(grün) für Datenkabel eingelegt" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.druckluftanscluss_montiert} label="Fest Druckluftanschluss montiert" />
+					<BooleanRadio bind:bindValue={form.druckluftanscluss_montiert} label="Fest Druckluftanschluss montiert" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.uberdrucktest_ok} label="Überdrucktest durchgeführt" />
+					<BooleanRadio bind:bindValue={form.uberdrucktest_ok} label="Überdrucktest durchgeführt" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lichtmodul_ok} label="10x Lichtmodul auf Funktion überprüft" />
+					<BooleanRadio bind:bindValue={form.lichtmodul_ok} label="10x Lichtmodul auf Funktion überprüft" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.motor_ok} label="10x Motor auf Funktion überprüft" />
+					<BooleanRadio bind:bindValue={form.motor_ok} label="10x Motor auf Funktion überprüft" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.motor_dauerhaft_drehbar} label="Motor im Dauerlauf überprüft(min. 30 Min.)" />
+					<BooleanRadio bind:bindValue={form.motor_dauerhaft_drehbar} label="Motor im Dauerlauf überprüft(min. 30 Min.)" required={true} />
 				</div>
 
 				<div class="field field-full-width">
@@ -468,32 +512,32 @@
 				</div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.drucksensor_ok} label="Drucksensor funktioniert" />
+					<BooleanRadio bind:bindValue={form.drucksensor_ok} label="Drucksensor funktioniert" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" />
+					<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" />
+					<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" required={true} />
                 </div>
 					{#if form.anzahl_optiken === 'Zwei_Optiken'}
                         <div class="field field-full-width">
-                            <BooleanRadio bind:bindValue={form.optik_wechseln_funktioniert} label="Optik wechseln funktioniert" />
+                            <BooleanRadio bind:bindValue={form.optik_wechseln_funktioniert} label="Optik wechseln funktioniert" required={true} />
                         </div>
 					{/if}
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.siegellack_aufgebracht} label="Siegellack aufgebracht" />
+					<BooleanRadio bind:bindValue={form.siegellack_aufgebracht} label="Siegellack aufgebracht" required={true} />
                 </div>
 
                 <div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" />
+					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" required={true} />
 				</div>
 
-				<div class="file-upload-field field-full-width">
-					<label for="qr_code_file">QR-Code Automatiktest (.svg)</label>
+				<!-- <div class="file-upload-field field-full-width">
+					<label for="qr_code_file" class="required">QR-Code Automatiktest (.svg)</label>
 					<div class="file-input-wrapper">
 						<input 
 							id="qr_code_file" 
@@ -506,7 +550,7 @@
 							<span class="file-text">SVG-Datei auswählen...</span>
 						</div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="button-group">
@@ -570,7 +614,7 @@
 <style>
 	.form-container {
 		min-height: 100vh;
-		background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%);
+		/* background: linear-gradient(135deg, var(--bg-light) 0%, var(--white) 100%); */
 		padding: var(--spacing-lg) var(--spacing-md);
 	}
 
@@ -796,6 +840,12 @@
 		margin-bottom: var(--spacing-xs);
 	}
 
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
+	}
+
 	input {
 		padding: var(--spacing-md);
 		font-size: var(--font-size-base);
@@ -831,7 +881,7 @@
 		box-shadow: none;
 	}
 
-	.file-upload-field {
+	/* .file-upload-field {
 		margin: var(--spacing-lg) 0;
 	}
 
@@ -872,7 +922,7 @@
 	.file-text {
 		font-weight: var(--font-weight-medium);
 		color: var(--text-secondary);
-	}
+	} */
 
 	.submit-button {
 		width: 100%;

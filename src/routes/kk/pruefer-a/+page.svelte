@@ -4,6 +4,48 @@
   import { getPrinterIp } from '$lib/printer.js';
 
   let form = getEmptyFormKKA();
+  let formErrors: string[] = [];
+
+  function validateForm(): boolean {
+    formErrors = [];
+
+    // Check required text fields
+    if (!form.pruefer_a.trim()) formErrors.push('- Prüfer A');
+    if (!form.serialnummer.trim()) formErrors.push('- Serialnummer');
+    if (!form.firmware_version.trim()) formErrors.push('- Firmware-Version');
+    if (!form.seriennummer_elektronik.trim()) formErrors.push('- Seriennummer Elektronik');
+    if (!form.seriennummer_optik1.trim()) formErrors.push('- Seriennummer Optik 1');
+    if (form.anzahl_optiken === 'Zwei_Optiken' && !form.seriennummer_optik2.trim()) formErrors.push('- Seriennummer Optik 2');
+    if (!form.chargenummer.trim()) formErrors.push('- Chargenummer');
+    if (!form.laufzeit_motor.trim()) formErrors.push('- Laufzeit Motor');
+
+    // Check required select fields
+    if (form.optik_format === null) formErrors.push('- Optik Format');
+
+    // Check required boolean fields
+    if (form.KonfigurationKK === null) formErrors.push('- Konfiguration');
+    if (form.pigtail_schrumpfschlauch === null) formErrors.push('- Pigtail Schrumpfschlauch');
+    if (form.pigtail_drehmoment === null) formErrors.push('- Pigtail Drehmoment');
+    if (form.hardware_ok === null) formErrors.push('- Hardware vollständig und unbeschädigt');
+    if (form.optikglas_ok === null) formErrors.push('- Optikglas i.O.');
+    if (form.rotor_ok === null) formErrors.push('- Rotor i.O.');
+    if (form.klebung_rotor_ok === null) formErrors.push('- Klebung Rotor i.O.');
+    if (form.kleber_2k_ok === null) formErrors.push('- 2K-Kleber i.O.');
+    if (form.dichtring_datenkabel_eingelegt === null) formErrors.push('- Dichtring Datenkabel eingelegt');
+    if (form.druckluftanscluss_montiert === null) formErrors.push('- Druckluftanschluss montiert');
+    if (form.uberdrucktest_ok === null) formErrors.push('- Überdrucktest i.O.');
+    if (form.lichtmodul_ok === null) formErrors.push('- Lichtmodul i.O.');
+    if (form.motor_ok === null) formErrors.push('- Motor i.O.');
+    if (form.motor_dauerhaft_drehbar === null) formErrors.push('- Motor dauerhaft drehbar');
+    if (form.drucksensor_ok === null) formErrors.push('- Drucksensor i.O.');
+    if (form.lagesensor_ok === null) formErrors.push('- Lagesensor i.O.');
+    if (form.zustandsdaten_ok === null) formErrors.push('- Zustandsdaten i.O.');
+    if (form.fokuslage_ok === null) formErrors.push('- Fokuslage i.O.');
+    if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_wechseln_funktioniert === null) formErrors.push('- Optik wechseln funktioniert');
+    if (form.siegellack_aufgebracht === null) formErrors.push('- Siegellack aufgebracht');
+
+    return formErrors.length === 0;
+  }
 
   $: {
     if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F1') {
@@ -73,6 +115,11 @@
   }
 
   async function submitFormKKA() {
+    if (!validateForm()) {
+      alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+      return;
+    }
+
     const res = await fetch('/api/kk', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -82,6 +129,7 @@
     if (res.ok) {
       alert('Form gespeichert. Bitte Prüfer B informieren.');
       form = getEmptyFormKKA();
+      formErrors = [];
     } else {
       alert('Fehler beim Speichern');
     }
@@ -99,8 +147,8 @@
 		<div class="form-grid">
 			
 			<div class="field">
-				<label for="pruefer_a">Prüfer A</label>
-				<input id="pruefer_a" bind:value={form.pruefer_a} />
+				<label for="pruefer_a">Prüfer A <span class="required">*</span></label>
+				<input id="pruefer_a" bind:value={form.pruefer_a} required />
 			</div>
 
 			<div class="section-title">Konfiguration</div>
@@ -130,6 +178,7 @@
 						{ label: "F2+TFT", value: "F2_TFT" }
 						  ]
 					}        
+					required={true}
 				/>
 
 				<SelectRadio
@@ -139,41 +188,42 @@
 						{ label: "RC", value: "RC" },
 						{ label: "DMG", value: "DMG" }
 					]}
+					required={true}
 				/>
 			</div>
 
 			<div class="section-title">Hardware-Informationen</div>
 
 			<div class="field">
-				<label for="serialnummer">Serialnummer</label>
-				<input id="serialnummer" bind:value={form.serialnummer} />
+				<label for="serialnummer">Serialnummer <span class="required">*</span></label>
+				<input id="serialnummer" bind:value={form.serialnummer} required />
 			</div>
 
 			<div class="field">
-				<label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-				<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+				<label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+				<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
 			</div>
 
 			<div class="field">
-				<label for="firmware_version">Firmware Version</label>
-				<input id="firmware_version" bind:value={form.firmware_version} />
+				<label for="firmware_version">Firmware Version <span class="required">*</span></label>
+				<input id="firmware_version" bind:value={form.firmware_version} required />
 			</div>
 
 			<div class="field">
-				<label for="seriennummer_optik1">Seriennummer Optik 1</label>
-				<input id="seriennummer_optik1" bind:value={form.seriennummer_optik1} />
+				<label for="seriennummer_optik1">Seriennummer Optik 1 <span class="required">*</span></label>
+				<input id="seriennummer_optik1" bind:value={form.seriennummer_optik1} required />
 			</div>
 
 			{#if form.anzahl_optiken === 'Zwei_Optiken'}
 				<div class="field">
-					<label for="seriennummer_optik2">Seriennummer Optik 2</label>
-					<input id="seriennummer_optik2" bind:value={form.seriennummer_optik2} />
+					<label for="seriennummer_optik2">Seriennummer Optik 2 <span class="required">*</span></label>
+					<input id="seriennummer_optik2" bind:value={form.seriennummer_optik2} required />
 				</div>
 			{/if}
 
 			<div class="field">
-				<label for="chargenummer">Chargenummer Lagereinheit</label>
-				<input id="chargenummer" bind:value={form.chargenummer} />
+				<label for="chargenummer">Chargenummer Lagereinheit <span class="required">*</span></label>
+				<input id="chargenummer" bind:value={form.chargenummer} required />
 			</div>
 
 			<div class="field">
@@ -211,83 +261,83 @@
 			{#if form.KonfigurationKK === 'DMG'}
 				<div class="section-title">DMG Konfiguration</div>
 				<div class="radio-grid">
-					<BooleanRadio bind:bindValue={form.pigtail_schrumpfschlauch} label="Pigtail Schrumpfschlauch montiert" />
-					<BooleanRadio bind:bindValue={form.pigtail_drehmoment} label="Pigtail Drehmoment korrekt" />
+					<BooleanRadio bind:bindValue={form.pigtail_schrumpfschlauch} label="Pigtail Schrumpfschlauch montiert" required={true} />
+					<BooleanRadio bind:bindValue={form.pigtail_drehmoment} label="Pigtail Drehmoment korrekt" required={true} />
 				</div>
 			{/if}
 
 			<div class="section-title">Funktionsprüfungen</div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+				<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.optikglas_ok} label="Optikglas Staub- und Fettfrei" />
+				<BooleanRadio bind:bindValue={form.optikglas_ok} label="Optikglas Staub- und Fettfrei" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.rotor_ok} label="Rotor dreht frei(von Hand)" />
+				<BooleanRadio bind:bindValue={form.rotor_ok} label="Rotor dreht frei(von Hand)" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.klebung_rotor_ok} label="Klebung Rotor i.O." />
+				<BooleanRadio bind:bindValue={form.klebung_rotor_ok} label="Klebung Rotor i.O." required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.kleber_2k_ok} label="2K-Kleber Lichtmodul i.O." />
+				<BooleanRadio bind:bindValue={form.kleber_2k_ok} label="2K-Kleber Lichtmodul i.O." required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.dichtring_datenkabel_eingelegt} label="Dichtring(grün) für Datenkabel eingelegt" />
+				<BooleanRadio bind:bindValue={form.dichtring_datenkabel_eingelegt} label="Dichtring(grün) für Datenkabel eingelegt" required={true} />
       </div>
 
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.druckluftanscluss_montiert} label="Fest Druckluftanschluss montiert" />
+				<BooleanRadio bind:bindValue={form.druckluftanscluss_montiert} label="Fest Druckluftanschluss montiert" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.uberdrucktest_ok} label="Überdrucktest durchgeführt" />
+				<BooleanRadio bind:bindValue={form.uberdrucktest_ok} label="Überdrucktest durchgeführt" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.lichtmodul_ok} label="10x Lichtmodul auf Funktion überprüft" />
+				<BooleanRadio bind:bindValue={form.lichtmodul_ok} label="10x Lichtmodul auf Funktion überprüft" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.motor_ok} label="10x Motor auf Funktion überprüft" />
+				<BooleanRadio bind:bindValue={form.motor_ok} label="10x Motor auf Funktion überprüft" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.motor_dauerhaft_drehbar} label="Motor im Dauerlauf überprüft(min. 30 Min.)" />
+				<BooleanRadio bind:bindValue={form.motor_dauerhaft_drehbar} label="Motor im Dauerlauf überprüft(min. 30 Min.)" required={true} />
       </div>
 
 			<div class="field field-full-width">
-				<label for="laufzeit_motor">Laufzeit des Motors eintragen</label>
-				<input id="laufzeit_motor" bind:value={form.laufzeit_motor} />
+				<label for="laufzeit_motor">Laufzeit des Motors eintragen <span class="required">*</span></label>
+				<input id="laufzeit_motor" bind:value={form.laufzeit_motor} required />
 			</div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.drucksensor_ok} label="Drucksensor funktioniert" />
+				<BooleanRadio bind:bindValue={form.drucksensor_ok} label="Drucksensor funktioniert" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" />
+				<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" required={true} />
       </div>
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" />
+				<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" required={true} />
       </div>
 
 				{#if form.anzahl_optiken === 'Zwei_Optiken'}
           <div class="field field-full-width">
-            <BooleanRadio bind:bindValue={form.optik_wechseln_funktioniert} label="Optik wechseln funktioniert" />
+            <BooleanRadio bind:bindValue={form.optik_wechseln_funktioniert} label="Optik wechseln funktioniert" required={true} />
           </div>
 				{/if}
 
       <div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.siegellack_aufgebracht} label="Siegellack aufgebracht" />
+				<BooleanRadio bind:bindValue={form.siegellack_aufgebracht} label="Siegellack aufgebracht" required={true} />
       </div>
     </div>
 
@@ -387,6 +437,12 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		margin-bottom: var(--spacing-xs);
+	}
+
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
 	}
 
 	input {

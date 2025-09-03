@@ -15,6 +15,7 @@
 	}
 
 	let form = getEmptyFormC2B();
+	let formErrors: string[] = [];
 	let serialToFindC2 = '';
 	let serialErrorC2 = '';
 	let showFormC2 = false;
@@ -23,6 +24,36 @@
 	let originalData: any = null;
 	let showConfirmDialog = false;
 	let currentAction: 'save' | 'saveAndPrint' = 'save';
+
+	function validateForm(): boolean {
+		formErrors = [];
+
+		// Check required text fields
+		if (!form.pruefer_b.trim()) formErrors.push('- Prüfer B');
+		if (!form.qr_code_automatiktest.trim()) formErrors.push('- QR Code Automatiktest');
+
+		// Check required select fields
+		if (form.konfiguration === null) formErrors.push('- Konfiguration');
+		if (!form.software_version.trim()) formErrors.push('- Software-Version');
+		if (!form.seriennummer_elektronik.trim()) formErrors.push('- Seriennummer Elektronik');
+		if (!form.mac_adresse.trim()) formErrors.push('- MAC-Adresse');
+		if (!form.ba_nummer.trim()) formErrors.push('- BA-Nummer');
+		// Check required boolean fields
+		if (form.hardware_ok === null) formErrors.push('- Hardware vollständig und unbeschädigt');
+		if (form.hutschienenclip_montiert === null) formErrors.push('- Hutschienenclip montiert');
+		if (form.hdmi_ok === null) formErrors.push('- HDMI-Verbindung funktioniert');
+		if (form.web_ok === null) formErrors.push('- Web funktioniert');
+		if (form.zoom_ok === null) formErrors.push('- Zoom funktioniert');
+		if (form.menue_bedienbar === null) formErrors.push('- Menü ist bedienbar');
+		if (form.ip_adresse === null) formErrors.push('- IP-Adresse sichtbar');
+		if (form.kameraeingang_ok === null) formErrors.push('- Kameraeingänge funktionieren');
+		if (form.zustandsdaten_ok === null) formErrors.push('- Zustandsdaten i.O.');
+		if (form.automatiktest_ok === null) formErrors.push('- Automatiktest i.O.');
+		if (form.werkseinstellung === null) formErrors.push('- Werkseinstellung i.O.');
+		if (form.lp_verschraubt === null) formErrors.push('- LP verschraubt');
+
+		return formErrors.length === 0;
+	}
 
 	function getEmptyFormC2B() {
         const today = new Date();
@@ -190,6 +221,11 @@
 	}
 
 	async function submitFormC2B() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/c2', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -199,6 +235,7 @@
 		if (res.ok) {
 			alert('Formular aktualisiert und Etikett gedruckt!');
 			form = getEmptyFormC2B();
+			formErrors = [];
 			serialToFindC2 = '';
 			showFormC2 = false;
 		} else {
@@ -207,6 +244,11 @@
 	}
 
 	async function saveOnlyC2B() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/c2', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -216,6 +258,7 @@
 		if (res.ok) {
 			alert('Formular gespeichert!');
 			form = getEmptyFormC2B();
+			formErrors = [];
 			serialToFindC2 = '';
 			showFormC2 = false;
 		} else {
@@ -261,8 +304,8 @@
 			
 			<div class="form-grid">
 				<div class="field">
-					<label for="pruefer_b">Prüfer B</label>
-					<input id="pruefer_b" bind:value={form.pruefer_b} />
+					<label for="pruefer_b">Prüfer B <span class="required">*</span></label>
+					<input id="pruefer_b" bind:value={form.pruefer_b} required />
 				</div>
 
 				<div class="section-title">Hardware-Informationen</div>
@@ -273,8 +316,8 @@
 				</div>
 				
 				<div class="field">
-					<label for="software_version">Software-Version</label>
-					<input id="software_version" bind:value={form.software_version} />
+					<label for="software_version">Software-Version <span class="required">*</span></label>
+					<input id="software_version" bind:value={form.software_version} required />
 				</div>
 
 				<div class="field">
@@ -287,17 +330,18 @@
 							{ label: "DEMO", value: "DEMO" },
 							{ label: "EDU", value: "EDU" }
 						]}
+						required={true}
 					/>
 				</div>
 
 				<div class="field">
-					<label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+					<label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
 				</div>
 
 				<div class="field">
-					<label for="mac_adresse">MAC-Adresse</label>
-					<input id="mac_adresse" bind:value={form.mac_adresse} />
+					<label for="mac_adresse">MAC-Adresse <span class="required">*</span></label>
+					<input id="mac_adresse" bind:value={form.mac_adresse} required />
 				</div>
 
 				<div class="section-title">Artikel-Informationen</div>
@@ -308,8 +352,8 @@
 				</div>
 				
 				<div class="field">
-					<label for="ba_nummer">BA-Nummer</label>
-					<input id="ba_nummer" bind:value={form.ba_nummer} />
+					<label for="ba_nummer">BA-Nummer <span class="required">*</span></label>
+					<input id="ba_nummer" bind:value={form.ba_nummer} required />
 				</div>
 				
 				<div class="field">
@@ -330,39 +374,39 @@
 				<div class="section-title">Funktionsprüfungen</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" />
+					<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" />
+					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" />
+					<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" />
+					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" />
+					<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" />
+					<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" />
+					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." />
+					<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." required={true} />
 				</div>
 
 				<div class="field field-full-width">
@@ -373,13 +417,13 @@
 				<div class="section-title">Prüfer B Spezifische Tests</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" />
+					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" required={true} />
 				</div>
 
 				<div class="field field-full-width file-upload-field">
-					<label for="qr_code_file">QR-Code Automatiktest (.svg)</label>
+					<label for="qr_code_file">QR-Code Automatiktest (.svg) <span class="required">*</span></label>
 					<div class="file-input-wrapper">
-						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadC2} />
+						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadC2} required />
 						<div class="file-input-display">
 							<Icon name="folder" size={16} className="file-icon" />
 							<span class="file-text">SVG-Datei auswählen</span>
@@ -388,11 +432,11 @@
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.werkseinstellung} label="Werkseinstellung durchgeführt" />
+					<BooleanRadio bind:bindValue={form.werkseinstellung} label="Werkseinstellung durchgeführt" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Leiterplattensteckverbinder verschraubt" />
+					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Leiterplattensteckverbinder verschraubt" required={true} />
 				</div>
 			</div>
 
@@ -682,6 +726,12 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		margin-bottom: var(--spacing-xs);
+	}
+
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
 	}
 
 	input {

@@ -1,10 +1,14 @@
 <script lang="ts">
 	export let label: string;
 	export let bindValue: boolean | null = null;
+	export let required: boolean = false;
 </script>
 
 <div class="field">
-	<span class="field-label">{label}</span>
+	<span class="field-label">
+		{label}
+		{#if required}<span class="required">*</span>{/if}
+	</span>
 	<div class="option-group">
 		<label for={label + '-ja'} class:active={bindValue === true}>
 			<input
@@ -13,6 +17,7 @@
 				name={label}
 				bind:group={bindValue}
 				value={true}
+				{required}
 			/>
 			Ja
 		</label>
@@ -23,6 +28,7 @@
 				name={label}
 				bind:group={bindValue}
 				value={false}
+				{required}
 			/>
 			Nein
 		</label>
@@ -97,5 +103,11 @@
 
 	.option-group label.active input[type='radio'] {
 		accent-color: var(--white);
+	}
+
+	.required {
+		color: #e53e3e;
+		font-weight: var(--font-weight-bold);
+		margin-left: 2px;
 	}
 </style>

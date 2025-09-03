@@ -3,6 +3,7 @@
 	import { getPrinterIp } from '$lib/printer.js';
 
 	let form = getEmptyFormCbasicB();
+	let formErrors: string[] = [];
 	let serialToFindCbasic = '';
 	let serialErrorCbasic = '';
 	let showFormCbasic = false;
@@ -11,6 +12,27 @@
 	let originalData: any = null;
 	let showConfirmDialog = false;
 	let currentAction: 'save' | 'saveAndPrint' = 'save';
+
+	function validateForm(): boolean {
+		formErrors = [];
+
+		// Check required text fields
+		if (!form.pruefer_b.trim()) formErrors.push('- Prüfer B');
+		if (!form.software_version.trim()) formErrors.push('- Software-Version');
+		if (!form.seriennummer_elektronik.trim()) formErrors.push('- Seriennummer Elektronik');
+		if (!form.ba_nummer.trim()) formErrors.push('- BA-Nummer');
+		// Check required boolean fields
+		if (form.hardware_ok === null) formErrors.push('- Hardware vollständig und unbeschädigt');
+		if (form.hutschienenclip_montiert === null) formErrors.push('- Hutschienenclip montiert');
+		if (form.hdmi_ok === null) formErrors.push('- HDMI-Verbindung funktioniert');
+		if (form.zoom_ok === null) formErrors.push('- Zoom funktioniert');
+		if (form.kameraeingang_ok === null) formErrors.push('- Kameraeingänge funktionieren');
+		if (form.sprache_wechslen_funktioniert === null) formErrors.push('- Sprache wechseln funktioniert');
+		if (form.sprache_auf_englisch_eingestellt === null) formErrors.push('- Sprache auf Englisch eingestellt');
+		if (form.lp_verschraubt === null) formErrors.push('- LP verschraubt');
+
+		return formErrors.length === 0;
+	}
 
 	function getEmptyFormCbasicB() {
         const today = new Date();
@@ -21,7 +43,7 @@
 			serialnummer: '',
 			hinweis: '',
 			ba_nummer: '',
-			artikel_nummer: '',
+			artikel_nummer: 10262,
 			software_version: '',
 			seriennummer_elektronik: '',
 			datum: formattedDateCbasic,
@@ -61,6 +83,11 @@
 	}
 
     	async function submitFormCbasicB() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/cbasic', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -70,6 +97,7 @@
 		if (res.ok) {
 			alert('Formular aktualisiert und Etikett gedruckt!');
 			form = getEmptyFormCbasicB();
+			formErrors = [];
 			serialToFindCbasic = '';
 			showFormCbasic = false;
 		} else {
@@ -78,6 +106,11 @@
 	}
 
 	async function saveOnlyCbasicB() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/cbasic', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -87,6 +120,7 @@
 		if (res.ok) {
 			alert('Formular gespeichert!');
 			form = getEmptyFormCbasicB();
+			formErrors = [];
 			serialToFindCbasic = '';
 			showFormCbasic = false;
 		} else {
@@ -222,20 +256,20 @@
 
 			<div class="form-grid">
 				<div class="field">
-					<label for="pruefer_b">Prüfer B</label>
-					<input id="pruefer_b" bind:value={form.pruefer_b} />
+					<label for="pruefer_b">Prüfer B <span class="required">*</span></label>
+					<input id="pruefer_b" bind:value={form.pruefer_b} required />
 				</div>
 
 				<div class="section-title">Hardware-Informationen</div>
 
 				<div class="field">
-					<label for="software_version">Software-Version</label>
-					<input id="software_version" bind:value={form.software_version} />
+					<label for="software_version">Software-Version <span class="required">*</span></label>
+					<input id="software_version" bind:value={form.software_version} required />
 				</div>
 
 				<div class="field">
-					<label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+					<label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+					<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
 				</div>
 
 				<div class="field">
@@ -251,13 +285,13 @@
 				</div>
 
 				<div class="field">
-					<label for="ba_nummer">BA-Nummer</label>
-					<input id="ba_nummer" bind:value={form.ba_nummer} />
+					<label for="ba_nummer">BA-Nummer <span class="required">*</span></label>
+					<input id="ba_nummer" bind:value={form.ba_nummer} required />
 				</div>
 
 				<div class="field">
 					<label for="artikel_nummer">Artikel-Nummer</label>
-					<input id="artikel_nummer" bind:value={form.artikel_nummer} />
+					<input id="artikel_nummer" bind:value={form.artikel_nummer} readonly />
 				</div>
 
 				<div class="field">
@@ -272,35 +306,35 @@
 
 				<div class="section-title">Funktionsprüfungen</div>
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" />
+					<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" />
+					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" />
+					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingang funktioniert" />
+					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingang funktioniert" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.sprache_wechslen_funktioniert} label="Sprache wechseln funktioniert" />
+					<BooleanRadio bind:bindValue={form.sprache_wechslen_funktioniert} label="Sprache wechseln funktioniert" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.sprache_auf_englisch_eingestellt} label="Sprache auf Englisch eingestellt" />
+					<BooleanRadio bind:bindValue={form.sprache_auf_englisch_eingestellt} label="Sprache auf Englisch eingestellt" required={true} />
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Leiterplattensteckverbinder verschraubt" />
+					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Leiterplattensteckverbinder verschraubt" required={true} />
 				</div>
 			</div>
 
@@ -588,6 +622,12 @@
 		margin-bottom: var(--spacing-xs);
 	}
 
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
+	}
+
 	input {
 		padding: var(--spacing-md);
 		font-size: var(--font-size-base);
@@ -626,7 +666,7 @@
 	.submit-button {
 		width: 100%;
 		padding: var(--spacing-lg) var(--spacing-xl);
-		background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
 		color: var(--white);
 		border: none;
 		border-radius: var(--border-radius-md);

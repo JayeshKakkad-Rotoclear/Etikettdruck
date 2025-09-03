@@ -5,6 +5,7 @@
   export let name: string = '';
   export let value: string | null = null;
   export let options: { label: string; value: string }[] = [];
+  export let required: boolean = false;
 
   const dispatch = createEventDispatcher();
 
@@ -15,7 +16,10 @@
 </script>
 
 <div class="radio-group" role="radiogroup" aria-labelledby="group-label-id">
-  <div id="group-label-id" class="group-label">{label}</div>
+  <div id="group-label-id" class="group-label">
+    {label}
+    {#if required}<span class="required">*</span>{/if}
+  </div>
   <div class="options">
     {#each options as option}
       <label class="radio-option">
@@ -25,6 +29,7 @@
           value={option.value}
           checked={option.value === value}
           on:change={() => select(option.value)}
+          {required}
         />
         {option.label}
       </label>
@@ -94,5 +99,11 @@
 
     .radio-option:has(input:checked) input[type="radio"] {
         accent-color: var(--white);
+    }
+
+    .required {
+        color: #e53e3e;
+        font-weight: var(--font-weight-bold);
+        margin-left: 2px;
     }
 </style>

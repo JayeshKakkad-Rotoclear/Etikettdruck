@@ -18,6 +18,7 @@
     }
 
 	let form = getEmptyFormCproB();
+	let formErrors: string[] = [];
 	let serialToFindCpro = '';
 	let serialErrorCpro = '';
 	let showFormCpro = false;
@@ -25,6 +26,40 @@
 	let showConfirmDialog = false;
 	let pendingAction: 'save' | 'saveAndPrint' | null = null;
 	let changes: Array<{field: string, oldValue: any, newValue: any, label: string}> = [];
+
+	function validateForm(): boolean {
+		formErrors = [];
+
+		// Check required text fields
+		if (!form.pruefer_b.trim()) formErrors.push('- Prüfer B');
+		if (!form.software_version.trim()) formErrors.push('- Software Version');
+		if (!form.seriennummer_elektronik.trim()) formErrors.push('- Seriennummer Elektronik');
+		if (!form.mac_adresse.trim()) formErrors.push('- MAC-Adresse');
+		if (!form.seriennummer_festplatte.trim()) formErrors.push('- Seriennummer Festplatte');
+		if (!form.ba_nummer.trim()) formErrors.push('- BA-Nummer');
+		if (!form.freier_festplattenspeicher.trim()) formErrors.push('- Freier Festplattenspeicher');
+		if (!form.qr_code_automatiktest.trim()) formErrors.push('- QR Code Automatiktest');
+
+		// Check required select fields
+		if (form.festplattengroesse === null) formErrors.push('- Festplattengröße');
+
+		// Check required boolean fields
+		if (form.hardware_ok === null) formErrors.push('- Hardware vollständig und unbeschädigt');
+		if (form.hdmi_ok === null) formErrors.push('- HDMI-Verbindung funktioniert');
+		if (form.web_ok === null) formErrors.push('- Web funktioniert');
+		if (form.zoom_ok === null) formErrors.push('- Zoom funktioniert');
+		if (form.menue_bedienbar === null) formErrors.push('- Menü ist bedienbar');
+		if (form.festplatte_angezeigt === null) formErrors.push('- Festplatte angezeigt');
+		if (form.ip_adresse === null) formErrors.push('- IP-Adresse sichtbar');
+		if (form.kameraeingang_ok === null) formErrors.push('- Kameraeingänge funktionieren');
+		if (form.zustandsdaten_ok === null) formErrors.push('- Zustandsdaten i.O.');
+		if (form.automatiktest_ok === null) formErrors.push('- Automatiktest i.O.');
+		if (form.werkseinstellung === null) formErrors.push('- Werkseinstellung i.O.');
+		if (form.lp_verschraubt === null) formErrors.push('- LP verschraubt');
+		if (form.festplatte_leer === null) formErrors.push('- Festplatte leer');
+
+		return formErrors.length === 0;
+	}
 
 	function getEmptyFormCproB() {
 		const today = new Date();
@@ -198,6 +233,11 @@
 	}
 
 	async function submitFormCproB() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/cpro', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -207,6 +247,7 @@
 		if (res.ok) {
 			alert('Formular aktualisiert und Etikett gedruckt!');
 			form = getEmptyFormCproB();
+			formErrors = [];
 			serialToFindCpro = '';
 			showFormCpro = false;
 		} else {
@@ -215,6 +256,11 @@
 	}
 
 	async function saveOnlyCproB() {
+		if (!validateForm()) {
+			alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+			return;
+		}
+
 		const res = await fetch('/api/cpro', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
@@ -224,6 +270,7 @@
 		if (res.ok) {
 			alert('Formular erfolgreich gespeichert!');
 			form = getEmptyFormCproB();
+			formErrors = [];
 			serialToFindCpro = '';
 			showFormCpro = false;
 		} else {
@@ -270,8 +317,8 @@
 			
 			<div class="form-grid">
 				<div class="field">
-					<label for="pruefer_b">Prüfer B</label>
-					<input id="pruefer_b" bind:value={form.pruefer_b} />
+					<label for="pruefer_b">Prüfer B <span class="required">*</span></label>
+					<input id="pruefer_b" bind:value={form.pruefer_b} required />
 				</div>
 
                 <div class="section-title">Hardware-Informationen</div>
@@ -282,8 +329,8 @@
                 </div>
 
                 <div class="field">
-                    <label for="software_version">Software-Version</label>
-                    <input id="software_version" bind:value={form.software_version} />
+                    <label for="software_version">Software-Version <span class="required">*</span></label>
+                    <input id="software_version" bind:value={form.software_version} required />
                 </div>
 
                 <div class="field">
@@ -300,18 +347,18 @@
                 </div>
 
                 <div class="field">
-                    <label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-                    <input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+                    <label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+                    <input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
                 </div>
 
                 <div class="field">
-                    <label for="mac_adresse">MAC-Adresse</label>
-                    <input id="mac_adresse" bind:value={form.mac_adresse} />
+                    <label for="mac_adresse">MAC-Adresse <span class="required">*</span></label>
+                    <input id="mac_adresse" bind:value={form.mac_adresse} required />
                 </div>
 
                 <div class="field">
-                    <label for="seriennummer_festplatte">Seriennummer Festplatte</label>
-                    <input id="seriennummer_festplatte" bind:value={form.seriennummer_festplatte} />
+                    <label for="seriennummer_festplatte">Seriennummer Festplatte <span class="required">*</span></label>
+                    <input id="seriennummer_festplatte" bind:value={form.seriennummer_festplatte} required />
                 </div>
 
                 <div class="field">
@@ -323,6 +370,7 @@
                             { label: "1 TB", value: "TB_1" },
                             { label: "4 TB", value: "TB_4" }
                         ]}
+                        required={true}
                     />
                 </div>
 
@@ -334,8 +382,8 @@
                 </div>
 
                 <div class="field">
-                    <label for="ba_nummer">BA-Nummer</label>
-                    <input id="ba_nummer" bind:value={form.ba_nummer} />
+                    <label for="ba_nummer">BA-Nummer <span class="required">*</span></label>
+                    <input id="ba_nummer" bind:value={form.ba_nummer} required />
                 </div>
 
                 <div class="field">
@@ -356,27 +404,27 @@
 				<div class="section-title">Funktionsprüfungen</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+					<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" />
+					<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" />
+					<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" />
+					<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" />
+					<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.festplatte_angezeigt} label="Festplatte wird angezeigt" />
+					<BooleanRadio bind:bindValue={form.festplatte_angezeigt} label="Festplatte wird angezeigt" required={true} />
 				</div>
 
 				<div class="field field-full-width">
@@ -388,19 +436,20 @@
 							{ label: "ca. 890 GB", value: "GB_890" },
 							{ label: "ca. 3.7 TB", value: "GB_3700" }
 						]}
+						required={true}
 					/>
 				</div>
 
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" />
+					<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" />
+					<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." />
+					<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." required={true} />
 				</div>
 
 				<div class="field field-full-width">
@@ -409,19 +458,19 @@
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.festplatte_leer} label="Festplatte leer" />
+					<BooleanRadio bind:bindValue={form.festplatte_leer} label="Festplatte leer" required={true} />
 				</div>
 
 				<div class="section-title">Prüfer B Spezifische Tests</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" />
+					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" required={true} />
 				</div>
 				
 				<div class="field field-full-width file-upload-field">
-					<label for="qr_code_file">QR-Code Automatiktest (.svg)</label>
+					<label for="qr_code_file">QR-Code Automatiktest (.svg) <span class="required">*</span></label>
 					<div class="file-input-wrapper">
-						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadCpro} />
+						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadCpro} required />
 						<div class="file-input-display">
 							<Icon name="folder" size={16} className="file-icon" />
 							<span class="file-text">SVG-Datei auswählen</span>
@@ -430,11 +479,11 @@
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.werkseinstellung} label="Auf Werkseinstellung zurückgesetzt" />
+					<BooleanRadio bind:bindValue={form.werkseinstellung} label="Auf Werkseinstellung zurückgesetzt" required={true} />
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Lüfterplatte verschraubt" />
+					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Lüfterplatte verschraubt" required={true} />
 				</div>
 			</div>
 
@@ -710,6 +759,12 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		margin-bottom: var(--spacing-xs);
+	}
+
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
 	}
 
 	input {

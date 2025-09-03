@@ -4,6 +4,7 @@
 	import { getPrinterIp } from '$lib/printer.js';
 
 	let form = getEmptyFormC2A();
+	let formErrors: string[] = [];
 
     $: {
 		if (form.konfiguration === 'DMG') {
@@ -13,6 +14,37 @@
 			form.artikel_bezeichnung = 'Steuerrechner fuer Rotoclear C2';
             form.artikel_nummer = '10082';
 		}
+	}
+
+	function validateForm() {
+		formErrors = [];
+		
+		// Required text fields
+		if (!form.pruefer_a?.trim()) formErrors.push('Prüfer A ist erforderlich');
+		if (!form.serialnummer?.trim()) formErrors.push('Serialnummer ist erforderlich');
+		if (!form.software_version?.trim()) formErrors.push('Software-Version ist erforderlich');
+		if (!form.seriennummer_elektronik?.trim()) formErrors.push('Seriennummer Elektronik ist erforderlich');
+		if (!form.mac_adresse?.trim()) formErrors.push('MAC-Adresse ist erforderlich');
+		if (!form.ba_nummer?.trim()) formErrors.push('BA-Nummer ist erforderlich');
+		
+		// Required select fields
+		if (!form.konfiguration) formErrors.push('Konfiguration ist erforderlich');
+		
+		// Required boolean fields
+		if (form.hardware_ok === null) formErrors.push('Hardware vollständig und unbeschädigt muss bewertet werden');
+		if (form.hutschienenclip_montiert === null) formErrors.push('Hutschienenclip montiert muss bewertet werden');
+		if (form.hdmi_ok === null) formErrors.push('HDMI-Verbindung muss bewertet werden');
+		if (form.web_ok === null) formErrors.push('Web funktioniert muss bewertet werden');
+		if (form.zoom_ok === null) formErrors.push('Zoom funktioniert muss bewertet werden');
+		if (form.menue_bedienbar === null) formErrors.push('Menü ist bedienbar muss bewertet werden');
+		if (form.ip_adresse === null) formErrors.push('IP-Adresse sichtbar muss bewertet werden');
+		if (form.kameraeingang_ok === null) formErrors.push('Kameraeingänge funktionieren muss bewertet werden');
+		if (form.zustandsdaten_ok === null) formErrors.push('Zustandsdaten i.O. muss bewertet werden');
+		if (form.automatiktest_ok === null) formErrors.push('Automatiktest durchgeführt muss bewertet werden');
+		if (form.werkseinstellung === null) formErrors.push('Werkseinstellung muss bewertet werden');
+		if (form.lp_verschraubt === null) formErrors.push('Lüfterplatte verschraubt muss bewertet werden');
+		
+		return formErrors.length === 0;
 	}
 
 	function getEmptyFormC2A() {
@@ -50,6 +82,11 @@
 	}
 
     async function submitFormC2A() {
+        if (!validateForm()) {
+            alert('Bitte füllen Sie alle erforderlichen Felder aus:\n\n' + formErrors.join('\n'));
+            return;
+        }
+
         const res = await fetch('/api/c2', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -59,6 +96,7 @@
         if (res.ok) {
             alert('Form gespeichert. Bitte Prüfer B informieren.');
             form = getEmptyFormC2A();
+            formErrors = [];
         } else {
             alert('Fehler beim Speichern');
         }
@@ -74,15 +112,15 @@
 		<h1>C2 Prüfprotokoll - Prüfer A</h1>
 		<div class="form-grid">
 			<div class="field">
-				<label for="pruefer_a">Prüfer A</label>
-				<input id="pruefer_a" bind:value={form.pruefer_a} />
+				<label for="pruefer_a">Prüfer A <span class="required">*</span></label>
+				<input id="pruefer_a" bind:value={form.pruefer_a} required />
 			</div>
 
 			<div class="section-title">Hardware-Informationen</div>
 
 			<div class="field">
-				<label for="serialnummer">Serialnummer</label>
-				<input id="serialnummer" bind:value={form.serialnummer} />
+				<label for="serialnummer">Serialnummer <span class="required">*</span></label>
+				<input id="serialnummer" bind:value={form.serialnummer} required />
 			</div>
 
 			<div class="field">
@@ -91,8 +129,8 @@
 			</div>
 
 			<div class="field">
-				<label for="software_version">Software-Version</label>
-				<input id="software_version" bind:value={form.software_version} />
+				<label for="software_version">Software-Version <span class="required">*</span></label>
+				<input id="software_version" bind:value={form.software_version} required />
 			</div>
 
 			<div class="field">
@@ -105,17 +143,18 @@
 						{ label: "DEMO", value: "DEMO" },
 						{ label: "EDU", value: "EDU" }
 					]}
+					required={true}
 				/>
 			</div>
 
 			<div class="field">
-				<label for="seriennummer_elektronik">Seriennummer Elektronik</label>
-				<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} />
+				<label for="seriennummer_elektronik">Seriennummer Elektronik <span class="required">*</span></label>
+				<input id="seriennummer_elektronik" bind:value={form.seriennummer_elektronik} required />
 			</div>
 
 			<div class="field">
-				<label for="mac_adresse">MAC-Adresse</label>
-				<input id="mac_adresse" bind:value={form.mac_adresse} />
+				<label for="mac_adresse">MAC-Adresse <span class="required">*</span></label>
+				<input id="mac_adresse" bind:value={form.mac_adresse} required />
 			</div>
 
 			<div class="section-title">Artikel-Informationen</div>
@@ -148,39 +187,39 @@
 			<div class="section-title">Funktionsprüfungen</div>
 
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" />
+				<BooleanRadio bind:bindValue={form.hardware_ok} label="Hardware vollständig und unbeschädigt" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" />
+				<BooleanRadio bind:bindValue={form.hutschienenclip_montiert} label="Hutschienenclip montiert" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" />
+				<BooleanRadio bind:bindValue={form.hdmi_ok} label="HDMI-Verbindung funktioniert" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" />
+				<BooleanRadio bind:bindValue={form.web_ok} label="Web funktioniert" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" />
+				<BooleanRadio bind:bindValue={form.zoom_ok} label="Zoom funktioniert" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" />
+				<BooleanRadio bind:bindValue={form.menue_bedienbar} label="Menü ist bedienbar" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" />
+				<BooleanRadio bind:bindValue={form.ip_adresse} label="IP-Adresse sichtbar" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" />
+				<BooleanRadio bind:bindValue={form.kameraeingang_ok} label="Kameraeingänge funktionieren" required={true} />
 			</div>
 			
 			<div class="field field-full-width">
-				<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." />
+				<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." required={true} />
 			</div>
 
 			<div class="field field-full-width">
@@ -280,6 +319,12 @@
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
 		margin-bottom: var(--spacing-xs);
+	}
+
+	.required {
+		color: #dc2626;
+		font-weight: bold;
+		margin-left: 2px;
 	}
 
 	input {
