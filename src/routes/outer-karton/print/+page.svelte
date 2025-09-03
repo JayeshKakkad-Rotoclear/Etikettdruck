@@ -18,7 +18,8 @@
     success = false;
 
     try {
-      const searchRes = await fetch(`/api/outerkarton/search?lieferschein=${encodeURIComponent(lieferscheinNumber.trim())}`);
+      // Search for the outer karton using the unified API
+      const searchRes = await fetch(`/api/outerkarton?lieferschein=${encodeURIComponent(lieferscheinNumber.trim())}`);
       const searchResult = await searchRes.json();
 
       if (!searchResult.success) {
@@ -26,16 +27,16 @@
         return;
       }
 
-      if (!searchResult.item) {
+      if (!searchResult.found || !searchResult.item) {
         error = `Keine Outer Karton Eintrag mit Lieferschein Nummer "${lieferscheinNumber}" gefunden.`;
         return;
       }
 
       outerKartonData = searchResult.item;
 
-      // Print the etikett
-      const printRes = await fetch('/api/outerkarton/print', {
-        method: 'POST',
+      // Print the etikett using the unified API PUT method
+      const printRes = await fetch('/api/outerkarton', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ outerKartonId: outerKartonData.id, printerIp: getPrinterIp() })
