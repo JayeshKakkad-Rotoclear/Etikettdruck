@@ -1,13 +1,14 @@
-# Schema: Benutzer Objekt
+# Schema: Benutzer-Objekte
 
-| Feld | Typ | Beschreibung |
-| ---- | --- | ------------ |
-| id | int | Primärschlüssel |
-| username | string | Eindeutig |
-| email | string | Eindeutig, validiert |
-| role | enum(UserRole) | Autorisierungsrolle |
-| status | enum(UserStatus) | ACTIVE / DISABLED |
-| createdAt | timestamp | Erstellzeit |
+| Feld      | Typ              | Hinweise             |
+| --------- | ---------------- | -------------------- |
+| id        | int              | Primärschlüssel      |
+| username  | string           | Eindeutig            |
+| email     | string           | Eindeutig, validiert |
+| role      | enum(UserRole)   | Berechtigungsumfang  |
+| status    | enum(UserStatus) | ACTIVE / DISABLED    |
+| createdAt | timestamp        | Audit                |
 
-Siehe Prisma Schema für Quelle.
+Siehe das Prisma-Schema als maßgebliche Definition.
 
+---

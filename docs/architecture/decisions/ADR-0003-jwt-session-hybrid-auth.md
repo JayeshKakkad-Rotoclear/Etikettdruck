@@ -1,7 +1,7 @@
 # ADR-0003: JWT Session Hybrid Authentication
 
 Status: Accepted
-Date: 2025-01-25
+Date: 2025-07-25
 
 ## Context
 Need stateless JWT benefits (scalable clients) plus ability to revoke/track sessions centrally for security.

@@ -1,7 +1,7 @@
 # ADR-0001: Multi-Schema Database
 
 Status: Accepted
-Date: 2025-01-15
+Date: 2025-07-15
 
 ## Context
 Need isolation between product lines and shared core tables while using a single PostgreSQL instance.

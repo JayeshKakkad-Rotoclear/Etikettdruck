@@ -1,7 +1,7 @@
 # ADR-0002: SvelteKit Full-Stack
 
 Status: Accepted
-Date: 2025-01-20
+Date: 2025-07-20
 
 ## Context
 Need unified framework for SSR, routing, API endpoints, and SPA interactivity.

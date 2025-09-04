@@ -1,9 +1,10 @@
 # API: Drucken
 
-| Methode | Pfad | Beschreibung |
-| ------- | ---- | ------------ |
-| POST | /api/print/label | Etikett drucken |
-| GET | /api/print/status | Drucker Status |
+| Methode | Pfad              | Beschreibung    |
+| ------- | ----------------- | --------------- |
+| POST    | /api/print/label  | Etikett drucken |
+| GET     | /api/print/status | Druckerstatus   |
 
-ZPL Rendering validiert Platzhalter + IP Format.
+Validiert ZPL-Vorlage & IP mithilfe der Utilities in `printer.ts`.
 
+---

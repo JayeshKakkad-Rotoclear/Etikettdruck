@@ -1,44 +1,8 @@
-# Release Prozess
+# Release-Prozess
 
-Definierter Ablauf zur Veröffentlichung produktionsreifer Versionen.
-
-## Branching & Versionierung
-- `main` immer releasbar
-- Feature Branch → PR → Code Review → Merge
-- SemVer Tags (`vMAJOR.MINOR.PATCH`)
-
-## Kriterien für Release
-- Alle Tests grün
-- Keine kritischen offenen Bugs
-- Sicherheits-Scans bestanden
-- Dokumentation (Änderungen + Migrationshinweise) aktualisiert
-
-## Schritt-für-Schritt
-| Schritt | Beschreibung | Artefakt |
-|---------|--------------|----------|
-| Plan | Scope & Ziel definieren | Ticket / ADR |
-| Freeze | Nur Fixes / keine neuen Features | Ankündigung |
-| Tag | Git Tag setzen | vX.Y.Z |
-| Build | CI Build & Scans | Images / Docs |
-| Deploy Staging | Automatisch nach Tag | Staging URL |
-| Verify | Smoke + Regression Checks | Testprotokoll |
-| Deploy Produktion | Manueller Approve | Live |
-| Post Monitoring | 24h erhöhte Überwachung | Dashboard |
-
-## Kommunikation
-- Changelog Eintrag
-- Interner Broadcast (Mail/Chat)
-- Optional Release Notes extern
-
-## Hotfix Prozess
-- Branch von Tag (`hotfix/x.y.z+1`)
-- Fix + Tests
-- Neuer Patch Tag
-
-## Automatisierung
-- CI generiert Changelog (konventionelle Commits optional)
-- Release Validation Checkliste in Pipeline
-
-## Nach Release
-- Technische Schulden einplanen
-- Metriken analysieren (Fehler, Performance)
+1. Branch erstellen & Feature abschließen
+2. `CHANGELOG.md` aktualisieren (von *Unreleased* → Version)
+3. Version taggen (SemVer)
+4. Auf Staging deployen, Smoke- & Security-Tests ausführen
+5. In Produktion promoten
+6. Release-Notes in GitHub erstellen

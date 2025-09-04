@@ -1,12 +1,13 @@
 # API: Benutzerverwaltung
 
-| Methode | Pfad | Beschreibung | Rolle |
-| ------- | ---- | ------------ | ----- |
-| GET | /api/users | Benutzerliste | MANAGEMENT / ADMIN |
-| POST | /api/users | Benutzer anlegen | ADMIN |
-| GET | /api/users/:id | Benutzer anzeigen | MANAGEMENT / ADMIN |
-| PATCH | /api/users/:id | Benutzer aktualisieren | ADMIN |
-| DELETE | /api/users/:id | Benutzer deaktivieren | ADMIN |
+| Methode | Pfad            | Beschreibung           |
+| ------- | --------------- | ---------------------- |
+| GET     | /api/users      | Benutzer auflisten     |
+| POST    | /api/users      | Benutzer anlegen       |
+| GET     | /api/users/\:id | Benutzer abrufen       |
+| PATCH   | /api/users/\:id | Benutzer aktualisieren |
+| DELETE  | /api/users/\:id | Soft-Delete Benutzer   |
 
-Soft Delete statt Hard Delete zur Nachvollziehbarkeit.
+Autorisierung: **ADMIN** für Anlage/Löschung; **Management**-Rollen für Lesezugriff.
 
+---

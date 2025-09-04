@@ -1,18 +1,17 @@
 # ADR-0002: SvelteKit Full-Stack
 
-Status: Akzeptiert
-Datum: 2025-01-20
+**Status:** Angenommen
+**Datum:** 20.07.2025
 
 ## Kontext
-Erwartung: schnelle Iteration, geteilte Typen, reduzierte Übergabekosten zwischen Frontend & Backend.
+
+Wir benötigen ein einheitliches Framework für SSR, Routing, API-Endpunkte und SPA-Interaktivität.
 
 ## Entscheidung
-SvelteKit als vereinheitlichte Plattform für Routing, SSR und leichte API Endpunkte.
+
+Verwendung von SvelteKit sowohl für die UI als auch für leichtgewichtige Server-Endpunkte (interne APIs) anstelle getrennter Frontend/Backend-Repos.
 
 ## Konsequenzen
-| Vorteil | Beschreibung |
-| ------- | ------------ |
-| Konsistenz | Ein Codebase / ein Tooling |
-| Produktivität | Weniger Integrationsaufwand |
-| Nachteile | Skalierung schwerer bei sehr rechenintensiven Endpoints |
 
+Vorteile: Schnellere Entwicklung, gemeinsame Typen, vereinfachtes Deployment.
+Nachteile: Gekoppeltes Deployment, potenzielle Skalierungsgrenzen für schwere APIs.

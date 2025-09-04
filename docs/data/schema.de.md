@@ -1,207 +1,220 @@
-# Datenbankschema Dokumentation
+# Datenbankschema-Dokumentation
 
-Multi-Schema PostgreSQL Datenbankdesign für das Etikettdrucker-System.
+Multi-Schema-PostgreSQL-Design für das Etikettdrucker-System.
 
-## Schema Überblick
+## Schema-Überblick
 
-Das System nutzt eine **Multi-Schema-Architektur** zur fachlichen Trennung (aus `prisma/schema.prisma`):
+Das System nutzt eine **Multi-Schema-Architektur**, um Domänen sauber zu trennen (aus `prisma/schema.prisma`):
 
 ```mermaid
 erDiagram
-		USER_MANAGEMENT ||--o{ CPRO_STEUERRECHNER : verwaltet
-		USER_MANAGEMENT ||--o{ C2_STEUERRECHNER : verwaltet
-		USER_MANAGEMENT ||--o{ CBASIC_STEUERRECHNER : verwaltet
-		USER_MANAGEMENT ||--o{ KK_KAMERAKOPF : verwaltet
-		USER_MANAGEMENT ||--o{ ZUBEHOER_ETIKETT : verwaltet
-		USER_MANAGEMENT ||--o{ OUTER_KARTON : verwaltet
+    USER_MANAGEMENT ||--o{ CPRO_STEUERRECHNER : manages
+    USER_MANAGEMENT ||--o{ C2_STEUERRECHNER : manages
+    USER_MANAGEMENT ||--o{ CBASIC_STEUERRECHNER : manages
+    USER_MANAGEMENT ||--o{ KK_KAMERAKOPF : manages
+    USER_MANAGEMENT ||--o{ ZUBEHOER_ETIKETT : manages
+    USER_MANAGEMENT ||--o{ OUTER_KARTON : manages
 ```
 
-### Datenbank Schemas
-- `user_management` – Benutzerkonten, Rollen, Sessions
-- `cpro_steuerrechner` – C-Pro Produktdaten
-- `c2_steuerrechner` – C2 Produktdaten  
-- `cbasic_steuerrechner` – C-Basic Produktdaten
-- `kk_kamerakopf` – KK Kamerakopf Daten
-- `zubehoer_etikett` – Zubehör Etikettierung
-- `outer_karton` – Außenkarton Verwaltung
-- `outer_karton_entry` – Karton Eintrags-Tracking
+### Datenbank-Schemas
 
-## Kernentitäten
+* `user_management` – Benutzerkonten, Rollen, Sitzungen
+* `cpro_steuerrechner` – Produktdaten C-Pro
+* `c2_steuerrechner` – Produktdaten C2
+* `cbasic_steuerrechner` – Produktdaten C-Basic
+* `kk_kamerakopf` – Produktdaten KK-Kamerakopf
+* `zubehoer_etikett` – Zubehör-Etikettierung
+* `outer_karton` – Außenkarton-Verwaltung
+* `outer_karton_entry` – Zuordnung/Einträge zu Außenkartons
 
-### User Management Schema (`user_management`)
+## Kerndomäne(n)
 
-#### User Entität
+### User-Management-Schema (`user_management`)
+
+#### Entity „User“
+
 ```typescript
 model User {
-	id          Int       @id @default(autoincrement())
-	username    String    @unique @db.VarChar(50)
-	email       String    @unique @db.VarChar(255)
-	passwordHash String   @map("password_hash") @db.VarChar(255)
-	firstName   String    @map("first_name") @db.VarChar(100)
-	lastName    String    @map("last_name") @db.VarChar(100)
-	role        UserRole  @default(VIEWER)
-	status      UserStatus @default(ACTIVE)
-	lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz
-	createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
-	updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  id          Int       @id @default(autoincrement())
+  username    String    @unique @db.VarChar(50)
+  email       String    @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  firstName   String    @map("first_name") @db.VarChar(100)
+  lastName    String    @map("last_name") @db.VarChar(100)
+  role        UserRole  @default(VIEWER)
+  status      UserStatus @default(ACTIVE)
+  lastLoginAt DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 }
 ```
 
 #### Benutzerrollen
+
 ```typescript
 enum UserRole {
-	ADMIN    // Vollzugriff
-	MANAGER  // Management Funktionen
-	USER     // Standard Nutzung
-	VIEWER   // Nur Lesen
+  ADMIN    // Vollzugriff
+  MANAGER  // Management-Funktionen
+  USER     // Standard-Operationen
+  VIEWER   // Nur-Lese-Zugriff
 }
 
 enum UserStatus {
-	ACTIVE
-	INACTIVE
-	SUSPENDED
+  ACTIVE
+  INACTIVE
+  SUSPENDED
 }
 ```
 
-## Produkt Schemas
+## Produkt-Schemas
 
-### C-Pro Schema (`cpro_steuerrechner`)
+### C-Pro-Schema (`cpro_steuerrechner`)
 
-#### SingleItemCPro Entität
-Zentrale C-Pro Produktzeile mit Qualitätsdaten:
+#### Entity „SingleItemCPro“
 
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| `id` | Int | Primärschlüssel |
-| `serialnummer` | String | Eindeutige Seriennummer |
-| `konfiguration` | KonfigurationCPro | RC/DMG/DEMO/EDU |
-| `datum` | DateTime | Produktionsdatum |
-| `pruefer_a` | String | Prüfer A Name |
-| `pruefer_b` | String | Prüfer B Name |
-| `hardware_ok` | Boolean | Hardware Check Status |
-| `hdmi_ok` | Boolean | HDMI Funktion |
-| `web_ok` | Boolean | Webinterface Prüfung |
-| `zoom_ok` | Boolean | Zoom Funktion |
+Zentrales C-Pro-Produktobjekt mit QC-Daten:
+
+| Feld            | Typ               | Beschreibung            |
+| --------------- | ----------------- | ----------------------- |
+| `id`            | Int               | Primärschlüssel         |
+| `serialnummer`  | String            | Eindeutige Seriennummer |
+| `konfiguration` | KonfigurationCPro | RC/DMG/DEMO/EDU         |
+| `datum`         | DateTime          | Produktionsdatum        |
+| `pruefer_a`     | String            | Name Prüfer A           |
+| `pruefer_b`     | String            | Name Prüfer B           |
+| `hardware_ok`   | Boolean           | Hardware-Check          |
+| `hdmi_ok`       | Boolean           | HDMI-Funktion           |
+| `web_ok`        | Boolean           | Web-Interface geprüft   |
+| `zoom_ok`       | Boolean           | Zoom-Funktion           |
 
 #### Konfigurationstypen
+
 ```typescript
 enum KonfigurationCPro {
-	RC    // Standard Konfiguration
-	DMG   // DMG Variante
-	DEMO  // Demo Konfiguration
-	EDU   // Education Version
+  RC
+  DMG
+  DEMO
+  EDU
 }
 
 enum Festplattengroesse {
-	GB_256  // 256 GB Speicher
-	TB_1    // 1 TB Speicher  
-	TB_4    // 4 TB Speicher
+  GB_256  // 256 GB
+  TB_1    // 1 TB
+  TB_4    // 4 TB
 }
 ```
 
-### C2 Schema (`c2_steuerrechner`)
+### C2-Schema (`c2_steuerrechner`)
 
-#### SingleItemC2 Entität
-Ähnliche Struktur wie C-Pro mit C2-spezifischen Feldern:
+#### Entity „SingleItemC2“
 
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| `id` | Int | Primärschlüssel |
-| `serialnummer` | String | Eindeutige Seriennummer |
-| `konfiguration` | KonfigurationC2 | RC/DMG/DEMO/EDU |
-| `software_version` | String | Installierte Softwareversion |
-| `seriennummer_elektronik` | String | Elektronik Seriennummer |
-| `mac_adresse` | String | Netzwerk MAC Adresse |
+Strukturell ähnlich C-Pro, mit C2-spezifischen Feldern:
 
-### KK Schema (`kk_kamerakopf`)
+| Feld                      | Typ             | Beschreibung                 |
+| ------------------------- | --------------- | ---------------------------- |
+| `id`                      | Int             | Primärschlüssel              |
+| `serialnummer`            | String          | Eindeutige Seriennummer      |
+| `konfiguration`           | KonfigurationC2 | RC/DMG/DEMO/EDU              |
+| `software_version`        | String          | Installierte Softwareversion |
+| `seriennummer_elektronik` | String          | Seriennummer Elektronik      |
+| `mac_adresse`             | String          | Netzwerk-MAC-Adresse         |
 
-#### SingleItemKK Entität  
-Kamerakopf-spezifische Produktdaten:
+### KK-Schema (`kk_kamerakopf`)
 
-| Feld | Typ | Beschreibung |
-|------|-----|--------------|
-| `id` | Int | Primärschlüssel |
-| `serialnummer` | String | Eindeutige Seriennummer |
-| `artikel_nummer` | String | Artikelnummer |
-| `pruefer_a` | String | Prüfer A Name |
-| `pruefer_b` | String | Prüfer B Name |
-| `sichtpruefung_ok` | Boolean | Sichtprüfung Status |
+#### Entity „SingleItemKK“ – Kamerakopf
+
+Produktdaten für den Kamerakopf:
+
+| Feld               | Typ     | Beschreibung            |
+| ------------------ | ------- | ----------------------- |
+| `id`               | Int     | Primärschlüssel         |
+| `serialnummer`     | String  | Eindeutige Seriennummer |
+| `artikel_nummer`   | String  | Artikelnummer           |
+| `pruefer_a`        | String  | Name Prüfer A           |
+| `pruefer_b`        | String  | Name Prüfer B           |
+| `sichtpruefung_ok` | Boolean | Status Sichtprüfung     |
 
 ## Datenbeziehungen
 
-### User–Produkt Beziehungen
+### User-Produkt-Beziehungen
+
 ```mermaid
 erDiagram
-		User {
-				int id PK
-				string username UK
-				string email UK
-				enum role
-				enum status
-				datetime lastLoginAt
-				datetime createdAt
-		}
+    User {
+        int id PK
+        string username UK
+        string email UK
+        enum role
+        enum status
+        datetime lastLoginAt
+        datetime createdAt
+    }
     
-		SingleItemCPro {
-				int id PK
-				string serialnummer UK
-				enum konfiguration
-				datetime datum
-				string pruefer_a FK
-				string pruefer_b FK
-		}
+    SingleItemCPro {
+        int id PK
+        string serialnummer UK
+        enum konfiguration
+        datetime datum
+        string pruefer_a FK
+        string pruefer_b FK
+    }
     
-		User ||--o{ SingleItemCPro : prueft
+    User ||--o{ SingleItemCPro : inspects
 ```
 
-### Qualitätsprüfungs-Workflow
+### Qualitätskontroll-Ablauf
+
 ```mermaid
 sequenceDiagram
-		participant PA as Prüfer A
-		participant System as System
-		participant PB as Prüfer B
-		participant DB as Datenbank
+    participant PA as Prüfer A
+    participant System as System
+    participant PB as Prüfer B
+    participant DB as Database
     
-		PA->>System: Erstprüfung anlegen
-		System->>DB: Speichere Prüfer A Daten
-		PB->>System: Prüfung abschließen
-		System->>DB: Speichere Prüfer B Daten
-		System->>System: Vergleiche A vs B
-		System->>DB: Markiere als abgeschlossen
+    PA->>System: Initiale Prüfung anlegen
+    System->>DB: Daten Prüfer A speichern
+    PB->>System: Prüfung abschließen
+    System->>DB: Daten Prüfer B speichern
+    System->>System: A- vs. B-Daten vergleichen
+    System->>DB: Status „abgeschlossen“ setzen
 ```
 
 ## Datenvalidierung & Constraints
 
 ### Eindeutigkeit
-- Alle Produkt-Seriennummern eindeutig innerhalb ihres Schemas
-- Benutzer Usernames & Emails global eindeutig
-- MAC Adressen eindeutig wo vorhanden
 
-### Pflichtfelder
-Aus Schema Analyse:
-- Produkte: `serialnummer`, `datum`
-- Benutzer: `username`, `email`, `passwordHash`, `firstName`, `lastName`
-- Qualitätsprozess: `pruefer_a` und `pruefer_b` für Abschluss
+* Seriennummern sind je Schema eindeutig
+* User-`username` und `email` sind global eindeutig
+* MAC-Adressen dort eindeutig, wo relevant
+
+### Pflichtfelder (aus Schema-Analyse)
+
+* Produkte: `serialnummer`, `datum`
+* Benutzer: `username`, `email`, `passwordHash`, `firstName`, `lastName`
+* Qualitätskontrolle: Für „abgeschlossen“ sind `pruefer_a` **und** `pruefer_b` erforderlich
 
 ### Datentypen & Formate
-- **Seriennummern**: String, herstellerspezifische Muster
-- **Datumswerte**: PostgreSQL timestamptz (Zeitzonen bewusst)
-- **MAC Adressen**: Standard Format Validierung
-- **Boolean Checks**: Drei-Zustände (true/false/null) für unvollständige Prüfungen
 
-## Datenbank Konfiguration
+* **Seriennummern:** String, hersteller-/produktabhängige Muster
+* **Datumswerte:** `timestamptz` (Zeitzonen-bewusst)
+* **MAC-Adresse:** Standardformat-Validierung
+* **Boolesche Checks:** Dreiwertig (true/false/null) zur Abbildung unvollständiger Prüfungen
 
-### Connection Setup (aus `.env`)
+## Datenbank-Konfiguration
+
+### Verbindungs-Setup (aus `.env`)
+
 ```properties
 DATABASE_URL="postgresql://username:password@host:port/database?sslmode=require"
 ```
 
-### Schema Verwaltung
+### Schema-Management
+
 ```bash
-# Schema Änderungen anwenden
+# Schema-Änderungen anwenden
 npx prisma db push
 
-# TypeScript Client generieren
+# TypeScript-Client generieren
 npx prisma generate
 
 # Daten im Browser ansehen
@@ -209,48 +222,53 @@ npx prisma studio
 ```
 
 ### Migrationen
-> TODO: Migrationsstrategie dokumentieren – kein migrations/ Verzeichnis gefunden, aktueller Ansatz: db push
 
-## Performance Überlegungen
+> TODO: Migrationsstrategie dokumentieren – kein `migrations/`-Ordner gefunden, derzeit „db push“-Ansatz
 
-### Index Strategie
-Basierend auf häufigen Abfragen:
-- Primärschlüssel (automatisch)
-- Eindeutigkeit auf Seriennummern
-- Foreign Key Beziehungen
-- Datumsbasierte Abfragen fürs Reporting
+## Performance-Aspekte
 
-### Empfohlene Indexe
+### Index-Strategie (empfohlen)
+
+* PKs (automatisch)
+* Unique-Constraints auf Seriennummern
+* FK-Beziehungen
+* Datumsindizes für Reporting
+
+### Empfohlene Indizes
+
 ```sql
--- Produktsuche nach Seriennummer (bereits unique)
--- Datumsbasierte Reporting Abfragen
+-- Datumsgesteuerte Auswertungen
 CREATE INDEX idx_cpro_datum ON cpro_steuerrechner.single_item_cpro(datum);
 CREATE INDEX idx_c2_datum ON c2_steuerrechner.single_item_c2(datum);
 
--- Qualitätsprüfungs Abfragen  
+-- QC-Abfragen (A/B)
 CREATE INDEX idx_cpro_pruefer ON cpro_steuerrechner.single_item_cpro(pruefer_a, pruefer_b);
 ```
 
 ## Datenschutz & Sicherheit
 
 ### Sensible Daten
-- Benutzer Passwörter (bcrypt gehasht)
-- Personenbezogene Prüfer Namen
-- Produktions-Seriennummern (geschäftskritisch)
 
-### Datenaufbewahrung
-> TODO: Aufbewahrungsrichtlinien dokumentieren
-> TODO: DSGVO Maßnahmen dokumentieren
+* Benutzerpasswörter (bcrypt-Hashes)
+* Personennamen der Prüfer
+* Produktions-Seriennummern (betriebsrelevant)
+
+### Aufbewahrung
+
+> TODO: Richtlinien zur Datenaufbewahrung
+> TODO: DSGVO-Maßnahmen für personenbezogene Daten
 
 ## Backup & Recovery
 
-### Backup Strategie
-> TODO: Backup Prozeduren dokumentieren
-> TODO: Point-in-Time Recovery dokumentieren
+### Backup-Strategie
+
+> TODO: Backup-Prozesse beschreiben
+> TODO: Point-in-Time-Recovery dokumentieren
 
 ### Datenexport
+
 ```bash
-# Gesamter Datenbank Dump
+# Gesamtdump
 pg_dump $DATABASE_URL > backup.sql
 
 # Schema-spezifischer Export
@@ -258,4 +276,7 @@ pg_dump $DATABASE_URL --schema=cpro_steuerrechner > cpro_backup.sql
 ```
 
 ---
-*Schema Definition in `prisma/schema.prisma` | Generierte Typen in `node_modules/@prisma/client`*
+
+*Definitionen in `prisma/schema.prisma` · Generierte Typen in `@prisma/client`.*
+
+---

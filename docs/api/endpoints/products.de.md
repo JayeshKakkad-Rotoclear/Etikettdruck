@@ -1,11 +1,12 @@
 # API: Produkte
 
-| Methode | Pfad | Beschreibung | Rolle |
-| ------- | ---- | ------------ | ----- |
-| GET | /api/products | Produkte auflisten | Prüfer / höher |
-| POST | /api/products | Produkt anlegen | MANAGEMENT / ADMIN |
-| GET | /api/products/:id | Produkt anzeigen | Prüfer / höher |
-| PATCH | /api/products/:id | Produkt aktualisieren | MANAGEMENT / ADMIN |
+| Methode | Pfad               | Beschreibung          |
+| ------- | ------------------ | --------------------- |
+| GET     | /api/products      | Produkte auflisten    |
+| POST    | /api/products      | Produkt anlegen       |
+| GET     | /api/products/\:id | Produkt abrufen       |
+| PATCH   | /api/products/\:id | Produkt aktualisieren |
 
-Änderungen auditierbar; Validierung auf Eindeutigkeit von Codes.
+Alle Änderungen werden auditiert.
 
+---

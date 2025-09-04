@@ -2,6 +2,8 @@
 
 Zweck: Basis-Admin und Beispieldaten für Entwicklung/Test bereitstellen.
 
-Skripte: Siehe `prisma/seed.ts` und `scripts/create-admin*.js`.
+Skripte: Siehe `prisma/seed.ts` sowie `scripts/create-admin*.js`.
 
-Niemals Entwicklungs-Seeds gegen Produktion ausführen.
+**Wichtig:** Dev-Seeds **niemals** gegen Produktion ausführen.
+
+---

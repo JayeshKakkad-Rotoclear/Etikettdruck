@@ -1,6 +1,6 @@
 # API: Management
 
-Administrative Operationen (Audit, Konfig, Systemparameter). Exakte Endpunkte evolvieren mit Featureumfang.
+Administrative Endpunkte (Auditing, Konfiguration, Rollen-Anpassungen).
+Detaillierte Spezifikationen folgen, sobald Features weiter ausgebaut werden.
 
-Zugriff ausschließlich ADMIN.
-
+---

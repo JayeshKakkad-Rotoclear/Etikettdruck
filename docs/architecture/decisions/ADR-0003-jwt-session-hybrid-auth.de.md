@@ -1,17 +1,19 @@
-# ADR-0003: JWT Session Hybrid Auth
+# ADR-0003: Hybride Authentifizierung mit JWT und Session
 
-Status: Akzeptiert
-Datum: 2025-01-25
+**Status:** Angenommen
+**Datum:** 25.07.2025
 
 ## Kontext
-Nur JWT: schwer widerrufbar. Nur Session: höhere Serverlast bei Skalierung. Ziel: Beste Eigenschaften kombinieren.
+
+Wir benötigen die Vorteile zustandsloser JWTs (skalierbare Clients) sowie die Möglichkeit, Sitzungen aus Sicherheitsgründen zentral zu widerrufen und nachzuverfolgen.
 
 ## Entscheidung
-JWT Tokens signieren und zusätzlich serverseitige Session mit Ablauf & optionaler IP Bindung pflegen.
+
+Ausgabe signierter JWTs, die an einen serverseitigen Sitzungsdatensatz (Datenbank) gebunden sind; optional mit IP-Bindung zur Risikominderung.
 
 ## Konsequenzen
-| Plus | Minus |
-| ---- | ----- |
-| Revokation möglich | Mehr DB Zugriffe |
-| Prüfbarkeit / Audit | Komplexere Implementierung |
 
+Vorteile: Widerruf, Auditing, horizontale Skalierung.
+Nachteile: Zusätzliche Datenbankabfragen bei der Validierung.
+
+---

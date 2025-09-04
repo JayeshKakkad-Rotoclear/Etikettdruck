@@ -1,3 +1,8 @@
-# Runbooks Übersicht
+# Runbook-Übersicht
 
-Index der Runbooks.
+Zentraler Index für operative Runbooks.
+
+| Runbook            | Zweck                                     |
+| ------------------ | ----------------------------------------- |
+| Troubleshooting    | Allgemeine Incident-Ersteinschätzung      |
+| Security Incidents | Sicherheitsereignisse eindämmen & beheben |

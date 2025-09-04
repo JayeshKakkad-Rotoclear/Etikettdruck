@@ -1,17 +1,19 @@
-# ADR-0001: Multi-Schema Datenbank
+# ADR-0001: Multi-Schema-Datenbank
 
-Status: Akzeptiert
-Datum: 2025-01-15
+**Status:** Angenommen
+**Datum:** 15.07.2025
 
 ## Kontext
-Benötigt wurde eine Möglichkeit, Daten domänenspezifisch zu segmentieren ohne mehrere physische Datenbanken zu betreiben.
+
+Wir benötigen Isolation zwischen Produktlinien und gemeinsam genutzten Core-Tabellen, während nur eine einzelne PostgreSQL-Instanz verwendet wird.
 
 ## Entscheidung
-Nutzung mehrerer PostgreSQL Schemas (z.B. `core`, produkt‑spezifisch) mit zentral verwaltetem Prisma Schema.
+
+Einsatz mehrerer PostgreSQL-Schemas zur logischen Partitionierung der Domänendaten (z. B. core, c2, cpro, cbasic); die Modelle werden durch Prisma verwaltet.
 
 ## Konsequenzen
-| Kategorie | Plus | Minus |
-| --------- | ---- | ----- |
-| Sicherheit | Isoliertere Abfragen | Rechteverwaltung komplexer |
-| Betrieb | Selektive Backups möglich | Migrationen sorgfältiger |
 
+Vorteile: Logische Isolation, einfachere Backups pro Schema.
+Nachteile: Etwas komplexere Migrationen und Cross-Schema-Abfragen.
+
+---

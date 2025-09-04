@@ -1,8 +1,10 @@
-# Vertrag: Dateiformate
+# Spezifikation: Dateiformate
 
-Liste unterstützter Import/Export Dateitypen (für zukünftige Erweiterungen):
+Liste der unterstützten Import-/Export-Dateitypen (für zukünftige Erweiterung):
 
-| Typ | Extension | Zweck |
-| ---- | --------- | ----- |
-| CSV | .csv | Massen-Datenimport |
-| JSON | .json | Konfig Export/Import |
+| Typ  | Erweiterung | Zweck                         |
+| ---- | ----------- | ----------------------------- |
+| CSV  | `.csv`      | Massendatenimport             |
+| JSON | `.json`     | Konfigurations-Export/-Import |
+
+---

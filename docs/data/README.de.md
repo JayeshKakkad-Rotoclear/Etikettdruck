@@ -1,28 +1,34 @@
-# Daten – Übersicht
+# Datenüberblick
 
-Zweck: Hochlevel-Überblick über die Daten-Domänen der Anwendung, Verantwortlichkeiten und Lebenszyklus.
+Zweck: Überblick über Datendomänen, Verantwortlichkeiten und Lebenszyklus der Anwendung.
 
 ## Domänen
-| Domäne | Beschreibung | Zentrale Tabellen / Entitäten | Owner |
-| ------ | ------------ | ----------------------------- | ----- |
-| Benutzer | Authentifizierung & Authorisierung | user, session | Plattform |
-| Produkte | Produkt- / Varianten-Metadaten | product_* Tabellen | Produkt |
-| Qualität | Prüf- & Etikettierergebnisse | inspection, label_* | QA |
 
-## Daten-Lebenszyklus
-1. Erfassung (Benutzeraktionen / Label-Scans)
-2. Validierung (Business- & Sicherheitsregeln)
-3. Persistenz (PostgreSQL Schemas)
-4. Reporting (Dashboard Aggregation)
+| Domäne   | Beschreibung                     | Zentrale Tabellen/Entities | Owner    |
+| -------- | -------------------------------- | -------------------------- | -------- |
+| Users    | Authentifizierung, Autorisierung | user, session              | Platform |
+| Products | Produkt-/Varianten-Metadaten     | product\_\* Tabellen       | Product  |
+| Quality  | Prüf- & Etikettierergebnisse     | inspection, label\_\*      | QA       |
+
+## Datenlebenszyklus
+
+1. Erfassung (User-Aktionen / Label-Scans)
+2. Validierung (Fachlogik & Sicherheitsregeln)
+3. Persistenz (PostgreSQL-Schemas)
+4. Reporting (Dashboard-Aggregationen)
 5. Archivierung & Aufbewahrung (siehe Backup & Recovery)
 
 ## Governance
-- Zugriff über Rollen gesteuert (siehe `user-guides/user-roles.de.md`).
-- Alle Mutationen werden auditiert (siehe Sicherheitsarchitektur).
-- Schemaänderungen folgen ADR- & Migrationsprozess.
+
+* Zugriff über Rollen gesteuert (siehe `user-guides/user-roles.md`).
+* Alle Mutationen werden auditiert (siehe Sicherheitsarchitektur).
+* Schema-Änderungen folgen ADR- und Migrationsprozess.
 
 ## Verwandte Dokumente
-- `data/schema.de.md`
-- `data/migrations.de.md`
-- `data/seeding.de.md`
-- Verträge (QR / ZPL / Dateiformate)
+
+* `data/schema.md`
+* `data/migrations.md`
+* `data/seeding.md`
+* Verträge (QR / ZPL / Dateiformate)
+
+---

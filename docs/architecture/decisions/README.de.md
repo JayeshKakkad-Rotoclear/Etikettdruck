@@ -1,10 +1,13 @@
-# ADR Index
+# Architekturentscheidungen (ADR-Index)
 
-Dieser Index fasst die angenommenen Architekturentscheidungen zusammen. Jede ADR Datei enthält Kontext, Entscheidung und Konsequenzen.
+Dieser Index listet die formalen Entscheidungen, die während des Systemdesigns getroffen wurden.
 
-| ID | Titel | Status |
-| -- | ----- | ------ |
-| 0001 | Multi-Schema Datenbank | Akzeptiert |
-| 0002 | SvelteKit Full-Stack | Akzeptiert |
-| 0003 | JWT Session Hybrid Auth | Akzeptiert |
+| ID   | Titel                   | Status     |
+| ---- | ----------------------- | ---------- |
+| 0001 | Multi-Schema-Datenbank  | Angenommen |
+| 0002 | SvelteKit Full-Stack    | Angenommen |
+| 0003 | JWT-Session-Hybrid-Auth | Angenommen |
 
+Jedes ADR hält Kontext, Entscheidung und Konsequenzen fest.
+
+---

@@ -1,12 +1,15 @@
 # Schema: Antwortformate
 
-Standard Antworthülle & Fehlerstruktur zur Vereinheitlichung des Clients.
+Standard-Hülle (Beispiel):
 
 ```json
-{ "success": true, "data": { /* Nutzlast */ }, "error": null }
-```
-Fehler:
-```json
-{ "success": false, "error": { "code": "...", "message": "..." } }
+{ "success": true, "data": { /* payload */ }, "error": null }
 ```
 
+Fehlerformat:
+
+```json
+{ "success": false, "error": { "code": "VALIDATION_ERROR", "message": "..." } }
+```
+
+---

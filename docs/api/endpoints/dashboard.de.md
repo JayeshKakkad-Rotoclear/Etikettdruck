@@ -1,11 +1,12 @@
 # API: Dashboard
 
-Aggregierte Kennzahlen zur Visualisierung in Management Oberflächen.
+Aggregierte Metrik-Endpunkte (Beispiele):
 
-| Methode | Pfad | Beschreibung |
-| ------- | ---- | ------------ |
-| GET | /api/dashboard/summary | KPI Snapshot |
-| GET | /api/dashboard/trends | Zeitreihenentwicklung |
+| Methode | Pfad                   | Beschreibung        |
+| ------- | ---------------------- | ------------------- |
+| GET     | /api/dashboard/summary | KPI-Übersicht       |
+| GET     | /api/dashboard/trends  | Zeitreihen-Metriken |
 
-Optimierungen möglich via Materialized Views.
+Performance: Für Trend-Abfragen Caching in Betracht ziehen.
 
+---

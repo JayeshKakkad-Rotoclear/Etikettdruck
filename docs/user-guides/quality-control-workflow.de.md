@@ -1,27 +1,16 @@
 # Qualitätskontroll-Workflow
 
-Dieser Ablauf beschreibt den Kernprozess von der Erfassung bis zum gedruckten Etikett.
+1. **Vorbereitung:** Sicherstellen, dass Drucker & QR-Scanner betriebsbereit sind
+2. **Scan/Eingabe:** Bediener erfasst oder scannt Chargenkennungen
+3. **Validierung:** Client wendet Eingabevalidierung an (`src/lib/input-validator.ts`)
+4. **Erfassung:** Server speichert Ergebnisse & druckt Etiketten
+5. **Review:** Management überprüft Dashboard-Kennzahlen
+6. **Audit:** Sicherheitsereignisse werden auf Auffälligkeiten protokolliert
 
-## Prozessschritte
-| Nr | Schritt | Beschreibung | Verantwortlich |
-| -- | ------ | ------------ | -------------- |
-| 1 | Vorbereitung | Hardware & Netzwerk prüfen (Scanner, Drucker) | Prüfer |
-| 2 | Eingabe / Scan | Produkt- oder Batchdaten erfassen | Prüfer |
-| 3 | Validierung | Client: Format / Server: Geschäftsregeln | System |
-| 4 | Persistenz | Datenbank schreibt Prüfdatensatz | System |
-| 5 | Druck | ZPL Vorlage + IP aus Konfiguration | System |
-| 6 | Review | Dashboards zeigen aggregierte Werte | Management |
-| 7 | Audit Log | Sicherheits-/Anomalieereignisse speichern | System |
+Swimlane (High-Level):
 
-## Fehlerfälle & Behandlung
-| Situation | Reaktion |
-| --------- | -------- |
-| Ungültige Eingabe | Validierungsfehler anzeigen, erneute Eingabe |
-| Drucker nicht erreichbar | Retry & Hinweis an Bediener |
-| Session abgelaufen | Re-Login erzwingen |
+```
+Bediener -> Web-App -> API -> DB -> Drucker -> Bediener
+```
 
-## Qualitätsmetriken
-- Fehlerquote (Rejected / Gesamt)
-- Reprint Rate
-- Durchsatz pro Zeiteinheit
-
+---

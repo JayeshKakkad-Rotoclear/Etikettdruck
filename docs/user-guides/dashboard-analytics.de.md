@@ -1,22 +1,12 @@
-# Dashboard Analysen
+# Dashboard-Analysen
 
-Dashboards liefern Echtzeit‑ und Trenddaten zur Prozessqualität.
+Wichtige KPIs:
 
-## Kern-KPIs
-| KPI | Definition | Interpretation |
-| --- | ---------- | -------------- |
-| Durchsatz | Verarbeitete Einheiten / Zeitraum | Effizienz |
-| Fehlerquote | (Fehlerhafte / Gesamt) * 100 | Qualitätsindikator |
-| Reprint Rate | Nachdrucke / Gesamt | Stabilität Druckprozess |
-| Session Aktivität | Aktive Sitzungen | Nutzung / Last |
+* Durchsatz pro Schicht
+* Fehlerquote (% Ausschuss)
+* Neudruck-Quote
+* Verteilung der Benutzersitzungen
 
-## Nutzungshinweise
-- Filter nach Zeitraum, Produktlinie, Rolle
-- Anomalien (Spikes) mit Audit Logs abgleichen
-- Reprint Rate > Schwellwert => Druckerkalibrierung prüfen
+Datenaktualisierung: Echtzeit über Live-Abfragen; zukünftige Optimierungen können materialisierte Sichten einführen.
 
-## Geplante Erweiterungen
-- Export als CSV
-- Drill‑down bis Einzelereignis
-- Historienspeicher in Materialized Views
-
+---

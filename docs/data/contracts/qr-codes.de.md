@@ -1,10 +1,13 @@
-# Vertrag: QR Codes
+# Spezifikation: QR-Codes
 
-Format: UTF-8 alphanumerisch mit optional zukünftigem Checksum.
+Format: UTF-8, alphanumerisch, mit Prüfsumme (optionale künftige Ergänzung).
 
 Strukturvorschlag:
+
 ```
 <PRODUCT_CODE>-<TIMESTAMP>-<INCREMENT>
 ```
 
-Validierung implementiert in `input-validator.ts`.
+Die Validierung erfolgt in `input-validator.ts`.
+
+---

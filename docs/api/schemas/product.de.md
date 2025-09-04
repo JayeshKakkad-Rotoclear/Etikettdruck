@@ -1,9 +1,10 @@
-# Schema: Produkt Objekt
+# Schema: Produkt-Objekte
 
-| Feld | Typ | Beschreibung |
-| ---- | --- | ------------ |
-| id | int | Primärschlüssel |
-| name | string | Anzeigetext |
-| code | string | Produkt- oder externer Code |
-| active | boolean | Aktivitätsstatus |
+| Feld   | Typ     | Hinweise                 |
+| ------ | ------- | ------------------------ |
+| id     | int     | Primärschlüssel          |
+| name   | string  | Anzeigename              |
+| code   | string  | Maschinen-/externer Code |
+| active | boolean | Verfügbarkeits-Flag      |
 
+---

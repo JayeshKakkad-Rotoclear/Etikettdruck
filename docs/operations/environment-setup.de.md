@@ -1,34 +1,11 @@
-# Betriebsumgebung Einrichtung
+# Betriebsumgebung einrichten
 
-Checkliste für das Aufsetzen einer neuen Umgebung (z.B. Staging, Test, Produktion).
+Checkliste für neue Umgebungen (Staging/Produktion):
 
-## Infrastruktur
-- Kubernetes Namespace / Server Provisionierung
-- Netzwerk / Firewall Regeln
-- TLS Zertifikate
+1. PostgreSQL bereitstellen (Version & Extensions festlegen)
+2. Erforderliche Umgebungsvariablen setzen (`JWT_SECRET`, DB-Zugangsdaten, Standard-IP für Drucker)
+3. Migrationen ausführen & Admin seeden
+4. Monitoring konfigurieren (Prometheus / Grafana-Dashboards)
+5. Backup-Zeitplan & Aufbewahrung (Retention) einrichten
 
-## Anwendung
-- Container Registry Zugriff
-- `DATABASE_URL` gesetzt
-- Secrets (JWT Keys, CSRF Salt, Admin Benutzer)
-
-## Observability
-- Logging Ziel (z.B. Loki / ELK / CloudWatch)
-- Metrics (Prometheus Endpoint scrape konfiguriert)
-- Alerts (CPU, Fehlerquote, Latenz, DB Verfügbarkeit)
-
-## Sicherheit
-- Least-Privilege Service Accounts
-- Netzwerksegmentierung
-- Backup Jobs aktiv
-
-## Validierung
-| Bereich | Prüfung | Status |
-|--------|---------|--------|
-| DB | Verbindung & Rechte | |
-| Auth | Login / Session / JWT | |
-| Druck | Testlabel erfolgreich | |
-| QR | Scan & Validierung | |
-
-## Abnahme
-Environment gilt als bereit wenn alle Prüfungen erfolgreich und dokumentiert.
+---
