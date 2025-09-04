@@ -1,9 +1,9 @@
 # Etikettdrucker - Quality Control & Label Printing System
 
-## Major Update: v0.1.0
-This release includes a comprehensive refactor, new notification system, mobile-first UI/UX, unified label printing APIs, advanced database/dashboard features, and extensive documentation. See Version History below for details.
+## Latest Release: v1.0.0-beta
+This major beta release includes comprehensive UI/UX improvements, enhanced form validation, advanced dashboard analytics with interactive charts, critical bug fixes for Prüfer B workflows, and consolidated API architecture. See Version History below for complete details.
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0--beta-orange.svg)
 ![SvelteKit](https://img.shields.io/badge/SvelteKit-FF3E00?logo=svelte&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)
 ![Prisma](https://img.shields.io/badge/Prisma-3982CE?logo=Prisma&logoColor=white)
@@ -22,11 +22,14 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 - **Professional Notification Center** - Centralized, mobile-friendly notification system with swipe gestures, accessibility, and localStorage persistence
 - **SVG Icon System** - Consistent, professional icons across all interfaces
 - **Mobile-First Responsive Design** - Optimized layouts, accessibility improvements, and touch gesture support
+- **Interactive Dashboard Analytics** - Advanced monthly production charts with hover tooltips, real-time statistics, and performance metrics
+- **Enhanced Form Validation** - Comprehensive client-side validation across all quality control forms with required field indicators and error messaging
 - **Comprehensive Documentation** - Architecture, security, deployment, and development standards
 - **Multi-Product Quality Control** - Standardized testing protocols for C Pro, C2, C Basic, and Kamerakopf product lines
-- **Dual-Inspector Workflow** - Sequential testing by Prüfer A and Prüfer B with comprehensive validation
-- **Comprehensive Dashboard** - Real-time statistics, production metrics, and performance analytics
-- **Label Generation** - Automated QR code generation and printing for tested products
+- **Dual-Inspector Workflow** - Sequential testing by Prüfer A and Prüfer B with change detection and confirmation dialogs
+- **Advanced Change Detection** - Smart comparison between Prüfer A and Prüfer B data with detailed before/after analysis
+- **Enhanced Label Generation** - Automated QR code generation with company branding, CE marking, and professional ZPL formatting
+- **Consolidated API Architecture** - Unified endpoints following consistent patterns across all product types
 - **Database Management** - Complete data viewing, searching, and management capabilities
 - **Packaging Support** - Outer carton labeling with dual-mode (scan/manual) product selection
 - **Accessory Management** - Zubehör (accessory) label creation and tracking
@@ -35,18 +38,27 @@ The Etikettdrucker system is designed to manage quality control processes for mu
 ## Technical Architecture
 
 ### Frontend Stack
-- **SvelteKit 2.22.0** - Modern, reactive web framework
-- **TypeScript 5.0** - Type-safe development
-- **Custom CSS** - Responsive design without external frameworks
+- **SvelteKit 2.22.0** - Modern, reactive web framework with enhanced interactivity
+- **TypeScript 5.0** - Type-safe development with improved error handling
+- **Custom CSS** - Professional responsive design with advanced animations and transitions
+- **Interactive Charts** - Custom-built dashboard analytics with hover tooltips and mobile optimization
 - **Vite 7.0** - Fast build tooling and development server
 
 ### Backend Stack
-- **Prisma 6.13.0** - Type-safe database ORM
-- **PostgreSQL** - Multi-schema database architecture
-- **Node.js APIs** - RESTful API endpoints for all operations
+- **Prisma 6.13.0** - Type-safe database ORM with optimized queries
+- **PostgreSQL** - Multi-schema database architecture with enhanced indexing
+- **Node.js APIs** - RESTful API endpoints with consolidated architecture patterns
 - **JWT Authentication** - Secure token-based authentication with HTTP-only cookies
 - **bcryptjs** - Password hashing and security
+- **Enhanced Error Handling** - Comprehensive logging and user-friendly error messages
 - **Role-Based Authorization** - Comprehensive access control system
+
+### Recent Technical Improvements
+- **API Consolidation** - Unified endpoint patterns across all product types
+- **Enhanced Data Validation** - Client-side and server-side validation improvements
+- **Optimized Database Queries** - Improved performance for dashboard analytics
+- **Interactive UI Components** - Professional chart components with smooth animations
+- **Mobile-First Design** - Touch-optimized interfaces with responsive breakpoints
 
 ### Database Design
 ```
@@ -87,7 +99,40 @@ The system implements a comprehensive 6-level role hierarchy:
 - **Profile Management** - User profile editing and password change functionality
 - **Initial Setup** - First-time setup wizard for creating the initial admin user
 
-## New Features in v0.1.0
+## New Features in v1.0.0-beta
+
+### Enhanced User Experience
+- **Interactive Dashboard Charts** - Monthly production charts with hover tooltips showing detailed product statistics
+- **Professional Chart Design** - Clean, responsive charts with smooth animations and mobile optimization
+- **Enhanced Visual Design** - Improved spacing, typography, and consistent styling across all interfaces
+
+### Quality Assurance Improvements
+- **Comprehensive Form Validation** - Client-side validation across all Prüfer A and Prüfer B forms
+- **Required Field Indicators** - Visual indicators and validation messages for mandatory fields
+- **Smart Change Detection** - Advanced comparison system between Prüfer A and Prüfer B data
+- **Confirmation Dialogs** - Detailed before/after comparisons with user-friendly change summaries
+
+### Critical Bug Fixes
+- **Prüfer B Data Loading** - Fixed API data access issues causing "Nicht gesetzt" display errors
+- **Change Detection Logic** - Resolved bugs preventing proper detection of field modifications
+- **Template Consistency** - Standardized change detection patterns across all product types
+
+### API Architecture Improvements
+- **Consolidated Outer Karton API** - Unified GET/POST/PUT endpoints following zubehoer pattern
+- **Consistent Response Formats** - Standardized API responses across all product endpoints
+- **Enhanced Error Handling** - Improved error logging and user feedback
+
+### Enhanced Label Generation
+- **Company Branding Integration** - Rotoclear logo and CE marking on all labels
+- **Professional ZPL Formatting** - Consistent layout and typography across all product labels
+- **Dynamic Footer Positioning** - Improved table formatting and visual hierarchy
+
+### Mobile & Accessibility
+- **Responsive Chart Design** - Touch-friendly interactions and mobile-optimized scrolling
+- **Improved Mobile Navigation** - Better touch targets and gesture support
+- **Enhanced Accessibility** - Improved screen reader support and keyboard navigation
+
+## Previous Features in v0.1.0
 - Unified and modernized label printing APIs for all product types
 - PUT endpoints for reprinting labels with original ZPL formatting
 - QR code image generation using qrcode and pngjs
@@ -547,7 +592,17 @@ This project is proprietary software developed for Rotoclear GmbH. All rights re
 
 See the latest release on GitHub for a full changelog and deployment instructions.
 
-### v0.0.1
+### v1.0.0-beta (September 2025)
+- **Interactive Dashboard Analytics** - Enhanced monthly production charts with hover tooltips, smooth animations, and mobile-responsive design
+- **Comprehensive Form Validation** - Client-side validation across all quality control forms with required field indicators and error messaging
+- **Critical Bug Fixes** - Resolved Prüfer B data loading issues, change detection logic problems, and API response inconsistencies
+- **Enhanced Change Detection** - Smart comparison between Prüfer A and Prüfer B data with detailed before/after analysis and confirmation dialogs
+- **API Architecture Consolidation** - Unified outer karton endpoints following consistent patterns, improved error handling and logging
+- **Enhanced Label Generation** - Company branding integration with Rotoclear logo and CE marking, professional ZPL formatting
+- **UI/UX Improvements** - Professional chart design, enhanced visual styling, improved mobile navigation and accessibility
+- **Quality Assurance** - Standardized validation patterns, consistent template structure, and improved user feedback systems
+
+### v0.1.0 (Previous Release)
 - **Authentication System** - Complete JWT-based authentication with HTTP-only cookies
 - **Role-Based Access Control** - 6-level user hierarchy (VIEWER → PRUEFER_B → PRUEFER_A → PRUEFER_AB → MANAGEMENT → ADMIN)
 - **User Management** - Comprehensive user administration with role assignment and profile management
@@ -561,3 +616,23 @@ See the latest release on GitHub for a full changelog and deployment instruction
 - **Outer Carton Labeling** - Dual-mode (scan/manual) product selection system
 - **Accessory Management** - Zubehör label creation and tracking
 - **Enhanced UI/UX** - Comprehensive page titles and improved navigation
+
+### v0.0.1 (Initial Release)
+- **Authentication System** - Complete JWT-based authentication with HTTP-only cookies
+- **Role-Based Access Control** - 6-level user hierarchy (VIEWER → PRUEFER_B → PRUEFER_A → PRUEFER_AB → MANAGEMENT → ADMIN)
+- **User Management** - Comprehensive user administration with role assignment and profile management
+- **Route Protection** - Layout-based guards protecting all sensitive operations
+- **Security Features** - Password hashing, session management, and XSS protection
+- **Initial Setup Wizard** - First-time admin user creation and system configuration
+- **Complete Quality Control Workflow** - Multi-product testing protocols for C Pro, C2, C Basic, and Kamerakopf
+- **Dashboard Analytics** - Real-time statistics, production metrics, and performance analytics  
+- **Label Generation** - Automated QR code generation and printing capabilities
+- **Database Management** - Complete data viewing, searching, and administrative tools
+- **Outer Carton Labeling** - Dual-mode (scan/manual) product selection system
+- **Accessory Management** - Zubehör label creation and tracking
+- **Enhanced UI/UX** - Comprehensive page titles and improved navigation
+
+## License
+This software is proprietary and confidential.  
+Copyright (c) 2025 Rotoclear GmbH. All rights reserved.  
+See [LICENSE](./LICENSE) and [NOTICE](./NOTICE) for details.

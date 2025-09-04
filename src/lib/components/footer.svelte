@@ -4,7 +4,7 @@
 </script>
 
 <footer>
-	<p>&copy; 2025 Rotoclear GmbH – All rights reserved. {APP_VERSION} {BUILD_DATE}</p>
+	<p>&copy; 2025 Rotoclear GmbH – Alle Rechte vorbehalten. {APP_VERSION} {BUILD_DATE}</p>
 </footer>
 
 <style>
