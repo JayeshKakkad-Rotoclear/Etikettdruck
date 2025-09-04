@@ -1,0 +1,50 @@
+{
+  "entryPoints": [
+    "src/lib/auth.ts",
+    "src/lib/security.ts", 
+    "src/lib/input-validator.ts",
+    "src/lib/security-middleware.ts",
+    "src/lib/roleUtils.ts",
+    "src/lib/printer.ts",
+    "src/lib/csrf.ts",
+    "src/lib/version.ts"
+  ],
+  "out": "docs/reference/api",
+  "theme": "default",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "readme": "docs/reference/README.md",
+  "name": "Etikettdrucker API Reference",
+  "tsconfig": "tsconfig.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "gitRevision": "main",
+  "sourceLinkTemplate": "https://github.com/JayeshKakkad-Rotoclear/Etikettdruck/blob/{gitRevision}/{path}#L{line}",
+  "navigationLinks": {
+    "Documentation": "https://github.com/JayeshKakkad-Rotoclear/Etikettdruck/tree/main/docs",
+    "GitHub": "https://github.com/JayeshKakkad-Rotoclear/Etikettdruck"
+  },
+  "sidebarLinks": {
+    "Getting Started": "../getting-started.md",
+    "Architecture": "../architecture/README.md",
+    "API Guide": "../api/README.md"
+  },
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Authentication",
+    "Security", 
+    "Validation",
+    "Utilities",
+    "*"
+  ],
+  "sort": ["source-order"],
+  "validation": {
+    "notExported": false,
+    "invalidLink": true,
+    "notDocumented": false
+  },
+  "commentStyle": "jsdoc",
+  "emit": "docs",
+  "logLevel": "Info"
+}

@@ -1,0 +1,10 @@
+{
+  "extends": ["markdownlint/style/prettier"],
+  "line-length": false,
+  "no-inline-html": {
+    "allowed_elements": ["br", "details", "summary", "kbd", "sub", "sup"]
+  },
+  "no-duplicate-heading": false,
+  "no-trailing-punctuation": false,
+  "no-bare-urls": false
+}
