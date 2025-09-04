@@ -17,17 +17,18 @@ on:
       - 'mkdocs.yml'
       - 'typedoc.json'
 
+# Add actions: read (required by deploy-pages@v4)
 permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  # Build Documentation
   build-docs:
     runs-on: ubuntu-latest
     steps:
@@ -35,113 +36,108 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Setup Python for MkDocs
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
           cache: 'pip'
-      
+
       - name: Install Python dependencies
-        run: |
-          pip install -r docs/requirements.txt
-      
+        run: pip install -r docs/requirements.txt
+
       - name: Generate TypeScript API Reference
-        run: |
-          npx typedoc
-      
+        run: npx typedoc
+
       - name: Validate documentation links
         run: |
-          find docs -name "*.md" -exec grep -l "](\./" {} \; | \
-          xargs -I {} python scripts/validate-links.py {}
-      
+          find docs -name "*.md" -exec grep -l "](\./" {} \; | xargs -I {} python scripts/validate-links.py {}
+
       - name: Build MkDocs site
-        run: |
-          mkdocs build --clean --strict
-      
+        run: mkdocs build --clean --strict
+
+      # 👇 Update to v3 (required) – v2 uses deprecated artifact v3 under the hood
       - name: Upload documentation artifact
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
 
-  # Deploy to GitHub Pages (only on main branch)
   deploy-pages:
     if: github.ref == 'refs/heads/main'
     needs: build-docs
     runs-on: ubuntu-latest
-    permissions:
-        pages: write
-        id-token: write
     environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # 👇 Update to v4 (requires actions: read at top)
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-  # Validate Documentation Quality
   validate-docs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Spell check documentation
-        run: |
-          npx cspell "docs/**/*.md"
-      
+        run: npx cspell "docs/**/*.md"
+
       - name: Check TypeScript documentation coverage
-        run: |
-          npx typedoc --listInvalidSymbolLinks
-      
+        run: npx typedoc --listInvalidSymbolLinks
+
       - name: Validate Markdown formatting
-        uses: DavidAnson/markdownlint-cli2-action@v16   # <-- fixed action
+        uses: DavidAnson/markdownlint-cli2-action@v20
         with:
           globs: |
             docs/**/*.md
           config: .markdownlint.json
-      
+
       - name: Check for TODO items in documentation
         run: |
           echo "## Documentation TODOs" >> $GITHUB_STEP_SUMMARY
           grep -r "TODO:" docs/ || echo "No TODOs found" >> $GITHUB_STEP_SUMMARY
 
-  # Security scan for documentation
   security-scan:
     runs-on: ubuntu-latest
+    # 👇 Needed so upload-sarif can write results
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Run Trivy vulnerability scanner
+        # (optional) pin to a tagged release instead of master, e.g. @0.24.0+
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: './docs'
           format: 'sarif'
           output: 'trivy-docs.sarif'
-      
+
+      # 👇 Update CodeQL action to v3
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-docs.sarif'
