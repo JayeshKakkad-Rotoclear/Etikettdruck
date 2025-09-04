@@ -81,8 +81,6 @@ markdown_extensions:
   - pymdownx.tilde
 
 plugins:
-  - search:
-      lang: en
   - git-revision-date-localized:
       enable_creation_date: true
       type: date

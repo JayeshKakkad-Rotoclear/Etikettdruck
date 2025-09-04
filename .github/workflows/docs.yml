@@ -100,7 +100,7 @@ jobs:
         run: npm ci
 
       - name: Spell check documentation
-        run: npx cspell "docs/**/*.md"
+        run: npx cspell --no-progress --no-must-find-files "docs/**/*.md"
 
       - name: Check TypeScript documentation coverage
         run: npx typedoc --listInvalidSymbolLinks
