@@ -1,0 +1,47 @@
+# Lightweight image to build and serve Etikettdrucker documentation (MkDocs + TypeDoc)
+FROM node:20-bookworm-slim AS typedoc
+WORKDIR /app
+
+# Only copy what's needed for TypeDoc first
+COPY package.json package-lock.json* .npmrc* ./
+RUN npm ci --omit=dev=false
+
+# Copy TS source needed for API docs
+COPY tsconfig.json ./
+COPY src/lib ./src/lib
+COPY typedoc.json ./
+
+# Generate TypeDoc output (markdown)
+RUN npx typedoc --options typedoc.json || true
+
+FROM python:3.12-slim AS mkdocs
+WORKDIR /docs
+
+# Install system dependencies for weasyprint (optional PDF) safely
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
+    libffi-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy docs folder
+COPY docs ./docs
+
+# Copy generated TypeDoc output from previous stage if present
+COPY --from=typedoc /app/docs/reference/api ./docs/reference/api
+
+# Python requirements
+COPY docs/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expose MkDocs port
+EXPOSE 8000
+
+# Default command: serve documentation
+CMD ["mkdocs", "serve", "-a", "0.0.0.0:8000"]
+
+# Usage:
+# docker build -f Dockerfile.docs -t etikettendrucker-docs .
+# docker run -p 8000:8000 etikettendrucker-docs

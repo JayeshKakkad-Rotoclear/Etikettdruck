@@ -20,7 +20,11 @@
     "create-admin:simple": "node scripts/create-admin-direct.js",
     "test:security": "node security-test-runner-simple.js",
     "test:security:standalone": "node tests/security-simple.test.cjs",
-    "postinstall": "prisma generate"
+  "postinstall": "prisma generate",
+  "docs:api": "npx typedoc --options typedoc.json",
+  "docs:build": "npm run docs:api && mkdocs build",
+  "docs:serve": "npm run docs:api && mkdocs serve -a 0.0.0.0:8000",
+  "docs:zip": "npm run docs:build && tar -czf site-docs.tar.gz site"
   },
   "overrides": {
     "cookie": "^1.0.2",
@@ -40,6 +44,8 @@
     "svelte": "^5.38.2",
     "svelte-check": "^4.3.1",
     "tsx": "^4.20.4",
+    "typedoc": "^0.28.12",
+    "typedoc-plugin-markdown": "^4.8.1",
     "typescript": "^5.9.2",
     "vite": "^7.1.3"
   },

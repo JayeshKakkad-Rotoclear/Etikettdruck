@@ -1,9 +1,9 @@
-import { json } from '@sveltejs/kit';
+import { json, type RequestHandler } from '@sveltejs/kit';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET({ url }) {
+export const GET: RequestHandler = async ({ url }) => {
     const serial = url.searchParams.get('serialnummer');
     if (!serial) {
         return json({ error: 'serialnummer fehlt' }, { status: 400 });
@@ -23,4 +23,4 @@ export async function GET({ url }) {
     } catch (error) {
         return json({ error: 'Interner Fehler' }, { status: 500 });
     }
-}
+};

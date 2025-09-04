@@ -9,26 +9,29 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: blue
-      accent: blue
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: blue
-      accent: blue
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.expand
-    - navigation.top
+  nav:
+    - Home: index.md
+    - Getting Started: getting-started.md
+    - User Guides:
+      - Overview: user-guides/README.md
+      - Admin Setup: user-guides/admin-setup.md
+    - Architecture:
+      - Overview: architecture/README.md
+    - API:
+      - Overview: api/README.md
+      - Generated Reference: reference/README.md
+    - Data:
+      - Overview: data/README.md
+    - Development:
+      - Environment Setup: development/setup.md
+    - Operations:
+      - Deployment: operations/deployment.md
+      - Monitoring: operations/monitoring.md
+      - Runbooks:
+        - Troubleshooting: operations/runbooks/troubleshooting.md
+        - Security Incidents: operations/runbooks/security-incidents.md
+    - Releases:
+      - Changelog: releases/CHANGELOG.md
     - search.highlight
     - search.share
     - content.code.copy
