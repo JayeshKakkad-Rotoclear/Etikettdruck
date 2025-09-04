@@ -53,7 +53,9 @@
 
 <header>
 	<!-- add icon etikettendruck\src\assets\Logo.svg-->
-	<img src="/Logo.svg" alt="Rotoclear Logo" class="logo" />
+	<a href="/">
+		<img src="/Logo.svg" alt="Rotoclear Logo" class="logo" />
+	</a>
 	<!-- <h1>Etikettendruck System</h1> -->
 	
 	<div class="header-actions">
@@ -378,7 +380,7 @@
 		display: flex;
 		flex-direction: column;
 		color: var(--text-primary);
-		border-radius: 0 0 12px 12px;
+		border-radius: 0 0 0 12px;
 		overflow: visible;
 		backdrop-filter: blur(10px);
 		z-index: 1001;
@@ -431,7 +433,7 @@
 		display: flex;
 		flex-direction: column;
 		min-width: 220px;
-		border-radius: 8px;
+		border-radius: 8px 0 0 8px;
 		overflow: hidden;
 		z-index: 1003;
 		opacity: 1;
@@ -478,7 +480,7 @@
 		margin-top: auto;
 		border-top: 2px solid #f1f1f1;
 		background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-		border-radius: 0 0 12px 12px;
+		border-radius: 0 0 0 12px;
 		overflow: hidden;
 	}
 
