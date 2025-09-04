@@ -8,7 +8,7 @@
 
 #### Defense in Depth
 Multiple layers of security controls to protect against various threat vectors:
-- **Application Layer**: Input validation, authentication, authorization
+- **Application Layer**: Enhanced input validation, authentication, authorization
 - **Network Layer**: HTTPS encryption, network segmentation
 - **Data Layer**: Encryption at rest, secure database connections
 - **Infrastructure Layer**: Server hardening, access controls
@@ -18,12 +18,14 @@ Users and processes have only the minimum access required:
 - **Role-Based Access Control (RBAC)**: Granular permissions per user role
 - **API Endpoint Protection**: Route-level authorization checks
 - **Database Access**: Limited connection pools with restricted permissions
+- **Dashboard Analytics**: Role-based access to sensitive production data
 
 #### Security by Design
 Security considerations integrated from the beginning:
 - **Secure Defaults**: All new features require explicit permission grants
-- **Input Validation**: Comprehensive sanitization and validation
+- **Enhanced Input Validation**: Comprehensive sanitization and validation with Zod schemas
 - **Error Handling**: Secure error messages that don't leak sensitive information
+- **Form Validation**: Advanced change detection and data integrity checks
 
 ### 14.2 Threat Model
 

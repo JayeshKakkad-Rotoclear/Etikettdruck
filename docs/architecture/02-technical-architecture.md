@@ -1,4 +1,4 @@
-## Part 2: Technical Architecture & Component Design
+# Part 2: Technical Architecture & Component Design
 
 ---
 
@@ -12,6 +12,8 @@ graph TB
         UI[SvelteKit Frontend]
         COMP[Reusable Components]
         STORE[Client Stores]
+        CHARTS[Chart.js Integration]
+        DASHBOARD[Interactive Dashboard]
     end
     
     subgraph "Application Tier"
@@ -19,6 +21,7 @@ graph TB
         AUTH[Authentication Layer]
         BL[Business Logic]
         VALID[Validation Layer]
+        ANALYTICS[Analytics Engine]
     end
     
     subgraph "Data Tier"
@@ -68,7 +71,11 @@ graph TB
 ```
 src/routes/
 ├── +layout.svelte          # Global layout with navigation
-├── +page.svelte            # Dashboard/landing page
+├── +page.svelte            # Dashboard/landing page with analytics
+├── dashboard/              # Dashboard analytics modules
+│   ├── cbasic/+page.svelte # C-Basic dashboard
+│   ├── c2/+page.svelte     # C2 dashboard
+│   └── cpro/+page.svelte   # C-Pro dashboard
 └── components/
     ├── Header.svelte       # Navigation header
     ├── Footer.svelte       # Application footer
@@ -80,16 +87,22 @@ src/routes/
 src/routes/
 ├── cbasic/                 # C-Basic product workflows
 │   ├── pruefer-a/
+│   ├── pruefer-b/          # Enhanced change detection
+│   ├── qr-preview/
 │   └── print-label/
 ├── c2/                     # C2 product workflows
 │   ├── pruefer-a/
-│   ├── pruefer-b/
+│   ├── pruefer-b/          # Enhanced change detection
 │   ├── qr-preview/
 │   └── print-label/
 ├── cpro/                   # C-Pro product workflows
-│   └── [same structure]
+│   ├── pruefer-a/
+│   ├── pruefer-b/          # Enhanced change detection
+│   ├── qr-preview/
+│   └── print-label/
 └── kk/                     # KK product workflows
-    └── [same structure]
+    ├── pruefer-a/
+    └── pruefer-b/          # Enhanced change detection
 ```
 
 #### Shared UI Components
@@ -101,7 +114,9 @@ src/lib/components/
 ├── FormInput.svelte        # Standardized form inputs
 ├── Modal.svelte            # Popup dialogs
 ├── LoadingSpinner.svelte   # Loading indicators
-└── DataTable.svelte        # Tabular data display
+├── DataTable.svelte        # Tabular data display
+├── Chart.svelte            # Chart.js integration wrapper
+└── Tooltip.svelte          # Interactive tooltip component
 ```
 
 ### 6.2 Component Design Principles
@@ -181,12 +196,23 @@ src/routes/api/
 │   ├── +server.ts            # GET, POST /api/users
 │   └── [id]/+server.ts       # GET, PUT, DELETE /api/users/:id
 ├── products/
-│   ├── cbasic/+server.ts     # C-Basic operations
-│   ├── c2/+server.ts         # C2 operations
-│   ├── cpro/+server.ts       # C-Pro operations
+│   ├── cbasic/
+│   │   ├── +server.ts        # C-Basic operations
+│   │   └── stats/+server.ts  # C-Basic analytics
+│   ├── c2/
+│   │   ├── +server.ts        # C2 operations
+│   │   ├── qr/+server.ts     # C2 QR generation
+│   │   └── stats/+server.ts  # C2 analytics
+│   ├── cpro/
+│   │   ├── +server.ts        # C-Pro operations
+│   │   ├── qr/+server.ts     # C-Pro QR generation
+│   │   └── stats/+server.ts  # C-Pro analytics
 │   └── kk/+server.ts         # KK operations
 ├── labels/
 │   └── print/+server.ts      # POST /api/labels/print
+├── dashboard/
+│   ├── monthly/+server.ts    # Monthly production stats
+│   └── analytics/+server.ts  # Dashboard analytics
 └── outerkarton/
     └── +server.ts            # Outer carton operations
 ```
@@ -479,4 +505,3 @@ export class FileService {
 ```
 
 ---
-

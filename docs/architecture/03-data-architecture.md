@@ -1,4 +1,4 @@
-## Part 3: Data Architecture & Database Design
+# Part 3: Data Architecture & Database Design
 
 ---
 
@@ -9,8 +9,9 @@
 #### Core Principles
 - **Data Integrity**: ACID compliance for all quality-critical transactions
 - **Traceability**: Complete audit trail for all product testing activities
-- **Performance**: Optimized queries for real-time operations
+- **Performance**: Optimized queries for real-time operations and analytics
 - **Scalability**: Design for future growth in product volume and complexity
+- **Analytics**: Built-in support for business intelligence and reporting
 
 #### Data Flow Architecture
 ```mermaid
@@ -19,12 +20,14 @@ graph TD
         UI[User Input Forms]
         FILES[File Uploads]
         QR[QR Code Scans]
+        ANALYTICS[Dashboard Analytics]
     end
     
     subgraph "Application Layer"
         VALID[Validation Layer]
         BL[Business Logic]
         AUDIT[Audit Service]
+        STATS[Statistics Engine]
     end
     
     subgraph "Data Layer"
@@ -667,5 +670,65 @@ main()
   });
 ```
 
----
+## 13. Analytics & Dashboard Data Architecture
 
+### 13.1 Dashboard Analytics Queries
+
+#### Monthly Production Statistics
+```typescript
+// Monthly production aggregation for dashboard charts
+interface MonthlyProductionStats {
+  month: string;
+  year: number;
+  totalProduction: number;
+  productTypeBreakdown: {
+    C2: number;
+    CPRO: number;
+    CBASIC: number;
+    KK: number;
+  };
+  qualityMetrics: {
+    firstPassRate: number;
+    reworkRate: number;
+    defectRate: number;
+  };
+}
+
+// Optimized query for monthly production data
+const getMonthlyProductionStats = async (year: number) => {
+  return await prisma.$queryRaw`
+    SELECT 
+      EXTRACT(MONTH FROM created_at) as month,
+      EXTRACT(YEAR FROM created_at) as year,
+      product_type,
+      COUNT(*) as production_count,
+      AVG(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as first_pass_rate
+    FROM testing_records 
+    WHERE EXTRACT(YEAR FROM created_at) = ${year}
+    GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at), product_type
+    ORDER BY year, month;
+  `;
+};
+```
+
+### 13.2 Performance Optimization for Analytics
+
+#### Database Indexes for Dashboard Queries
+```sql
+-- Indexes for performance optimization
+CREATE INDEX idx_testing_records_created_at ON testing_records(created_at);
+CREATE INDEX idx_testing_records_product_type ON testing_records(product_type);
+CREATE INDEX idx_testing_records_status ON testing_records(status);
+CREATE INDEX idx_testing_records_created_by ON testing_records(created_by);
+
+-- Composite indexes for common dashboard queries
+CREATE INDEX idx_testing_records_dashboard ON testing_records(created_at, product_type, status);
+CREATE INDEX idx_monthly_stats ON testing_records(date_trunc('month', created_at), product_type);
+```
+
+#### Caching Strategy for Dashboard
+- **In-Memory Caching**: Monthly statistics cached for 1 hour
+- **Query Optimization**: Aggregate queries with proper indexing
+- **Real-time Updates**: WebSocket connections for live dashboard updates
+
+---
