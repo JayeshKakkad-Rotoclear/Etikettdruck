@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "types": [],
+    "baseUrl": "./",
+    "paths": {
+      "$lib/*": ["src/lib/*"]
+    }
+  },
+  "include": [
+    "src/lib/**/*.ts"
+  ],
+  "exclude": [
+    "src/lib/stores/**"
+  ]
+}

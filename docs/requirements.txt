@@ -20,3 +20,4 @@ mkdocs-with-pdf>=0.9.0
 
 # Link checking
 mkdocs-linkcheck>=1.0.0
+mkdocs-static-i18n>=1.2.0

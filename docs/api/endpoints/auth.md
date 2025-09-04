@@ -1,3 +1,12 @@
+# API: Authentication
+
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| POST | /api/auth/login | Authenticate user & create session |
+| POST | /api/auth/logout | Invalidate session |
+| POST | /api/auth/refresh | Refresh JWT token |
+
+Security: JWT + session hybrid (see ADR-0003). Rate limiting applied.
 # Authentication Endpoints
 
 Authentication and session management endpoints.

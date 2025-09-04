@@ -2,46 +2,67 @@
 FROM node:20-bookworm-slim AS typedoc
 WORKDIR /app
 
-# Only copy what's needed for TypeDoc first
+# Copy manifests first for dependency layer caching
 COPY package.json package-lock.json* .npmrc* ./
-RUN npm ci --omit=dev=false
 
-# Copy TS source needed for API docs
-COPY tsconfig.json ./
+# Copy Prisma schema BEFORE install so postinstall (prisma generate) succeeds
+COPY prisma ./prisma
+
+# Install all dependencies (need dev deps for TypeDoc). Remove invalid --omit flag.
+RUN npm ci
+
+# Copy TS sources needed for TypeDoc
+COPY tsconfig.json tsconfig.typedoc.json ./
 COPY src/lib ./src/lib
 COPY typedoc.json ./
+COPY docs/reference/README.md ./docs/reference/README.md
 
-# Generate TypeDoc output (markdown)
+# Generate TypeDoc output (markdown). Allow build to continue even if warnings occur.
 RUN npx typedoc --options typedoc.json || true
 
 FROM python:3.12-slim AS mkdocs
 WORKDIR /docs
 
-# Install system dependencies for weasyprint (optional PDF) safely
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Install system dependencies for weasyprint (optional PDF) & clean up
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpango-1.0-0 \
     libpangoft2-1.0-0 \
     libffi-dev \
     git \
+    curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy docs folder
+# Copy docs source
 COPY docs ./docs
+COPY mkdocs.yml ./
 
 # Copy generated TypeDoc output from previous stage if present
 COPY --from=typedoc /app/docs/reference/api ./docs/reference/api
 
-# Python requirements
+# Python requirements (copy separately if you later want caching improvements)
 COPY docs/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Add non-root user
+RUN useradd -r -u 1001 -m docs && chown -R docs:docs /docs
+USER docs
 
 # Expose MkDocs port
 EXPOSE 8000
 
-# Default command: serve documentation
+# Healthcheck (basic) – assumes root path serves 200
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -fsS http://127.0.0.1:8000/ >/dev/null || exit 1
+
+# Default command: serve documentation (no live reload outside source mount scenario)
 CMD ["mkdocs", "serve", "-a", "0.0.0.0:8000"]
 
 # Usage:
 # docker build -f Dockerfile.docs -t etikettendrucker-docs .
 # docker run -p 8000:8000 etikettendrucker-docs
+# For live editing (mount repo):
+# docker run --rm -p 8000:8000 -v $(pwd):/docs etikettendrucker-docs mkdocs serve -a 0.0.0.0:8000 --dirtyreload

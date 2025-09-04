@@ -1,6 +1,6 @@
 site_name: Etikettdrucker Documentation
 site_description: Comprehensive documentation for the Etikettdrucker quality control and labeling system
-site_author: Rotoclear Development Team
+site_author: Jayesh Kakkad
 site_url: https://jayeshkakkad-rotoclear.github.io/Etikettdruck
 
 repo_name: JayeshKakkad-Rotoclear/Etikettdruck
@@ -58,8 +58,8 @@ markdown_extensions:
   - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       anchor_linenums: true
       line_spans: __span
@@ -84,9 +84,17 @@ markdown_extensions:
   - pymdownx.tilde
 
 plugins:
+  - i18n:
+      languages:
+        - locale: en
+          name: English
+          default: true
+        - locale: de
+          name: Deutsch
   - git-revision-date-localized:
       enable_creation_date: true
       type: date
+      fallback_to_build_date: true
   - minify:
       minify_html: true
 
@@ -94,6 +102,13 @@ extra:
   version:
     provider: mike
     default: latest
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: Deutsch
+      link: /de/
+      lang: de
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/JayeshKakkad-Rotoclear/Etikettdruck
