@@ -6,10 +6,10 @@
 
     $: {
 		if (form.konfiguration === 'DMG') {
-			form.artikel_bezeichnung = 'Steuerrechner für RotoLENS DMG-Artikel-Nr.: 3812889';
+			form.artikel_bezeichnung = 'Steuerrechner fuer RotoLENS DMG-Artikel-Nr.: 3812889';
             form.artikel_nummer = '10052';
 		} else if (form.konfiguration === 'RC' || form.konfiguration === 'EDU' || form.konfiguration === 'DEMO') {
-			form.artikel_bezeichnung = 'Steuerrechner für Rotoclear C2';
+			form.artikel_bezeichnung = 'Steuerrechner fuer Rotoclear C2';
             form.artikel_nummer = '10082';
 		}
 	}

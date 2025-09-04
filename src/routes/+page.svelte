@@ -27,6 +27,8 @@
   let loading = true;
   let error: string | null = null;
   let currentUser: any = null;
+  let chartContainer: HTMLElement;
+  let tooltipElement: HTMLElement;
 
   onMount(() => {
     // Check authentication first
@@ -45,6 +47,69 @@
 
     return unsubscribe;
   });
+
+  // Setup tooltips when stats are loaded and DOM is ready
+  $: if (stats && chartContainer) {
+    setupChartTooltips();
+  }
+
+  function setupChartTooltips() {
+    if (!chartContainer) return;
+    
+    const bars = chartContainer.querySelectorAll('.bar');
+    bars.forEach(bar => {
+      // Remove existing listeners to prevent duplicates
+      bar.removeEventListener('mouseenter', handleBarHover);
+      bar.removeEventListener('mouseleave', handleBarLeave);
+      bar.removeEventListener('mousemove', handleBarMove);
+      
+      // Add new listeners
+      bar.addEventListener('mouseenter', handleBarHover);
+      bar.addEventListener('mouseleave', handleBarLeave);
+      bar.addEventListener('mousemove', handleBarMove);
+    });
+  }
+
+  function handleBarHover(event: Event) {
+    const bar = event.target as HTMLElement;
+    const value = bar.getAttribute('data-value');
+    const product = bar.getAttribute('data-product');
+    const month = bar.getAttribute('data-month');
+    
+    if (tooltipElement && value && product && month) {
+      const tooltipHeader = tooltipElement.querySelector('.tooltip-header');
+      const tooltipBody = tooltipElement.querySelector('.tooltip-body');
+      
+      if (tooltipHeader && tooltipBody) {
+        tooltipHeader.textContent = month;
+        tooltipBody.innerHTML = `<strong>${product}:</strong> ${formatNumber(parseInt(value))} Stück`;
+      }
+      
+      tooltipElement.style.display = 'block';
+      tooltipElement.style.opacity = '1';
+    }
+  }
+
+  function handleBarLeave() {
+    if (tooltipElement) {
+      tooltipElement.style.opacity = '0';
+      setTimeout(() => {
+        if (tooltipElement) tooltipElement.style.display = 'none';
+      }, 200);
+    }
+  }
+
+  function handleBarMove(event: Event) {
+    const mouseEvent = event as MouseEvent;
+    if (tooltipElement) {
+      const rect = tooltipElement.getBoundingClientRect();
+      const x = mouseEvent.clientX + 10;
+      const y = mouseEvent.clientY - rect.height - 10;
+      
+      tooltipElement.style.left = `${x}px`;
+      tooltipElement.style.top = `${y}px`;
+    }
+  }
 
   async function loadDashboardStats() {
     try {
@@ -265,19 +330,46 @@
       <!-- Monthly Production Chart -->
       <div class="chart-section">
         <h3>Monatliche Produktion (letztes Jahr)</h3>
-        <div class="chart-container">
+        <div class="chart-container" bind:this={chartContainer}>
           <div class="chart-scroll-wrapper">
             <div class="chart">
-              {#each stats.monthlyStats as month}
-                <div class="chart-bar">
+              {#each stats.monthlyStats as month, index}
+                {@const maxTotal = Math.max(...stats.monthlyStats.map(m => m.cpro + m.c2 + m.cbasic + m.kk))}
+                <div class="chart-bar" data-month="{month.label}">
                   <div class="bar-container">
-                    <div class="bar cpro" style="height: {(month.cpro / Math.max(...stats.monthlyStats.map(m => m.cpro + m.c2 + m.cbasic + m.kk))) * 100}%"></div>
-                    <div class="bar c2" style="height: {(month.c2 / Math.max(...stats.monthlyStats.map(m => m.cpro + m.c2 + m.cbasic + m.kk))) * 100}%"></div>
-                    <div class="bar cbasic" style="height: {(month.cbasic / Math.max(...stats.monthlyStats.map(m => m.cpro + m.c2 + m.cbasic + m.kk))) * 100}%"></div>
-                    <div class="bar kk" style="height: {(month.kk / Math.max(...stats.monthlyStats.map(m => m.cpro + m.c2 + m.cbasic + m.kk))) * 100}%"></div>
+                    <div 
+                      class="bar cpro" 
+                      style="height: {(month.cpro / maxTotal) * 100}%"
+                      data-value="{month.cpro}"
+                      data-product="C Pro"
+                      data-month="{month.label}"
+                    ></div>
+                    <div 
+                      class="bar c2" 
+                      style="height: {(month.c2 / maxTotal) * 100}%"
+                      data-value="{month.c2}"
+                      data-product="C2"
+                      data-month="{month.label}"
+                    ></div>
+                    <div 
+                      class="bar cbasic" 
+                      style="height: {(month.cbasic / maxTotal) * 100}%"
+                      data-value="{month.cbasic}"
+                      data-product="C Basic"
+                      data-month="{month.label}"
+                    ></div>
+                    <div 
+                      class="bar kk" 
+                      style="height: {(month.kk / maxTotal) * 100}%"
+                      data-value="{month.kk}"
+                      data-product="Kamerakopf"
+                      data-month="{month.label}"
+                    ></div>
                   </div>
-                  <div class="chart-label">{month.label}</div>
-                  <div class="chart-total">{month.cpro + month.c2 + month.cbasic + month.kk}</div>
+                  <div class="chart-labels">
+                    <div class="chart-label">{month.label}</div>
+                    <div class="chart-total">{formatNumber(month.cpro + month.c2 + month.cbasic + month.kk)}</div>
+                  </div>
                 </div>
               {/each}
             </div>
@@ -288,6 +380,14 @@
             <div class="legend-item"><span class="legend-color c2"></span> C2</div>
             <div class="legend-item"><span class="legend-color cbasic"></span> C Basic</div>
             <div class="legend-item"><span class="legend-color kk"></span> Kamerakopf</div>
+          </div>
+        </div>
+        
+        <!-- Tooltip -->
+        <div class="chart-tooltip" bind:this={tooltipElement}>
+          <div class="tooltip-content">
+            <div class="tooltip-header"></div>
+            <div class="tooltip-body"></div>
           </div>
         </div>
       </div>
@@ -644,16 +744,19 @@
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     border-radius: var(--border-radius-md);
+    background: var(--bg-light);
+    padding: var(--spacing-md);
   }
 
   .chart {
     display: flex;
     align-items: end;
-    gap: var(--spacing-sm);
-    height: 300px;
-    padding: var(--spacing-lg) 0;
-    border-bottom: 2px solid var(--border-light);
-    min-width: 800px;
+    gap: var(--spacing-md);
+    height: 320px;
+    padding: var(--spacing-lg) 0 var(--spacing-xl) 0;
+    border-bottom: 2px solid var(--border-medium);
+    min-width: 900px;
+    position: relative;
   }
 
   .chart-bar {
@@ -661,6 +764,8 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    min-width: 60px;
+    position: relative;
   }
 
   .bar-container {
@@ -669,48 +774,125 @@
     display: flex;
     flex-direction: column-reverse;
     align-items: center;
-    gap: 1px;
+    gap: 2px;
+    padding: 0 var(--spacing-xs);
   }
 
   .bar {
-    width: 80%;
-    min-height: 2px;
+    width: 100%;
+    min-height: 3px;
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
-    transition: all var(--transition-fast) ease;
+    transition: all var(--transition-smooth) ease;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
 
   .bar:hover {
-    opacity: 0.8;
-    transform: scaleX(1.1);
+    opacity: 0.9;
+    transform: scaleX(1.05) scaleY(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
   }
 
-  .bar.cpro { background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%); }
-  .bar.c2 { background: linear-gradient(180deg, var(--success-color) 0%, #38a169 100%); }
-  .bar.cbasic { background: linear-gradient(180deg, var(--warning-color) 0%, #d69e2e 100%); }
-  .bar.kk { background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-hover) 100%); }
+  .bar.cpro { 
+    background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%);
+    border-top: 2px solid #2b77cb;
+  }
+  
+  .bar.c2 { 
+    background: linear-gradient(180deg, var(--success-color) 0%, #38a169 100%);
+    border-top: 2px solid #2f855a;
+  }
+  
+  .bar.cbasic { 
+    background: linear-gradient(180deg, var(--warning-color) 0%, #d69e2e 100%);
+    border-top: 2px solid #b7791f;
+  }
+  
+  .bar.kk { 
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    border-top: 2px solid var(--primary-active);
+  }
+
+  .chart-labels {
+    margin-top: var(--spacing-md);
+    text-align: center;
+    width: 100%;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--spacing-xs);
+  }
 
   .chart-label {
-    font-size: var(--font-size-xs);
-    color: var(--text-secondary);
-    margin-top: var(--spacing-sm);
-    transform: rotate(-45deg);
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: var(--font-weight-semibold);
     white-space: nowrap;
-    font-weight: var(--font-weight-normal);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 1.2;
   }
 
   .chart-total {
     font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-semibold);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-color);
+    background: var(--white);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius-full);
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+
+  .chart-tooltip {
+    position: fixed;
+    background: var(--white);
+    border: 1px solid var(--border-medium);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-md);
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-fast) ease;
+    max-width: 200px;
+  }
+
+  .tooltip-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .tooltip-header {
+    font-weight: var(--font-weight-bold);
     color: var(--text-primary);
-    margin-top: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid var(--border-light);
+    padding-bottom: var(--spacing-xs);
+  }
+
+  .tooltip-body {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    line-height: 1.4;
   }
 
   .chart-legend {
     display: flex;
     justify-content: center;
     gap: var(--spacing-xl);
-    margin-top: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
     flex-wrap: wrap;
+    padding: var(--spacing-lg);
+    background: var(--bg-light);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-light);
   }
 
   .chart-scroll-hint {
@@ -924,6 +1106,7 @@
     .chart-scroll-wrapper {
       scrollbar-width: thin;
       scrollbar-color: var(--primary-color) var(--bg-light);
+      padding: var(--spacing-sm);
     }
 
     .chart-scroll-wrapper::-webkit-scrollbar {
@@ -945,23 +1128,61 @@
     }
 
     .chart {
-      min-width: 1000px;
+      min-width: 1100px;
+      height: 280px;
+      gap: var(--spacing-sm);
     }
 
     .chart-bar {
-      min-width: 60px;
+      min-width: 50px;
+    }
+
+    .bar-container {
+      height: 200px;
+      padding: 0 2px;
+    }
+
+    .chart-labels {
+      min-height: 45px;
+      gap: 4px;
     }
 
     .chart-label {
       font-size: var(--font-size-xs);
+      line-height: 1.1;
+    }
+
+    .chart-total {
+      font-size: var(--font-size-xs);
+      padding: 2px var(--spacing-xs);
     }
 
     .chart-legend {
       gap: var(--spacing-lg);
+      padding: var(--spacing-md);
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .legend-item {
+      font-size: var(--font-size-xs);
     }
 
     .chart-scroll-hint {
       display: block;
+    }
+
+    .chart-tooltip {
+      max-width: 180px;
+      padding: var(--spacing-sm);
+    }
+
+    .tooltip-header {
+      font-size: var(--font-size-xs);
+    }
+
+    .tooltip-body {
+      font-size: var(--font-size-xs);
     }
 
     .distribution-section {
