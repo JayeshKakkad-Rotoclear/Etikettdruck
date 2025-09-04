@@ -53,16 +53,16 @@ RUN useradd -r -u 1001 -m docs && chown -R docs:docs /docs
 USER docs
 
 # Expose MkDocs port
-EXPOSE 8000
+EXPOSE 8081
 
 # Healthcheck (basic) – assumes root path serves 200
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -fsS http://127.0.0.1:8000/ >/dev/null || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -fsS http://127.0.0.1:8081/ >/dev/null || exit 1
 
 # Default command: serve documentation (no live reload outside source mount scenario)
-CMD ["mkdocs", "serve", "-a", "0.0.0.0:8000"]
+CMD ["mkdocs", "serve", "-a", "0.0.0.0:8081"]
 
 # Usage:
 # docker build -f Dockerfile.docs -t etikettendrucker-docs .
-# docker run -p 8000:8000 etikettendrucker-docs
+# docker run -p 8081:8081 etikettendrucker-docs
 # For live editing (mount repo):
-# docker run --rm -p 8000:8000 -v $(pwd):/docs etikettendrucker-docs mkdocs serve -a 0.0.0.0:8000 --dirtyreload
+# docker run --rm -p 8081:8081 -v $(pwd):/docs etikettendrucker-docs mkdocs serve -a 0.0.0.0:8081 --dirtyreload
