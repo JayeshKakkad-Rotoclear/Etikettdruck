@@ -86,7 +86,6 @@ plugins:
   - mermaid2
   - awesome-pages
   - redirects
-  - linkcheck
   - with-pdf
   - i18n:
       languages:
