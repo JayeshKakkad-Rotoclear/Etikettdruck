@@ -44,8 +44,8 @@ theme:
     text: Inter
     code: JetBrains Mono
 
-  logo: etikettendruck\static\Logo.svg
-  favicon: etikettendruck\static\app-icon.svg
+  logo: assets\Logo.svg
+  favicon: assets\app-icon.svg
 
   icon:
     repo: fontawesome/brands/github
