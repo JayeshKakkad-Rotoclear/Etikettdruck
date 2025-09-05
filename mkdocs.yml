@@ -33,11 +33,10 @@ theme:
     - content.action.edit
     - content.action.view
     - search.share
-
-icon:
-  repo: fontawesome/brands/github
-  edit: material/pencil
-  view: material/eye
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
 
 markdown_extensions:
   - abbr
