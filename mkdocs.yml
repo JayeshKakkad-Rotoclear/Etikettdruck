@@ -30,9 +30,6 @@ theme:
     - toc.follow
     - search.highlight
     - content.code.copy
-    - content.action.edit
-    - content.action.view
-    - search.share
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
@@ -45,7 +42,6 @@ markdown_extensions:
   - def_list
   - footnotes
   - md_in_html
-  - tables
   - toc:
       permalink: true
   - pymdownx.arithmatex:
@@ -69,7 +65,6 @@ markdown_extensions:
       repo: Etikettdruck
   - pymdownx.mark
   - pymdownx.smartsymbols
-  - pymdownx.snippets
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -82,11 +77,6 @@ markdown_extensions:
   - pymdownx.tilde
 
 plugins:
-  - search
-  - mermaid2
-  - awesome-pages
-  - redirects
-  - with-pdf
   - i18n:
       languages:
         - locale: en
@@ -123,63 +113,63 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - User Guides:
-      - Overview: user-guides/README.md
-      - Admin Setup: user-guides/admin-setup.md
-      - User Roles: user-guides/user-roles.md
-      - Quality Control Workflow: user-guides/quality-control-workflow.md
-      - Dashboard Analytics: user-guides/dashboard-analytics.md
+    - Overview: user-guides/README.md
+    - Admin Setup: user-guides/admin-setup.md
+    - User Roles: user-guides/user-roles.md
+    - Quality Control Workflow: user-guides/quality-control-workflow.md
+    - Dashboard Analytics: user-guides/dashboard-analytics.md
   - Architecture:
-      - Overview: architecture/README.md
-      - System Overview: architecture/01-system-overview.md
-      - Technical Architecture: architecture/02-technical-architecture.md
-      - Data Architecture: architecture/03-data-architecture.md
-      - Security Architecture: architecture/04-security-architecture.md
-      - Deployment Architecture: architecture/05-deployment-architecture.md
-      - Development Standards: architecture/06-development-standards.md
-      - Decisions:
-          - ADR Index: architecture/decisions/README.md
-          - Multi-Schema Database: architecture/decisions/ADR-0001-multi-schema-database.md
-          - SvelteKit Full-Stack: architecture/decisions/ADR-0002-sveltekit-full-stack.md
-          - JWT Session Hybrid: architecture/decisions/ADR-0003-jwt-session-hybrid-auth.md
+    - Overview: architecture/README.md
+    - System Overview: architecture/01-system-overview.md
+    - Technical Architecture: architecture/02-technical-architecture.md
+    - Data Architecture: architecture/03-data-architecture.md
+    - Security Architecture: architecture/04-security-architecture.md
+    - Deployment Architecture: architecture/05-deployment-architecture.md
+    - Development Standards: architecture/06-development-standards.md
+    - Decisions:
+      - ADR Index: architecture/decisions/README.md
+      - Multi-Schema Database: architecture/decisions/ADR-0001-multi-schema-database.md
+      - SvelteKit Full-Stack: architecture/decisions/ADR-0002-sveltekit-full-stack.md
+      - JWT Session Hybrid: architecture/decisions/ADR-0003-jwt-session-hybrid-auth.md
   - API Reference:
-      - Overview: api/README.md
-      - Authentication: api/endpoints/auth.md
-      - User Management: api/endpoints/users.md
-      - Products: api/endpoints/products.md
-      - Dashboard: api/endpoints/dashboard.md
-      - Printing: api/endpoints/printing.md
-      - Management: api/endpoints/management.md
-      - Schemas:
-          - User Objects: api/schemas/user.md
-          - Product Objects: api/schemas/product.md
-          - Response Formats: api/schemas/responses.md
+    - Overview: api/README.md
+    - Authentication: api/endpoints/auth.md
+    - User Management: api/endpoints/users.md
+    - Products: api/endpoints/products.md
+    - Dashboard: api/endpoints/dashboard.md
+    - Printing: api/endpoints/printing.md
+    - Management: api/endpoints/management.md
+    - Schemas:
+      - User Objects: api/schemas/user.md
+      - Product Objects: api/schemas/product.md
+      - Response Formats: api/schemas/responses.md
   - Data Layer:
-      - Database Schema: data/schema.md
-      - Migrations: data/migrations.md
-      - Seeding: data/seeding.md
-      - Contracts:
-          - ZPL Labels: data/contracts/zpl-labels.md
-          - QR Codes: data/contracts/qr-codes.md
-          - File Formats: data/contracts/file-formats.md
+    - Database Schema: data/schema.md
+    - Migrations: data/migrations.md
+    - Seeding: data/seeding.md
+    - Contracts:
+      - ZPL Labels: data/contracts/zpl-labels.md
+      - QR Codes: data/contracts/qr-codes.md
+      - File Formats: data/contracts/file-formats.md
   - Development:
-      - Setup: development/setup.md
-      - Testing: development/testing.md
-      - Contributing: development/contributing.md
-      - Code Review: development/code-review.md
-      - Debugging: development/debugging.md
+    - Setup: development/setup.md
+    - Testing: development/testing.md
+    - Contributing: development/contributing.md
+    - Code Review: development/code-review.md
+    - Debugging: development/debugging.md
   - Operations:
-      - Deployment: operations/deployment.md
-      - Environment Setup: operations/environment-setup.md
-      - Monitoring: operations/monitoring.md
-      - Backup & Recovery: operations/backup-recovery.md
-      - Runbooks:
-          - Overview: operations/runbooks/README.md
-          - Troubleshooting: operations/runbooks/troubleshooting.md
-          - Security Incidents: operations/runbooks/security-incidents.md
+    - Deployment: operations/deployment.md
+    - Environment Setup: operations/environment-setup.md
+    - Monitoring: operations/monitoring.md
+    - Backup & Recovery: operations/backup-recovery.md
+    - Runbooks:
+      - Overview: operations/runbooks/README.md
+      - Troubleshooting: operations/runbooks/troubleshooting.md
+      - Security Incidents: operations/runbooks/security-incidents.md
   - Releases:
-      - Changelog: releases/CHANGELOG.md
-      - Release Process: releases/release-process.md
-      - Migration Guides:
-          - v1.0.0-beta: releases/migration-guides/v1.0.0-beta.md
+    - Changelog: releases/CHANGELOG.md
+    - Release Process: releases/release-process.md
+    - Migration Guides:
+      - v1.0.0-beta: releases/migration-guides/v1.0.0-beta.md
 
-copyright: Copyright © 2025 Rotoclear
+copyright: Copyright &copy; 2025 Rotoclear
