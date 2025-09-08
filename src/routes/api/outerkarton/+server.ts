@@ -170,7 +170,7 @@ async function generateOuterKartonZPL(entries: any[], qrContent: string, printer
   ];
 
   // Header
-  zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear Outer Karton^FS`);
+  zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear C-Line^FS`);
   {
     const headIconX = W - M - HEAD_WDOTS; // within right margin
     zplParts.push(`^FO${headIconX},${y}${HEAD_GFA}^FS`);

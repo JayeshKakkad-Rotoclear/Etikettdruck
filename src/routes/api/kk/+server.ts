@@ -309,7 +309,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
       ];
 
       // Header
-      zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDKamerakopf^FS`);
+      zplParts.push(`^AZN,${H12PT},${H12PT}`, `^FO${X},${y}^FDRotoclear C-Line^FS`);
 
       {
       const headIconX = W - M - HEAD_WDOTS; // within right margin

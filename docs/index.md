@@ -75,6 +75,7 @@ Welcome to the comprehensive documentation for the Etikettdrucker (Label Printer
 ## Documentation Standards
 
 This documentation follows these principles:
+
 - **Wiki-ready**: Plain Markdown with relative links for portability
 - **Code-derived**: Information extracted from actual source code
 - **Maintainable**: Clear structure with explicit TODOs for missing information
@@ -83,6 +84,7 @@ This documentation follows these principles:
 ## Contributing to Documentation
 
 Documentation improvements are welcome! See [Contributing Guidelines](./development/contributing.md) for details on:
+
 - Documentation standards and style guide
 - Review process for documentation changes
 - How to generate API documentation from code

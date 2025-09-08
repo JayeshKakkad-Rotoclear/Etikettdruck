@@ -9,9 +9,10 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  generator: false
   palette:
     - scheme: default
-      primary: blue grey
+      primary: '#123345'
       accent: deep orange
       toggle:
         icon: material/brightness-7
