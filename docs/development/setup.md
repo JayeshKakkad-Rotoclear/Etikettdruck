@@ -69,6 +69,7 @@ npm run create-admin:simple
 ```
 
 This creates an admin with:
+
 - Username: `admin`
 - Password: `AdminP@ssw0rd2024!`
 
@@ -109,6 +110,7 @@ npm run test:security    # Run security tests
 
 ### TypeScript Configuration
 The project uses strict TypeScript settings (from `tsconfig.json`):
+
 - Strict mode enabled
 - No implicit any
 - Exact optional property types
@@ -205,6 +207,7 @@ npm run db:seed
 
 ### Multi-Schema Development
 The system uses multiple PostgreSQL schemas:
+
 - `user_management` - User accounts and authentication
 - `cpro_steuerrechner` - C-Pro product data
 - `c2_steuerrechner` - C2 product data
@@ -237,6 +240,7 @@ npm run test:security
 ```
 
 Current tests (from `tests/security-simple.test.cjs`):
+
 - Authentication endpoints
 - Rate limiting
 - Input validation

@@ -10,4 +10,5 @@ Need unified framework for SSR, routing, API endpoints, and SPA interactivity.
 Use SvelteKit for both UI and lightweight server endpoints (internal APIs) instead of separate frontend/backend repos.
 
 ## Consequences
-Pros: Faster development, shared types, simplified deployment. Cons: Coupled deployment, potential scaling limits for heavy APIs.
+Pros: Faster development, shared types, simplified deployment. 
+Cons: Coupled deployment, potential scaling limits for heavy APIs.

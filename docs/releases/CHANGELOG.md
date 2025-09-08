@@ -1,137 +1,134 @@
 # Changelog
 
-Alle bedeutsamen Änderungen am Projekt **Etikettdrucker** werden in dieser Datei dokumentiert.
+All significant changes to the **Etikettdrucker** project are documented in this file.
 
-Das Format basiert auf [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) und dieses Projekt folgt der [Semantischen Versionierung](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## \[1.0.0-beta] – 2025-09-04
 
-### Hauptfunktionen
+### Key Features
 
-* **Interaktive Dashboard-Analysen**: Monats-Produktionsdiagramme mit Hover-Tooltips und professioneller Gestaltung
-* **Erweiterte Qualitätskontroll-Workflows**: Verbesserte Prüfer-A/B-Abläufe mit fortschrittlicher Änderungsdetektion
-* **QR-Code-Erzeugung**: Dynamische QR-Codes für Rückverfolgbarkeit aller Produkttypen
-* **Multi-Produkt-Support**: Vollständige Workflows für C2, C-Pro, C-Basic und KK
-* **Rollenbasierte Zugriffskontrolle**: Umfassendes RBAC-System mit 6 Berechtigungsstufen
+* **Interactive dashboard analytics**: Monthly production charts with hover tooltips and a polished presentation.
+* **Enhanced quality control workflows**: Improved Inspector A/B processes with advanced change detection.
+* **QR code generation**: Dynamic QR codes for traceability across all product types.
+* **Multi-product support**: End-to-end workflows for C2, C-Pro, C-Basic, and KK.
+* **Role-based access control**: Comprehensive RBAC system with six permission levels.
 
-### Verbesserungen der Benutzererfahrung
+### User Experience Improvements
 
-* **Mobil-optimiertes Design**: Oberfläche vollständig für Mobil- und Tablet-Geräte optimiert
-* **Professionelles UI/UX**: Aufgeräumtes, modernes Interface mit besserer Navigation und visueller Hierarchie
-* **Interaktive Diagramme**: Chart.js-Integration mit Hover-Tooltips und responsivem Layout
-* **Verbesserte Formularvalidierung**: Echtzeit-Validierung mit aussagekräftigen Fehlermeldungen
+* **Mobile-optimized design**: Fully optimized UI for mobile and tablet devices.
+* **Professional UI/UX**: Clean, modern interface with better navigation and visual hierarchy.
+* **Interactive charts**: Chart.js integration with hover tooltips and responsive layout.
+* **Improved form validation**: Real-time validation with clear, descriptive error messages.
 
-### Technische Verbesserungen
+### Technical Enhancements
 
-* **Multi-Schema-Datenbank**: PostgreSQL mit domänengetrennter Schema-Struktur
-* **Härtung der Sicherheit**: Verbesserte Authentifizierung, Rate Limiting und Audit-Logging
-* **API-Konsolidierung**: Strukturierte REST-API mit einheitlichen Antwortformaten
-* **Docker-Support**: Produktionsreife Containerisierung mit Multi-Stage-Builds
+* **Multi-schema database**: PostgreSQL with domain-separated schemas.
+* **Security hardening**: Improved authentication, rate limiting, and audit logging.
+* **API consolidation**: Structured REST API with standardized response formats.
+* **Docker support**: Production-grade containerization with multi-stage builds.
 
-### Sicherheitsfunktionen
+### Security Features
 
-* **Hybrid-Authentifizierung (JWT + Session)**: Sicheres tokenbasiertes Login mit serverseitigem Sitzungsmanagement
-* **Rate Limiting**: API-Schutz gegen Missbrauch und DoS-Angriffe
-* **Security-Audit-Logging**: Umfassende Protokollierung aller Auth- und Sicherheitsereignisse
-* **CSRF-Schutz**: Schutz vor Cross-Site-Request-Forgery für statusändernde Operationen
-* **Eingabevalidierung**: Serverseitige Validierung mit durchgesetzten TypeScript-Schemata
+* **Hybrid authentication (JWT + session)**: Secure token-based login with server-side session management.
+* **Rate limiting**: API protection against abuse and DoS attacks.
+* **Security audit logging**: Comprehensive logging of authentication and security events.
+* **CSRF protection**: Safeguards for state-changing operations.
+* **Input validation**: Server-side validation enforced with TypeScript schemas.
 
-### Fehlerbehebungen
+### Bug Fixes
 
-* **Prüfer-B-Änderungsdetektion**: Kritischen Fehler behoben, bei dem stets „keine Änderungen“ angezeigt wurde
-* **Formular-State-Management**: Probleme mit Datenpersistenz und Validierung behoben
-* **Dashboard-Tooltips**: Positionierung und Interaktivität der Tooltips korrigiert
-* **Mobile Navigation**: Menüfunktion und responsives Verhalten auf Mobilgeräten verbessert
+* **Inspector B change detection**: Fixed a critical issue that always displayed “no changes.”
+* **Form state management**: Resolved data persistence and validation issues.
+* **Dashboard tooltips**: Corrected tooltip positioning and interactivity.
+* **Mobile navigation**: Improved menu behavior and responsive handling on mobile devices.
 
-### Daten & Analysen
+### Data & Analytics
 
-* **Produktionsstatistiken**: Monatliches Tracking und Reporting
-* **Qualitätsmetriken**: First-Pass-Rate, Nacharbeitsquote und Fehlertracking
-* **Dashboard-Visualisierungen**: Interaktive Diagramme zur Produktionsüberwachung
-* **Exportfunktionen**: PDF- und Datenexport
+* **Production statistics**: Monthly tracking and reporting.
+* **Quality metrics**: First-pass rate, rework rate, and defect tracking.
+* **Dashboard visualizations**: Interactive charts for production monitoring.
+* **Export functions**: PDF and data export.
 
-### API-Verbesserungen
+### API Improvements
 
-* **Standardisiertes Antwortformat**: Konsistente API-Responses für alle Endpunkte
-* **Fehlerbehandlung**: Verbesserte Fehlerantworten mit detaillierten Informationen
-* **Authentifizierungs-Endpunkte**: Umfassende Auth-API mit Sitzungsverwaltung
-* **Produktspezifische APIs**: Dedizierte Endpunkte je Produkttyp inkl. Analytik
+* **Standardized response format**: Consistent API responses across all endpoints.
+* **Error handling**: More informative error responses.
+* **Authentication endpoints**: Comprehensive auth API with session management.
+* **Product-specific APIs**: Dedicated endpoints per product type, including analytics.
 
-### Plattform-Support
+### Platform Support
 
-* **Windows-Server-Deployment**: Optimiert für Windows-Infrastruktur
-* **Docker-Deployment**: Containerisierte Bereitstellung via Docker Compose
-* **PostgreSQL 14+**: Datenbankkompatibilität und Performance-Optimierungen
-* **Node.js 20**: Moderner JavaScript-Runtime mit verbesserter Performance
-
----
-
-## \[Frühere Versionen]
-
-### Vor-1.0.0-Entwicklung
-
-* Initiales SvelteKit-Setup
-* Basis-Authentifizierungssystem
-* Prisma-Integration
-* Multi-Schema-Datenbankdesign
-* Basis-Produktworkflows
-* Security-Middleware-Implementierung
+* **Windows Server deployment**: Optimized for Windows infrastructure.
+* **Docker deployment**: Containerized deployment via Docker Compose.
+* **PostgreSQL 14+**: Database compatibility and performance optimizations.
+* **Node.js 20**: Modern JavaScript runtime with improved performance.
 
 ---
 
-## Versionshistorie (Kurzüberblick)
+## \[Earlier Versions]
 
-| Version    | Veröffentlichungsdatum | Kernfeatures                                          |
-| ---------- | ---------------------- | ----------------------------------------------------- |
-| 1.0.0-beta | 2025-09-04             | Dashboard-Analysen, verbessertes UX, Security-Härtung |
-| 0.x.x      | 2025-08-xx             | Initiale Entwicklung, Kernfunktionalitäten            |
+### Pre-1.0.0 Development
 
-## Inkompatible Änderungen (Breaking Changes)
+* Initial SvelteKit setup
+* Basic authentication system
+* Prisma integration
+* Multi-schema database design
+* Core product workflows
+* Security middleware implementation
+
+---
+
+## Version History (At a Glance)
+
+| Version    | Release Date | Core Features                                        |   |
+| ---------- | ------------ | ---------------------------------------------------- | - |
+| 1.0.0-beta | 2025-09-04   | Dashboard analytics, improved UX, security hardening |   |
+| 0.x.x      | 2025-08-xx   | Initial development, core functionality              |   |
+
+## Breaking Changes
 
 ### 1.0.0-beta
 
-* **Datenbankschema**: Migration auf Multi-Schema für bestehende Installationen erforderlich
-* **API-Antwortformat**: Vereinheitlichtes Format kann Client-Updates notwendig machen
-* **Authentifizierung**: Verbesserte Sicherheit kann Session-Refresh erfordern
-* **Umgebungsvariablen**: Neue Konfigurationsoptionen für das Deployment notwendig
+* **Database schema**: Migration to a multi-schema setup required for existing installations.
+* **API response format**: Unified format may require client updates.
+* **Authentication**: Strengthened security may require session refresh.
+* **Environment variables**: New configuration options required for deployment.
 
-## Migrationsleitfaden
+## Migration Guide
 
-### Upgrade auf 1.0.0-beta
+### Upgrading to 1.0.0-beta
 
-1. **DB-Migration**: `npm run db:setup` ausführen, um Schema-Änderungen anzuwenden
-2. **Umgebung aktualisieren**: Neue Variablen aus `.env.example` übernehmen
-3. **Admin-Konto**: Neues Admin-Konto mit verschärften Sicherheitsanforderungen anlegen
-4. **Abhängigkeiten**: Auf Node.js 20.x und PostgreSQL 14+ wechseln
+1. **DB migration**: Run `npm run db:setup` to apply schema changes.
+2. **Update environment**: Incorporate new variables from `.env.example`.
+3. **Admin account**: Create a new admin account with stricter security requirements.
+4. **Dependencies**: Move to Node.js 20.x and PostgreSQL 14+.
 
-## Sicherheitshinweise
+## Security Notes
 
-### Sicherheitsverbesserungen in 1.0.0-beta
+### Security Improvements in 1.0.0-beta
 
-* **Passwortrichtlinie**: Mindestens 12 Zeichen mit Komplexitätsanforderungen
-* **Sitzungssicherheit**: Verbesserte Verwaltung inkl. IP-Validierung
-* **Rate Limiting**: Schutz gegen Brute Force und DoS
-* **Audit-Logging**: Umfassende Protokollierung von Sicherheitsereignissen
+* **Password policy**: Minimum 12 characters with complexity requirements.
+* **Session security**: Improved management, including IP validation.
+* **Rate limiting**: Protection against brute-force and DoS attacks.
+* **Audit logging**: Comprehensive logging of security events.
 
-## Danksagungen
+## Acknowledgements
 
-### Mitwirkende
+### Contributors
 
-* Entwicklungsteam: Kernsystem & Architektur
-* Qualitätssicherung: Tests & Validierung
-* Security-Review: Bewertung & Härtung
+* Development team: Core system & architecture
+* Quality assurance: Testing & validation
+* Security review: Assessment & hardening
 
-### Abhängigkeiten
+### Dependencies
 
-* **SvelteKit 2.x**: Full-Stack-Framework
-* **Prisma**: Typsicherer DB-Client
-* **PostgreSQL**: Robuste relationale Datenbank
-* **Chart.js**: Interaktive Datenvisualisierung
-* **bcryptjs**: Sicheres Passwort-Hashing
-
----
-
-*Ausführliche technische Änderungen: siehe [Architekturdokumentation](../architecture/README.md).*
-*Deployment-Anleitung: siehe [Deployment Guide](../operations/deployment.md).*
+* **SvelteKit 2.x**: Full-stack framework
+* **Prisma**: Type-safe DB client
+* **PostgreSQL**: Robust relational database
+* **Chart.js**: Interactive data visualization
+* **bcryptjs**: Secure password hashing
 
 ---
+
+*For detailed technical changes, see the [Architecture documentation](../architecture/README.md). For deployment instructions, see the [Deployment Guide](../operations/deployment.md).*

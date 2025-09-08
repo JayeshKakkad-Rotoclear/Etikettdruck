@@ -8,6 +8,7 @@
 | Disaster Recovery | Restore latest full + incremental logs |
 
 Recovery Steps:
+
 1. Identify failure scope
 2. Choose most recent clean backup
 3. Restore to new instance

@@ -86,11 +86,36 @@ Erfassen & an das SIEM weiterleiten:
 
 ## Dashboards (Grafana-Layout)
 
-1. **Overview**: Requests (gesamt/Route), Erfolgs- vs. Fehlerquote, Latenz-Heatmap, aktive Sessions, Top 5 langsame Endpunkte
-2. **Authentication**: Login-Trends Erfolg/Fehlschlag, Rate-Limiting-Zähler, aktive Sessions pro Rolle
-3. **Database**: Query-Latenz-Histogramm, Verbindungen über Zeit, Top-Slow-Queries (pg\_stat\_statements)
-4. **Printing & QR**: Druckjobs pro Produktlinie, Fehlertrend, QR-Durchsatz
-5. **System Health**: CPU/Speicher/Restarts, Node.js-Event-Loop-Lag (falls instrumentiert)
+1. **Overview:**
+
+  * Requests (gesamt/Route)
+  * Erfolgs- vs. Fehlerquote 
+  * Latenz-Heatmap
+  * aktive Sessions 
+  * Top 5 langsame Endpunkte
+
+2. **Authentication:**
+
+  * Login-Trends Erfolg/Fehlschlag 
+  * Rate-Limiting-Zähler 
+  * aktive Sessions pro Rolle
+
+3. **Database:** 
+
+  * Query-Latenz-Histogramm
+  * Verbindungen über Zeit 
+  * Top-Slow-Queries (pg\_stat\_statements)
+
+4. **Printing & QR:** 
+
+  * Druckjobs pro Produktlinie
+  * Fehlertrend
+  * QR-Durchsatz
+
+5. **System Health:** 
+  
+  * CPU/Speicher/Restarts
+  * Node.js-Event-Loop-Lag (falls instrumentiert)
 
 ## Implementierungs-Snippet (Metriken)
 

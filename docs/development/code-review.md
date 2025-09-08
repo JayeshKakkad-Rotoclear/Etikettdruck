@@ -1,6 +1,7 @@
 # Code Review Guidelines
 
 Focus areas:
+
 - Correctness & security
 - Simplicity
 - Test coverage

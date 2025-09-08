@@ -1,6 +1,7 @@
 # Dashboard Analytics
 
 Key KPIs:
+
 - Throughput per shift
 - Defect rate (% rejected)
 - Reprint ratio

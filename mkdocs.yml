@@ -9,7 +9,6 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  generator: false
   palette:
     - scheme: default
       primary: '#123345'
@@ -110,6 +109,7 @@ plugins:
       minify_html: true
 
 extra:
+  generator: false
   version:
     provider: mike
     default: latest

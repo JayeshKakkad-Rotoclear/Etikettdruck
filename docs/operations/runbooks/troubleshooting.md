@@ -22,13 +22,12 @@ Operational guide for diagnosing and resolving common production issues.
 | 5 | Roll back if regression | CI/CD rollback |
 
 ### 2. Slow Responses
-| Step | Action |
-|------|--------|
-| 1 | Check latency histogram p95/p99 |
-| 2 | Identify if DB bound (query time) |
-| 3 | Look for blocking logs or long queries |
-| 4 | Add temporary profiling (enable detailed logging) |
-| 5 | Scale horizontally if saturation present |
+
+1. Check latency histogram p95/p99
+2. Identify if DB bound (query time)
+3. Look for blocking logs or long queries
+4. Add temporary profiling (enable detailed logging)
+5. Scale horizontally if saturation present
 
 ### 3. Authentication Failures Spike
 | Cause | Remediation |
@@ -52,20 +51,18 @@ Operational guide for diagnosing and resolving common production issues.
 | High latency | Cache repeated generations if applicable |
 
 ### 6. Database Connection Saturation
-| Step | Action |
-|------|--------|
-| 1 | Check active vs max connections |
-| 2 | Identify long-running queries |
-| 3 | Increase pool size cautiously |
-| 4 | Add indexing if repetitive scans |
+
+1. Check active vs max connections 
+2. Identify long-running queries 
+3. Increase pool size cautiously
+4. Add indexing if repetitive scans
 
 ### 7. Memory Leak Suspected
-| Step | Action |
-|------|--------|
-| 1 | Enable heap snapshot (if safe) |
-| 2 | Check object retention via inspector |
-| 3 | Verify large in-memory caches not unbounded |
-| 4 | Restart process as temporary mitigation |
+
+1. Enable heap snapshot (if safe)
+2. Check object retention via inspector
+3. Verify large in-memory caches not unbounded
+4. Restart process as temporary mitigation
 
 ## Log Patterns
 | Pattern | Meaning | Action |

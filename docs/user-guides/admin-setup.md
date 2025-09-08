@@ -26,6 +26,7 @@ npm run create-admin:simple
 ```
 
 **Creates default admin with:**
+
 - **Username**: `admin`
 - **Password**: `AdminP@ssw0rd2024!`
 - **Forces password change on first login**
@@ -37,6 +38,7 @@ npm run create-admin
 ```
 
 **Interactive wizard that prompts for:**
+
 - Custom username
 - Email address
 - Secure password (with strength validation)
@@ -55,6 +57,7 @@ node scripts/create-admin.js
 
 ### Password Policy (Automatically Enforced)
 All passwords must meet these requirements:
+
 - **Minimum 12 characters**
 - **At least one uppercase letter (A-Z)**
 - **At least one lowercase letter (a-z)**
@@ -77,6 +80,7 @@ All passwords must meet these requirements:
 
 ### 1. Access the System
 Navigate to your system URL:
+
 - **Development**: `http://localhost:5173/login`
 - **Production**: `https://your-domain.com/login`
 
@@ -88,6 +92,7 @@ If you used the quick setup option, you'll be prompted to change the default pas
 
 ### 4. Complete Profile Setup
 Update your profile information:
+
 - First and last name
 - Contact information
 - Preferred settings
@@ -184,6 +189,7 @@ From `src/lib/security.ts`:
 
 ### Audit Logging
 All administrative actions are logged with:
+
 - Timestamp
 - User performing action
 - Action type
@@ -275,6 +281,7 @@ echo $DATABASE_URL
 
 #### System Lockout Recovery
 If all admin accounts are inaccessible:
+
 1. Access server with administrative privileges
 2. Run emergency admin creation script
 3. Use database direct access if necessary

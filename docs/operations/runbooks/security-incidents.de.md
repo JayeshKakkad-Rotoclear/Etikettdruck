@@ -74,14 +74,13 @@ Follow-up: Zusätzlichen Bestätigungsschritt für Admin-Erhöhungen einführen.
 
 ## Beseitigung & Wiederherstellung
 
-| Schritt | Maßnahme                                                    |
-| ------- | ----------------------------------------------------------- |
-| 1       | Ausgenutzte Schwachstelle/Fehlkonfiguration beheben         |
-| 2       | Anmeldedaten/Secrets rotieren                               |
-| 3       | Kompromittierte Komponenten neu aufbauen (falls nötig)      |
-| 4       | Sauberen DB-Snapshot wiederherstellen (bei Datenkorruption) |
-| 5       | Nutzerzugänge schrittweise wieder freigeben                 |
-| 6       | Monitoring vorübergehend verschärfen                        |
+
+1. Ausgenutzte Schwachstelle/Fehlkonfiguration beheben
+2. Anmeldedaten/Secrets rotieren
+3. Kompromittierte Komponenten neu aufbauen (falls nötig)
+4. Sauberen DB-Snapshot wiederherstellen (bei Datenkorruption)
+5. Nutzerzugänge schrittweise wieder freigeben
+6. Monitoring vorübergehend verschärfen
 
 ## Ursachenanalyse (RCA)
 

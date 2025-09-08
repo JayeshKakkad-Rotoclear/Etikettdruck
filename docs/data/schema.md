@@ -179,6 +179,7 @@ sequenceDiagram
 
 ### Required Fields
 From schema analysis:
+
 - All products require: `serialnummer`, `datum`
 - Users require: `username`, `email`, `passwordHash`, `firstName`, `lastName`
 - Quality control requires both `pruefer_a` and `pruefer_b` for completion
@@ -215,6 +216,7 @@ npx prisma studio
 
 ### Indexing Strategy
 Based on common query patterns:
+
 - Primary keys (automatic)
 - Unique constraints on serial numbers
 - Foreign key relationships

@@ -7,15 +7,18 @@
 | POST | /api/auth/refresh | Refresh JWT token |
 
 Security: JWT + session hybrid (see ADR-0003). Rate limiting applied.
-# Authentication Endpoints
+
+---
+
+## Authentication Endpoints
 
 Authentication and session management endpoints.
 
-## POST /api/auth/login
+### POST /api/auth/login
 
 Authenticate a user and create a session.
 
-### Request
+#### Request
 ```http
 POST /api/auth/login
 Content-Type: application/json
@@ -27,7 +30,7 @@ Content-Type: application/json
 }
 ```
 
-### Request Body Schema
+#### Request Body Schema
 ```typescript
 interface LoginRequest {
   identifier: string;    // Username or email
@@ -36,7 +39,7 @@ interface LoginRequest {
 }
 ```
 
-### Response - Success
+#### Response - Success
 ```json
 {
   "success": true,
@@ -59,7 +62,7 @@ interface LoginRequest {
 }
 ```
 
-### Response - Error
+#### Response - Error
 ```json
 {
   "success": false,
@@ -70,27 +73,30 @@ interface LoginRequest {
 }
 ```
 
-### Cookies Set
+#### Cookies Set
 The endpoint sets these HTTP-only cookies:
+
 - `auth-token`: JWT containing user info and session
 - `session-id`: Session identifier for server-side tracking
 
-### Rate Limiting
+#### Rate Limiting
 - **IP-based rate limiting** applies (from `src/lib/security.ts`)
 - Returns `429 Too Many Requests` when exceeded
 - Includes `Retry-After` header
 
-### Security Features
+#### Security Features
 - Password validation
 - Failed login attempt logging
 - IP address and user agent tracking
 - Session duration based on `stayLoggedIn` parameter
 
+---
+
 ## POST /api/auth/logout
 
 Invalidate the current session and clear authentication cookies.
 
-### Request
+#### Request
 ```http
 POST /api/auth/logout
 Cookie: auth-token=<jwt>; session-id=<session>
@@ -109,7 +115,7 @@ Cookie: auth-token=<jwt>; session-id=<session>
 }
 ```
 
-### Side Effects
+#### Side Effects
 - Session invalidated in database
 - Authentication cookies cleared
 - Security audit log entry created
@@ -118,13 +124,13 @@ Cookie: auth-token=<jwt>; session-id=<session>
 
 Get current authenticated user information.
 
-### Request
+#### Request
 ```http
 GET /api/auth/me
 Cookie: auth-token=<jwt>; session-id=<session>
 ```
 
-### Response - Success
+#### Response - Success
 ```json
 {
   "success": true,
@@ -145,7 +151,7 @@ Cookie: auth-token=<jwt>; session-id=<session>
 }
 ```
 
-### Response - Unauthorized
+#### Response - Unauthorized
 ```json
 {
   "success": false,

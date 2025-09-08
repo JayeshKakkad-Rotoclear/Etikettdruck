@@ -57,21 +57,19 @@ Operativer Leitfaden zur Diagnose und Behebung häufiger Produktionsprobleme.
 
 ### 6. Sättigung DB-Verbindungen
 
-| Schritt | Maßnahme                            |
-| ------- | ----------------------------------- |
-| 1       | Aktive vs. max. Verbindungen prüfen |
-| 2       | Langläufer-Queries identifizieren   |
-| 3       | Poolgröße vorsichtig erhöhen        |
-| 4       | Indizes für häufige Scans ergänzen  |
+
+1. Aktive vs. max. Verbindungen prüfen
+2. Langläufer-Queries identifizieren
+3. Poolgröße vorsichtig erhöhen
+4. Indizes für häufige Scans ergänzen
 
 ### 7. Verdacht auf Memory-Leak
 
-| Schritt | Maßnahme                                     |
-| ------- | -------------------------------------------- |
-| 1       | Heap-Snapshot aktivieren (falls unkritisch)  |
-| 2       | Objektretention via Inspector prüfen         |
-| 3       | Große In-Memory-Caches auf Begrenzung prüfen |
-| 4       | Prozess temporär neu starten (Mitigation)    |
+
+1. Heap-Snapshot aktivieren (falls unkritisch)
+2. Objektretention via Inspector prüfen
+3. Große In-Memory-Caches auf Begrenzung prüfen
+4. Prozess temporär neu starten (Mitigation)
 
 ## Log-Muster
 

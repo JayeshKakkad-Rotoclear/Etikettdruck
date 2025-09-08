@@ -98,6 +98,7 @@ interface ApiResponse<T> {
 ## Rate Limiting
 
 API requests are rate-limited based on IP address:
+
 - **Limit**: > TODO: Extract from `src/lib/security.ts`
 - **Window**: > TODO: Extract from `src/lib/security.ts`
 - **Headers**: `Retry-After` header included in 429 responses
@@ -200,12 +201,14 @@ curl -X GET http://localhost:5173/api/users \
 
 ### Adding New Endpoints
 All API routes are located in `src/routes/api/` following SvelteKit conventions:
+
 - `+server.ts` files define HTTP handlers
 - Folder structure matches URL structure
 - Use TypeScript for type safety
 
 ### Security Middleware
 All protected endpoints use `SecurityMiddleware.secureEndpoint()` for:
+
 - Authentication validation
 - Role-based authorization
 - CSRF protection

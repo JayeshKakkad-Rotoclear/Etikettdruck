@@ -10,4 +10,5 @@ Need stateless JWT benefits (scalable clients) plus ability to revoke/track sess
 Issue signed JWTs bound to a server-side session record (DB) including IP binding option for risk mitigation.
 
 ## Consequences
-Pros: Revocation, auditing, horizontal scaling. Cons: Extra DB lookups on validation.
+Pros: Revocation, auditing, horizontal scaling. 
+Cons: Extra DB lookups on validation.

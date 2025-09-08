@@ -10,4 +10,5 @@ Need isolation between product lines and shared core tables while using a single
 Adopt multiple PostgreSQL schemas to logically partition domain data (e.g., core, c2, cpro, cbasic) with Prisma managing models.
 
 ## Consequences
-Pros: Logical isolation, simpler backups per schema. Cons: Slightly more complex migrations & cross-schema queries.
+Pros: Logical isolation, simpler backups per schema. 
+Cons: Slightly more complex migrations & cross-schema queries.

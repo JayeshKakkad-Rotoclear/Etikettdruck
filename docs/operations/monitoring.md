@@ -69,6 +69,7 @@ Use structured JSON logging in production:
 
 ## Security Event Monitoring
 Capture and forward these to SIEM:
+
 - Privilege escalation (role changes)
 - Repeated failed logins from same IP
 - Token tampering detection events
@@ -76,24 +77,33 @@ Capture and forward these to SIEM:
 - CSRF validation failures (if abnormally high)
 
 ## Dashboards (Grafana Layout)
-1. Overview
+1. **Overview:**
+
    - Requests: total, by route, success vs error
    - Latency heatmap
    - Active sessions
    - Top 5 slow endpoints
-2. Authentication
+
+2. **Authentication:**
+
    - Login success/failure trends
    - Rate limiting counters
    - Active sessions per role
-3. Database
+
+3. **Database:**
+
    - Query latency histogram
    - Connections over time
    - Top slow queries (pg_stat_statements)
-4. Printing & QR
+
+4. **Printing & QR:**
+
    - Print jobs per product line
    - Failed jobs trend
    - QR generation throughput
-5. System Health
+
+5. **System Health:**
+
    - CPU / memory / restarts
    - Node.js event loop lag (if instrumented)
 
@@ -135,6 +145,7 @@ setInterval(()=>{
 
 ## Capacity Planning Inputs
 Track:
+
 - Users active per hour
 - Peak request concurrency
 - DB connections & pool saturation

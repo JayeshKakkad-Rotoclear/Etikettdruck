@@ -65,17 +65,17 @@ Follow-up: Implement additional confirmation step for admin elevation.
 ```
 
 ## Eradication & Recovery
-| Step | Action |
-|------|--------|
-| 1 | Patch exploited vulnerability / misconfiguration |
-| 2 | Rotate credentials / secrets |
-| 3 | Rebuild compromised components (if required) |
-| 4 | Restore clean DB snapshot (data corruption scenarios) |
-| 5 | Re-enable user access incrementally |
-| 6 | Increase monitoring temporarily |
+
+1. Patch exploited vulnerability / misconfiguration 
+2. Rotate credentials / secrets 
+3. Rebuild compromised components (if required) 
+4. Restore clean DB snapshot (data corruption scenarios) 
+5. Re-enable user access incrementally 
+6. Increase monitoring temporarily 
 
 ## Root Cause Analysis (RCA)
 Include:
+
 - Timeline of events
 - Detection vector
 - Impact assessment
