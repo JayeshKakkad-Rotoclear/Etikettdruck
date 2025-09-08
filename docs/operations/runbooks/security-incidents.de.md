@@ -122,7 +122,3 @@ Enthält:
 | Management          | Vorfall > 2 Stunden ungelöst               |
 
 ---
-
-**Status:** Entwurf (Kontakt- & Eskalationsrichtlinie anpassen)
-
----

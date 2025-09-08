@@ -109,4 +109,3 @@ Include:
 | Management | Incident > 2 hours unresolved |
 
 ---
-**Status:** Draft (Customize contact & escalation policy)

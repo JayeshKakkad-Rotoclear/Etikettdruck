@@ -108,4 +108,3 @@ Operational guide for diagnosing and resolving common production issues.
 - Synthetic printer subsystem health check
 
 ---
-**Status:** Draft (adapt to actual runtime characteristics)

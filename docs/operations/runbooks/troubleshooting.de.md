@@ -121,7 +121,3 @@ Operativer Leitfaden zur Diagnose und Behebung häufiger Produktionsprobleme.
 * Synthetischer Health-Check für das Drucker-Subsystem
 
 ---
-
-**Status:** Entwurf (an reale Laufzeitcharakteristika anpassen)
-
----

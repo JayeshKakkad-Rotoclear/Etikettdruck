@@ -180,6 +180,3 @@ Nachverfolgen:
 
 ---
 
-**Status:** Entwurf (reale Metrik-Namen beim Implementieren ergänzen)
-
----

@@ -163,4 +163,3 @@ Track:
 - Frontend RUM (web vitals) collection
 
 ---
-**Status:** Draft (add real metric names as implemented)
