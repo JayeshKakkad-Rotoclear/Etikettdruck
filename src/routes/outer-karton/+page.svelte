@@ -788,12 +788,6 @@
             id="scanInput" 
             type="text" 
             bind:value={scanInput} 
-            on:keydown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                handleScanInput();
-              }
-            }} 
             class="scan-input"
           />
           <button type="button" class="scan-button" on:click={handleScanInput}>
@@ -1531,6 +1525,28 @@
     overflow-x: auto;
     border-radius: var(--border-radius-md);
     box-shadow: var(--shadow-sm);
+    /* Improved mobile scrolling */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color) var(--bg-light);
+  }
+
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    background: var(--bg-light);
+    border-radius: var(--border-radius-sm);
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--border-radius-sm);
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
   }
 
   .preview-table {
@@ -1539,6 +1555,7 @@
     background: var(--white);
     border-radius: var(--border-radius-md);
     overflow: hidden;
+    min-width: 600px; /* Ensure minimum width for proper column display */
   }
 
   .preview-table th {
@@ -1549,6 +1566,8 @@
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-base);
     border: none;
+    white-space: nowrap; /* Prevent header text wrapping */
+    min-width: 120px; /* Minimum column width */
   }
 
   .preview-table .table-cell {
@@ -1557,6 +1576,8 @@
     font-size: var(--font-size-base);
     color: var(--text-primary);
     transition: background-color var(--transition-smooth);
+    min-width: 120px; /* Minimum column width */
+    word-break: break-word; /* Allow long text to wrap within cells */
   }
 
   .preview-table tr:hover .table-cell {
@@ -1674,11 +1695,31 @@
 
     .table-container {
       font-size: var(--font-size-sm);
+      /* Ensure scrolling hint on mobile */
+      position: relative;
+    }
+
+    .table-container::after {
+      content: '← Swipe to scroll →';
+      position: absolute;
+      bottom: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: var(--font-size-xs);
+      color: var(--text-muted);
+      font-style: italic;
+      white-space: nowrap;
+    }
+
+    .preview-table {
+      min-width: 700px; /* Increase minimum width on mobile for better readability */
     }
 
     .preview-table th,
     .preview-table .table-cell {
       padding: var(--spacing-sm) var(--spacing-md);
+      min-width: 100px; /* Slightly smaller min-width on mobile */
+      font-size: var(--font-size-sm);
     }
 
     .create-button {
@@ -1733,10 +1774,20 @@
       padding: var(--spacing-sm) var(--spacing-md);
     }
 
+    .preview-table {
+      min-width: 800px; /* Even wider on smallest screens to ensure readability */
+    }
+
     .preview-table th,
     .preview-table .table-cell {
       padding: var(--spacing-xs) var(--spacing-sm);
       font-size: var(--font-size-xs);
+      min-width: 90px;
+    }
+
+    .table-container::after {
+      bottom: -20px;
+      font-size: 10px;
     }
 
     .create-button {
