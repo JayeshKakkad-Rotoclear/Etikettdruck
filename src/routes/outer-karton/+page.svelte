@@ -719,6 +719,11 @@
       }
     } catch (err) {
       notificationStore.error('Verbindungsfehler', err instanceof Error ? err.message : 'Verbindungsfehler beim Speichern.');
+    } finally {
+      const form = document.querySelector('.form');
+      if (form && form instanceof HTMLElement) {
+        delete form.dataset.allowSubmit;
+      }
     }
   }
 
@@ -745,7 +750,17 @@
 </svelte:head>
 
 <div class="form-container">
-  <form on:submit|preventDefault={submitOuterKarton} class="form">
+  <form 
+    on:submit|preventDefault={(e) => {
+      if (!e.target || !(e.target as HTMLElement).dataset.allowSubmit) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+      submitOuterKarton();
+    }} 
+    class="form"
+  >
     <h1 class="page-title">Außenkarton – QR-Scan Übersicht</h1>
 
     <div class="mode-switcher">
@@ -789,6 +804,20 @@
             type="text" 
             bind:value={scanInput} 
             class="scan-input"
+            on:keydown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Tab') {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+              }
+            }}
+            on:keyup={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            on:input={(e) => {
+              e.stopPropagation();
+            }}
           />
           <button type="button" class="scan-button" on:click={handleScanInput}>
             Hinzufügen
@@ -1084,7 +1113,15 @@
         </table>
       </div>
 
-      <button type="submit" class="create-button">
+      <button 
+        type="submit" 
+        class="create-button"
+        on:click={(e) => {
+          if (e.target && (e.target as Element).closest && (e.target as Element).closest('form')) {
+            ((e.target as Element).closest('form') as HTMLElement).dataset.allowSubmit = 'true';
+          }
+        }}
+      >
         Etikett erstellen
       </button>
     </div>
