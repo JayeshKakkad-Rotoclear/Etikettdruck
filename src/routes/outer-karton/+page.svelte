@@ -788,7 +788,12 @@
             id="scanInput" 
             type="text" 
             bind:value={scanInput} 
-            on:keydown={(e) => e.key === 'Enter' && handleScanInput()} 
+            on:keydown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleScanInput();
+              }
+            }} 
             class="scan-input"
           />
           <button type="button" class="scan-button" on:click={handleScanInput}>
