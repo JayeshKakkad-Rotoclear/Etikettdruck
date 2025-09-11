@@ -144,8 +144,8 @@
 		if (!form.fokuslage_ok) formErrors.push('Fokuslage korrekt eingestellt');
 		if (form.anzahl_optiken === 'Zwei_Optiken' && !form.optik_wechseln_funktioniert) formErrors.push('Optik wechseln funktioniert');
 		if (!form.siegellack_aufgebracht) formErrors.push('Siegellack aufgebracht');
-		if (!form.automatiktest_ok) formErrors.push('Automatiktest durchgeführt');
-		if (!form.qr_code_automatiktest) formErrors.push('QR-Code Automatiktest');
+		// if (!form.automatiktest_ok) formErrors.push('Automatiktest durchgeführt');
+		// if (!form.qr_code_automatiktest) formErrors.push('QR-Code Automatiktest');
 		
 		return formErrors;
 	}
@@ -538,9 +538,9 @@
 					<BooleanRadio bind:bindValue={form.siegellack_aufgebracht} label="Siegellack aufgebracht" required={true} />
                 </div>
 
-                <div class="field field-full-width">
+                <!-- <div class="field field-full-width">
 					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" required={true} />
-				</div>
+				</div> -->
 
 				<!-- <div class="file-upload-field field-full-width">
 					<label for="qr_code_file" class="required">QR-Code Automatiktest (.svg)</label>
