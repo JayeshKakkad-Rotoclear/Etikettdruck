@@ -154,7 +154,7 @@
 			automatiktest_ok: 'Automatiktest OK',
 			qr_code_automatiktest: 'QR-Code Automatiktest',
 			werkseinstellung: 'Werkseinstellung',
-			lp_verschraubt: 'Lüfterplatte verschraubt'
+			lp_verschraubt: 'Leiterplattensteckverbinder verschraubt'
 		};
 		return labels[fieldName as keyof typeof labels] || fieldName;
 	}

@@ -482,7 +482,7 @@
 				</div>
 				
 				<div class="field field-full-width">
-					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Lüfterplatte verschraubt" required={true} />
+					<BooleanRadio bind:bindValue={form.lp_verschraubt} label="Leiterplattensteckverbinder verschraubt" required={true} />
 				</div>
 			</div>
 

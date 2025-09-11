@@ -516,6 +516,15 @@
 					<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" required={true} />
                 </div>
 
+      <div class="field field-full-width">
+				<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." required={true} />
+      </div>
+
+		<div class="field field-full-width">
+			<label for="zustand_fehler">Zustand des Fehlers eintragen</label>
+			<input id="zustand_fehler" bind:value={form.zustandsdaten_fehler} />
+		</div>
+
                 <div class="field field-full-width">
 					<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" required={true} />
                 </div>

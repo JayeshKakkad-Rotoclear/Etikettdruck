@@ -24,8 +24,6 @@
 
     // Check required boolean fields
     if (form.KonfigurationKK === null) formErrors.push('- Konfiguration');
-    if (form.pigtail_schrumpfschlauch === null) formErrors.push('- Pigtail Schrumpfschlauch');
-    if (form.pigtail_drehmoment === null) formErrors.push('- Pigtail Drehmoment');
     if (form.hardware_ok === null) formErrors.push('- Hardware vollständig und unbeschädigt');
     if (form.optikglas_ok === null) formErrors.push('- Optikglas i.O.');
     if (form.rotor_ok === null) formErrors.push('- Rotor i.O.');
@@ -261,8 +259,8 @@
 			{#if form.KonfigurationKK === 'DMG'}
 				<div class="section-title">DMG Konfiguration</div>
 				<div class="radio-grid">
-					<BooleanRadio bind:bindValue={form.pigtail_schrumpfschlauch} label="Pigtail Schrumpfschlauch montiert" required={true} />
-					<BooleanRadio bind:bindValue={form.pigtail_drehmoment} label="Pigtail Drehmoment korrekt" required={true} />
+					<BooleanRadio bind:bindValue={form.pigtail_schrumpfschlauch} label="Pigtail Schrumpfschlauch montiert" required={false} />
+					<BooleanRadio bind:bindValue={form.pigtail_drehmoment} label="Pigtail Drehmoment korrekt" required={false} />
 				</div>
 			{/if}
 
@@ -313,10 +311,10 @@
 				<BooleanRadio bind:bindValue={form.motor_dauerhaft_drehbar} label="Motor im Dauerlauf überprüft(min. 30 Min.)" required={true} />
       </div>
 
-			<div class="field field-full-width">
-				<label for="laufzeit_motor">Laufzeit des Motors eintragen <span class="required">*</span></label>
-				<input id="laufzeit_motor" bind:value={form.laufzeit_motor} required />
-			</div>
+		<div class="field field-full-width">
+			<label for="laufzeit_motor">Laufzeit des Motors eintragen <span class="required">*</span></label>
+			<input id="laufzeit_motor" bind:value={form.laufzeit_motor} required />
+		</div>
 
       <div class="field field-full-width">
 				<BooleanRadio bind:bindValue={form.drucksensor_ok} label="Drucksensor funktioniert" required={true} />
@@ -325,6 +323,15 @@
       <div class="field field-full-width">
 				<BooleanRadio bind:bindValue={form.lagesensor_ok} label="Lagesensor funktioniert" required={true} />
       </div>
+	  
+      <div class="field field-full-width">
+				<BooleanRadio bind:bindValue={form.zustandsdaten_ok} label="Zustandsdaten i.O." required={true} />
+      </div>
+
+		<div class="field field-full-width">
+			<label for="zustand_fehler">Zustand des Fehlers eintragen</label>
+			<input id="zustand_fehler" bind:value={form.zustandsdaten_fehler} />
+		</div>
 
       <div class="field field-full-width">
 				<BooleanRadio bind:bindValue={form.fokuslage_ok} label="Fokuslage korrekt eingestellt" required={true} />

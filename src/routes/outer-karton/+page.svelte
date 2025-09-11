@@ -898,7 +898,7 @@
 
     <!-- Lieferschein Number Input -->
     <div class="lieferschein-section">
-      <label for="lieferscheinInput" class="input-label">Lieferschein Nummer:</label>
+      <label for="lieferscheinInput" class="input-label">Auftrags Nummer:</label>
       <input 
         id="lieferscheinInput" 
         type="text" 
