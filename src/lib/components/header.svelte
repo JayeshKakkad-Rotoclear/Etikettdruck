@@ -237,6 +237,24 @@
 					{/if}
 				</div>
 
+				<!-- Halterung -->
+				<div
+					class="sidebar-item"
+					role="button"
+					tabindex="0"
+					on:mouseenter={() => !isMobile && (hoveredProduct = 'halterung')}
+					on:mouseleave={() => !isMobile && (hoveredProduct = '')}
+					on:click={() => isMobile && (hoveredProduct = hoveredProduct === 'halterung' ? '' : 'halterung')}
+					on:keydown={(e) => e.key === 'Enter' && isMobile && (hoveredProduct = hoveredProduct === 'halterung' ? '' : 'halterung')}
+				>
+					<span>Halterung KK</span>
+					{#if hoveredProduct === 'halterung'}
+						<div class="submenu" transition:fade>
+							<a href="/halterung">Formular</a>
+						</div>
+					{/if}
+				</div>
+
 				<!-- Outer Karton -->
 				<div
 					class="sidebar-item"

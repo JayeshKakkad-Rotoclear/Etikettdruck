@@ -132,7 +132,9 @@ extra_css:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
+  - Getting Started: 
+    - Overview: getting-started.md
+    - Setup: setup.md
   - User Guides:
     - Overview: user-guides/README.md
     - Admin Setup: user-guides/admin-setup.md

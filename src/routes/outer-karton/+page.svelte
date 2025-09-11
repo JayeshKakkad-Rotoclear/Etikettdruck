@@ -408,6 +408,120 @@
         serialnummer: null, 
         menge: 1 
       }];
+    }
+
+    // Check if this is a Halterung QR code
+    // Two formats:
+    // 1. Single item: ART: [description] ARTN: [number] MENGE: [qty] DAT: [date]
+    // 2. Multiple items: HALTERUNG: [date] \n [artikelnummer] - [description] - [menge] \n ...
+    if (qr.includes('HALTERUNG: ')) {
+      // Support two multi-item styles:
+      // A) New compact: HALTERUNG: <datum> || ART:<nr>|BEZ:<bez>|M:<qty> || ART:...
+      // B) Legacy dashed (all in one line or newline separated): HALTERUNG: <datum> <nr> - <bez> - <qty> <nr> - <bez> - <qty>
+      const entries: any[] = [];
+      const compact = qr.includes('||') && qr.includes('ART:') && qr.includes('|BEZ:');
+
+      if (compact) {
+        // Extract segments after first '||'
+        const segments = qr.split('||').map(s => s.trim()).filter(s => s.startsWith('ART:'));
+        for (const seg of segments) {
+          // seg example: ART:10144|BEZ:Flex-Armhalter (Blecheinbau)-HALTERUNG|M:1
+          const artMatch = seg.match(/ART:([^|]+)/);
+          const bezMatch = seg.match(/\|BEZ:([^|]+)(?=\|M:|$)/);
+          const mengeMatch = seg.match(/\|M:(\d+)/);
+          const artikelnummer = artMatch?.[1]?.trim();
+          const artikelbezeichnung = bezMatch?.[1]?.replace(/-HALTERUNG/g,'').trim();
+          const menge = mengeMatch ? parseInt(mengeMatch[1]) : NaN;
+          if (artikelnummer && artikelbezeichnung && !isNaN(menge)) {
+            entries.push({ artikelnummer, artikelbezeichnung, menge, serialnummer: null, needsLookup: false });
+          }
+        }
+      } else {
+        // Legacy form: try to isolate repeating pattern <nr> - <text> - <qty>
+        // Remove leading header 'HALTERUNG: date'
+        const body = qr.replace(/^[^\d]*\d{2}-\d{2}-\d{4}\s*/,'');
+        // Pattern: number - description - qty (qty is last integer after dash)
+        // We'll split by occurrences of a number followed by ' - '
+        const tokenRegex = /(\d{4,})\s*-\s*([^\-]+?)\s*-\s*(\d+)(?=\s+\d{4,}\s*-|$)/g;
+        let m: RegExpExecArray | null;
+        while ((m = tokenRegex.exec(body)) !== null) {
+          const artikelnummer = m[1].trim();
+          const artikelbezeichnung = m[2].trim();
+          const menge = parseInt(m[3]);
+          if (artikelnummer && artikelbezeichnung && !isNaN(menge)) {
+            entries.push({ artikelnummer, artikelbezeichnung, menge, serialnummer: null, needsLookup: false });
+          }
+        }
+      }
+
+      if (entries.length > 0) return entries;
+      return [{ artikelnummer:'HALTERUNG_MULTI_UNKNOWN', artikelbezeichnung:'Halterung Multi-Etikett (Parsing Error)', serialnummer:null, menge:1 }];
+    } else if (qr.includes('ART: ') && qr.includes('ARTN: ') && qr.includes('DAT: ') && 
+        qr.includes('MENGE: ') && !qr.includes('SN: ') && !qr.includes('ZUBEHOER:') && !qr.includes('HALTERUNG:')) {
+      // Single item format: ART: [description] ARTN: [number] MENGE: [qty] DAT: [date]
+      const entries = [];
+      
+      // Handle both single-line and multi-line formats
+      // For single item (your case): ART: item ARTN: number MENGE: qty DAT: date
+      // For multiple items: ART: item1 ART: item2 ARTN: num1 ARTN: num2 MENGE: qty1 MENGE: qty2 DAT: date
+      
+      // Extract all occurrences of each field
+      const artMatches = qr.match(/ART:\s*([^A\n\r]*?)(?=\s+(?:ART|ARTN):|$)/g);
+      const artnMatches = qr.match(/ARTN:\s*([^\s\n\r]+)/g);
+      const mengeMatches = qr.match(/MENGE:\s*(\d+)/g);
+      
+      if (artMatches && artnMatches && mengeMatches && 
+          artMatches.length === artnMatches.length && artnMatches.length === mengeMatches.length) {
+        for (let i = 0; i < artMatches.length; i++) {
+          // Clean extract the content
+          const artContent = artMatches[i].replace(/ART:\s*/, '').trim();
+          const artnContent = artnMatches[i].replace(/ARTN:\s*/, '').trim();
+          const mengeContent = parseInt(mengeMatches[i].replace(/MENGE:\s*/, '').trim());
+          
+          if (artContent && artnContent && !isNaN(mengeContent)) {
+            entries.push({
+              artikelnummer: artnContent,
+              artikelbezeichnung: artContent,
+              serialnummer: null, // Halterung has no serial numbers
+              menge: mengeContent,
+              needsLookup: false
+            });
+          }
+        }
+      } else {
+        // Fallback for single item case - simpler parsing
+        const artMatch = qr.match(/ART:\s*(.+?)(?=\s+ARTN:)/);
+        const artnMatch = qr.match(/ARTN:\s*(.+?)(?=\s+MENGE:)/);
+        const mengeMatch = qr.match(/MENGE:\s*(\d+)/);
+        
+        if (artMatch && artnMatch && mengeMatch) {
+          const artikelbezeichnung = artMatch[1].trim();
+          const artikelnummer = artnMatch[1].trim();
+          const menge = parseInt(mengeMatch[1]);
+          
+          if (artikelbezeichnung && artikelnummer && !isNaN(menge)) {
+            entries.push({
+              artikelnummer: artikelnummer,
+              artikelbezeichnung: artikelbezeichnung,
+              serialnummer: null, // Halterung has no serial numbers
+              menge: menge,
+              needsLookup: false
+            });
+          }
+        }
+      }
+      
+      if (entries.length > 0) {
+        return entries;
+      }
+      
+      // Fallback for malformed halterung QR
+      return [{ 
+        artikelnummer: 'HALTERUNG_UNKNOWN', 
+        artikelbezeichnung: 'Halterung Etikett (Parsing Error)', 
+        serialnummer: null, 
+        menge: 1 
+      }];
     } else {
       // Check if this is a new format QR code (single line with space-separated key:value pairs)
       const qrText = qr.trim();

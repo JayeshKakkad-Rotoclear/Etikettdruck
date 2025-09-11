@@ -2,47 +2,21 @@
   import { onMount } from 'svelte';
   import { getPrinterIp } from '$lib/printer.js';
 
-  type Item = {
-    id: string;
-    artikelnummer: string;
-    artikelbezeichnung: string;
-    selected: boolean | null;
-    menge: number;
-  };
-
   const initialItems = [
     {
-      category: 'C-Extender',
+      category: 'Halterung KK',
       items: [
-        { artikelnummer: '10370', artikelbezeichnung: 'Rotoclear C-Extender' },
-        { artikelnummer: '10413', artikelbezeichnung: 'Halterung fuer Rotoclear C-Extender' },
-      ],
-    },
-    {
-      category: 'Datenkabel',
-      items: [
-        { artikelnummer: '10035', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (10m)' },
-        { artikelnummer: '10036', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (20m)' },
-		{ artikelnummer: '10358', artikelbezeichnung: 'Datenkabel mit 2x M12-Stecker (männlich - weiblich), x-kodiert. Länge: 20m' },
-      ],
-    },
-    {
-      category: 'Extras',
-      items: [
-        { artikelnummer: '10091', artikelbezeichnung: 'Stromkabel (2m)' },
-		{ artikelnummer: '10343', artikelbezeichnung: 'Netzteil 230V -> 24V fuer Rotoclear Produkte' },
-		{ artikelnummer: '10344', artikelbezeichnung: 'Schutzschlauchsystem 1,5m fuer Flex-Armhalter' },
-		{ artikelnummer: '10086', artikelbezeichnung: 'Ersatzscheibe (rotierende Scheibe) fuer Kamerakopf' },
-        { artikelnummer: '10038', artikelbezeichnung: 'Sperrluftleitung 5m (6x1mm)' },
-        { artikelnummer: '10299', artikelbezeichnung: 'Durchgangsventil fuer Sperrluftschlauch 6mm' },
+        { artikelnummer: '10144', artikelbezeichnung: 'Flex-Armhalter (Blecheinbau)' },
+        { artikelnummer: '10178', artikelbezeichnung: 'Flex-Armhalter (Vorwandmontage)' },
+        { artikelnummer: '10222', artikelbezeichnung: 'Flex-Armhalter (Magnethalter)' },
+        { artikelnummer: '10229', artikelbezeichnung: 'Kugelhalterung' },
+        { artikelnummer: '10147', artikelbezeichnung: 'Verlängerungsstück fuer Flex-Armhalterung' },
       ],
     }
   ];
 
   let selectedCategories: Record<string, boolean | null> = {};
   let itemSelections: Record<string, { selected: boolean | null; menge: number }> = {};
-  let serialnummer = '';
-  let lieferscheinnummer = '';
 
   onMount(() => {
     for (const block of initialItems) {
@@ -57,9 +31,6 @@ async function submitForm() {
     await submitFormInternal(false);
 }
 
-async function saveOnlyForm() {
-    await submitFormInternal(true);
-}
 
 async function submitFormInternal(skipPrint: boolean = false) {
     const selectedItems = Object.entries(itemSelections)
@@ -71,22 +42,16 @@ async function submitFormInternal(skipPrint: boolean = false) {
                 artikelbezeichnung: item?.artikelbezeichnung ?? '',
                 menge: itemSelections[artikelnummer].menge,
             };
-            
-            if (artikelnummer === '10370' && serialnummer) {
-                return { ...itemData, serialnummer };
-            }
-            
             return itemData;
         });
 
     const payload: any = {
         items: selectedItems,
-        lieferscheinnummer: lieferscheinnummer.trim() || null,
         skipPrint: skipPrint,
         printerIp: getPrinterIp()
     };
 
-    const res = await fetch('/api/zubehoer', {
+    const res = await fetch('/api/halterung', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -96,43 +61,31 @@ async function submitFormInternal(skipPrint: boolean = false) {
         const error = await res.json();
         alert('Fehler beim Speichern: ' + error.error);
         return;
-    } else {
-            alert(skipPrint ? 'Formular gespeichert!' : 'Etikett erfolgreich erstellt!');
-            serialnummer = '';
-            lieferscheinnummer = '';
-            for (const block of initialItems) {
-                    selectedCategories[block.category] = null;
-                    for (const item of block.items) {
-                            itemSelections[item.artikelnummer] = { selected: null, menge: 1 };
-                    }
+    }
+
+    const result = await res.json();
+    if (result.success) {
+        for (const block of initialItems) {
+            selectedCategories[block.category] = null;
+            for (const item of block.items) {
+                itemSelections[item.artikelnummer] = { selected: null, menge: 1 };
             }
+        }
+    } else {
+        alert('Fehler beim Erstellen des Etiketts: ' + (result.error || 'Unbekannter Fehler'));
     }
 }
 </script>
 
 <svelte:head>
-  <title>Zubehör Etikett - Erstellen</title>
+  <title>Halterung Etikett - Erstellen</title>
 </svelte:head>
 
 <div class="form-container">
 	<form on:submit|preventDefault={submitForm} class="form">
         <div class="header-section">
-            <h1>Zubehör Etikett erstellen</h1>
-            <a href="/zubehoer/print-label" class="print-link">
-                Etikett nachdrucken
-            </a>
+            <h1>Halterung Etikett erstellen</h1>
         </div>
-
-		<div class="lieferschein-section">
-			<label class="control-label" for="lieferscheinnummer">Lieferschein-Nummer:</label>
-			<input 
-				type="text" 
-				bind:value={lieferscheinnummer}
-				class="lieferschein-input" 
-				id="lieferscheinnummer"
-				required
-			/>
-		</div>
 
 		<div class="categories-grid">
 			{#each initialItems as categoryBlock}
@@ -195,18 +148,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 													{/each}
 												</select>
 											</div>
-
-											{#if item.artikelnummer === '10370'}
-												<div class="serial-section">
-													<label class="control-label" for="serial-{item.artikelnummer}">Serialnummer:</label>
-													<input 
-														type="text" 
-														bind:value={serialnummer}
-														class="serial-input" 
-														id="serial-{item.artikelnummer}"
-													/>
-												</div>
-											{/if}
 										</div>
 									{/if}
 								</div>
@@ -218,9 +159,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		</div>
 
 		<div class="submit-section">
-			<button type="button" on:click={saveOnlyForm} class="submit-button save-only">
-				Speichern
-			</button>
 			<button type="submit" class="submit-button">
 				Speichern & Drucken
 			</button>
@@ -257,23 +195,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		gap: var(--spacing-md);
 	}
 
-	.print-link {
-		color: var(--primary-color);
-		text-decoration: none;
-		font-weight: var(--font-weight-medium);
-		padding: var(--spacing-sm) var(--spacing-md);
-		border: 1px solid var(--primary-color);
-		border-radius: var(--border-radius-sm);
-		transition: all var(--transition-smooth);
-		white-space: nowrap;
-		font-size: var(--font-size-sm);
-	}
-
-	.print-link:hover {
-		background: var(--primary-color);
-		color: var(--white);
-	}
-
 	.form {
 		max-width: 1000px;
 		margin: 0 auto var(--spacing-xl) auto;
@@ -294,45 +215,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		right: 0;
 		height: 4px;
 		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-	}
-
-	.lieferschein-section {
-		background: var(--bg-light);
-		border: 2px solid var(--border-light);
-		border-radius: var(--border-radius-lg);
-		padding: var(--spacing-lg);
-		margin-bottom: var(--spacing-xl);
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-md);
-		transition: all var(--transition-smooth);
-	}
-
-	.lieferschein-section:hover {
-		border-color: var(--primary-light);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.lieferschein-input {
-		flex: 1;
-		padding: var(--spacing-md);
-		border: 2px solid var(--border-medium);
-		border-radius: var(--border-radius-md);
-		background: var(--white);
-		font-size: var(--font-size-base);
-		transition: all var(--transition-smooth);
-		min-height: 48px;
-	}
-
-	.lieferschein-input:focus {
-		outline: none;
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 3px var(--primary-light);
-	}
-
-	.lieferschein-input:hover:not(:focus) {
-		border-color: var(--border-color);
-		box-shadow: var(--shadow-sm);
 	}
 
 	.categories-grid {
@@ -515,8 +397,7 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		}
 	}
 
-	.quantity-section,
-	.serial-section {
+	.quantity-section {
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-sm);
@@ -550,30 +431,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 	}
 
 	.quantity-select:hover {
-		border-color: var(--border-color);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.serial-input {
-		padding: var(--spacing-sm) var(--spacing-md);
-		border: 2px solid var(--border-medium);
-		border-radius: var(--border-radius-md);
-		background: var(--white);
-		font-size: var(--font-size-base);
-		transition: all var(--transition-smooth);
-		min-height: 40px;
-		box-sizing: border-box;
-		width: 150px;
-	}
-
-	.serial-input:focus {
-		outline: none;
-		border-color: var(--primary-color);
-		box-shadow: 0 0 0 3px var(--primary-light);
-		background: var(--bg-light);
-	}
-
-	.serial-input:hover:not(:focus) {
 		border-color: var(--border-color);
 		box-shadow: var(--shadow-sm);
 	}
@@ -641,14 +498,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 		margin: 0;
 	}
 
-	.submit-button.save-only {
-		background: linear-gradient(135deg, var(--success-color), var(--success-hover));
-	}
-
-	.submit-button.save-only:hover {
-		background: linear-gradient(135deg, var(--success-hover), var(--success-color));
-	}
-
 	@media (max-width: 768px) {
 		.form-container {
 			padding: var(--spacing-md) var(--spacing-sm);
@@ -666,10 +515,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 			flex-direction: column;
 			align-items: stretch;
 			text-align: center;
-		}
-
-		.print-link {
-			align-self: center;
 		}
 
 		.categories-grid {
@@ -767,10 +612,6 @@ async function submitFormInternal(skipPrint: boolean = false) {
 
 		.submit-button {
 			min-height: 48px;
-		}
-
-		.serial-input {
-			width: 100%;
 		}
 	}
 </style>
