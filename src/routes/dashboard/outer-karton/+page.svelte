@@ -73,7 +73,7 @@
 							</th>
 							<th class="table-header">
 								<div class="header-content">
-									<span class="header-label">Lieferschein Nr.</span>
+									<span class="header-label">Auftrags Nr.</span>
 								</div>
 							</th>
 							<th class="table-header">

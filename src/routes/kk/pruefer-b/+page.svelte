@@ -16,19 +16,28 @@
   let changes: Array<{field: string, oldValue: any, newValue: any, label: string}> = [];
 
   $: {
-    if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F1') {
+    if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F1' && form.KonfigurationKK === 'RC') {
       form.artikel_bezeichnung = 'Kamerakopf F1';
       form.artikel_nummer = '10083';
-    } else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F2') {
+    } else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F1' && form.KonfigurationKK === 'DMG') {
+      form.artikel_bezeichnung = 'Kamerakopf F1';
+      form.artikel_nummer = '10007';
+    } else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F2' && form.KonfigurationKK === 'RC') {
       form.artikel_bezeichnung = 'Kamerakopf F2';
       form.artikel_nummer = '10084';
-    } else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'TFT') {
+    } else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'F2' && form.KonfigurationKK === 'DMG') {
+	  form.artikel_bezeichnung = 'Kamerakopf F2';
+	  form.artikel_nummer = '10080';
+	} else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'TFT') {
       form.artikel_bezeichnung = 'Kamerakopf TFT';
       form.artikel_nummer = '10471';
-    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+F2') {
+    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+F2' && form.KonfigurationKK === 'RC') {
       form.artikel_bezeichnung = 'Kamerakopf F1+F2';
       form.artikel_nummer = '10085';
-    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+TFT') {
+    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+F2' && form.KonfigurationKK === 'DMG') {
+	  form.artikel_bezeichnung = 'Kamerakopf F1+F2';
+	  form.artikel_nummer = '10081';
+	} else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+TFT') {
       form.artikel_bezeichnung = 'Kamerakopf F1+TFT';
       form.artikel_nummer = '10691';
     } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F2+TFT') {
@@ -209,8 +218,8 @@
 			seriennummer_optik2: 'Seriennummer Optik 2',
 			datum: 'Datum',
 			produktionsjahr: 'Produktionsjahr',
-			automatiktest_ok: 'Automatiktest OK',
-			qr_code_automatiktest: 'QR-Code Automatiktest',
+			// automatiktest_ok: 'Automatiktest OK',
+			// qr_code_automatiktest: 'QR-Code Automatiktest',
 			pruefer_b: 'Prüfer B',
 			KonfigurationKK: 'Konfiguration KK',
 			pigtail_schrumpfschlauch: 'Pigtail Schrumpfschlauch',
