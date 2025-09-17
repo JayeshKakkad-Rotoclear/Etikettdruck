@@ -38,7 +38,12 @@
 		if (!form.seriennummer_festplatte.trim()) formErrors.push('- Seriennummer Festplatte');
 		if (!form.ba_nummer.trim()) formErrors.push('- BA-Nummer');
 		if (!form.freier_festplattenspeicher.trim()) formErrors.push('- Freier Festplattenspeicher');
-		if (!form.qr_code_automatiktest.trim()) formErrors.push('- QR Code Automatiktest');
+		// Automatiktest Link (now a URL instead of uploaded SVG)
+		if (!form.qr_code_automatiktest.trim()) {
+			formErrors.push('- Automatiktest Link');
+		} else if (!/^https?:\/\//i.test(form.qr_code_automatiktest.trim())) {
+			formErrors.push('- Automatiktest Link (muss mit http:// oder https:// beginnen)');
+		}
 
 		// Check required select fields
 		if (form.festplattengroesse === null) formErrors.push('- Festplattengröße');
@@ -466,15 +471,9 @@
 					<BooleanRadio bind:bindValue={form.automatiktest_ok} label="Automatiktest durchgeführt" required={true} />
 				</div>
 				
-				<div class="field field-full-width file-upload-field">
-					<label for="qr_code_file">QR-Code Automatiktest (.svg) <span class="required">*</span></label>
-					<div class="file-input-wrapper">
-						<input id="qr_code_file" type="file" accept="image/svg+xml" on:change={handleFileUploadCpro} required />
-						<div class="file-input-display">
-							<Icon name="folder" size={16} className="file-icon" />
-							<span class="file-text">SVG-Datei auswählen</span>
-						</div>
-					</div>
+				<div class="field field-full-width">
+					<label for="automatiktest_link">Automatiktest Link <span class="required">*</span></label>
+					<input id="automatiktest_link" bind:value={form.qr_code_automatiktest} required />
 				</div>
 				
 				<div class="field field-full-width">
@@ -799,47 +798,6 @@
 		border-color: var(--border-light);
 	}
 
-	.file-upload-field {
-		margin: var(--spacing-lg) 0;
-	}
-
-	.file-input-wrapper {
-		position: relative;
-		display: inline-block;
-		width: 100%;
-	}
-
-	.file-input-wrapper input[type="file"] {
-		position: absolute;
-		opacity: 0;
-		width: 100%;
-		height: 100%;
-		cursor: pointer;
-	}
-
-	.file-input-display {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-md);
-		padding: var(--spacing-md) var(--spacing-lg);
-		border: 2px dashed var(--border-medium);
-		border-radius: var(--border-radius-md);
-		background: var(--bg-light);
-		transition: all var(--transition-smooth);
-		cursor: pointer;
-		min-height: 60px;
-	}
-
-	.file-input-display:hover {
-		border-color: var(--primary-color);
-		background: var(--white);
-		box-shadow: var(--shadow-sm);
-	}
-
-	.file-text {
-		font-weight: var(--font-weight-medium);
-		color: var(--text-secondary);
-	}
 
 	.submit-button {
 		width: 100%;

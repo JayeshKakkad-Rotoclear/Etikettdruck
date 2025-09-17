@@ -115,20 +115,6 @@
 		}
 	}
 
-    function handleFileUploadKK(event: Event) {
-        const input = event.target as HTMLInputElement;
-        const file = input?.files?.[0];
-
-        if (file && file.type === 'image/svg+xml') {
-            const reader = new FileReader();
-            reader.onload = () => {
-                form.qr_code_automatiktest = reader.result as string;
-            };
-            reader.readAsText(file);
-        } else {
-            alert('Bitte eine .svg Datei auswählen.');
-        }
-    }
 
 	function validateForm(): string[] {
 		const formErrors: string[] = [];
@@ -153,8 +139,8 @@
 		if (!form.fokuslage_ok) formErrors.push('Fokuslage korrekt eingestellt');
 		if (form.anzahl_optiken === 'Zwei_Optiken' && !form.optik_wechseln_funktioniert) formErrors.push('Optik wechseln funktioniert');
 		if (!form.siegellack_aufgebracht) formErrors.push('Siegellack aufgebracht');
-		// if (!form.automatiktest_ok) formErrors.push('Automatiktest durchgeführt');
-		// if (!form.qr_code_automatiktest) formErrors.push('QR-Code Automatiktest');
+		if (!form.qr_code_automatiktest) formErrors.push('Automatiktest Link');
+		else if (!/^https?:\/\//i.test(form.qr_code_automatiktest.trim())) formErrors.push('Automatiktest Link muss mit http:// oder https:// beginnen');
 		
 		return formErrors;
 	}

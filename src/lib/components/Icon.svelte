@@ -157,6 +157,13 @@
       <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="${color}" stroke-width="2"/>
     </svg>`,
     
+    // External Link
+    external: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M14 3H21V10" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M10 14L21 3" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M21 14V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H10" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    
     // WiFi/Network
     wifi: `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M1.42 9C3.28 6.8 5.98 5.45 8.95 5.05C11.92 4.65 14.95 5.21 17.58 6.65C18.85 7.35 20 8.25 21 9.35M5 13C6.24 11.61 7.97 10.68 9.86 10.39C11.75 10.1 13.68 10.46 15.36 11.42C16.2 11.9 16.97 12.53 17.64 13.29M8.53 16.11C9.37 15.66 10.32 15.42 11.28 15.42C12.24 15.42 13.19 15.66 14.03 16.11M12 20L12.01 19.99" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

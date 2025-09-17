@@ -1,32 +1,28 @@
 <script lang="ts">
 	import { notificationStore } from '$lib';
-	
+	import AutomatiktestLinkPreview from '$lib/components/AutomatiktestLinkPreview.svelte';
 	let serialnummer = '';
-	let qrSVG = '';
+	let qrContent = '';
 	let showPreview = false;
 	let loading = false;
 
 	async function loadQR() {
 		showPreview = false;
-		qrSVG = '';
+		qrContent = '';
 		loading = true;
-
 		try {
 			const res = await fetch(`/api/cpro/qr?serialnummer=${encodeURIComponent(serialnummer)}`);
-			if (res.ok) {
-				const data = await res.json();
-				if (data.qr_code) {
-					qrSVG = data.qr_code;
-					showPreview = true;
-					notificationStore.success('QR-Code geladen', 'QR-Code erfolgreich generiert und geladen.');
-				} else {
-					notificationStore.error('QR-Code nicht gefunden', 'Kein QR-Code gefunden für diese Seriennummer.');
-				}
+			if (!res.ok) throw new Error('Fehler beim Abrufen');
+			const data = await res.json();
+			if (data.qr_code) {
+				qrContent = data.qr_code;
+				showPreview = true;
+				notificationStore.success('Automatiktest Link geladen', 'Link erfolgreich geladen.');
 			} else {
-				notificationStore.error('Abruffehler', 'Fehler beim Abrufen des QR-Codes.');
+				notificationStore.error('QR-Code nicht gefunden', 'Kein QR-Code gefunden für diese Seriennummer.');
 			}
-		} catch (err) {
-			notificationStore.error('Verbindungsfehler', 'Verbindungsfehler beim Abrufen des QR-Codes.');
+		} catch (e) {
+			notificationStore.error('Abruffehler', 'Fehler beim Abrufen des QR-Codes.');
 		} finally {
 			loading = false;
 		}
@@ -68,14 +64,7 @@
 
 		{#if showPreview}
 			<div class="preview-section">
-				<h2 class="section-title">
-					QR-Code Vorschau
-				</h2>
-				<div class="qr-container">
-					<div class="qr-wrapper">
-						{@html qrSVG}
-					</div>
-				</div>
+				<AutomatiktestLinkPreview link={qrContent} />
 			</div>
 		{/if}
 	</form>
@@ -248,14 +237,7 @@
 			transform: translateY(0);
 		}
 	}
-	.preview-section {
-		background: var(--white);
-		border-radius: var(--border-radius-lg);
-		padding: var(--spacing-xl);
-		border: 1px solid var(--border-light);
-		box-shadow: var(--shadow-sm);
-		animation: fadeIn 0.5s ease-out;
-	}
+	.preview-section { background: var(--white); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); border:1px solid var(--border-light); box-shadow: var(--shadow-sm); animation: fadeIn .5s ease-out; }
 
 	@keyframes fadeIn {
 		from {
@@ -266,54 +248,6 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
-	}
-
-	.section-title {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-sm);
-		font-size: var(--font-size-xl);
-		font-weight: var(--font-weight-bold);
-		color: var(--primary-color);
-		margin-bottom: var(--spacing-lg);
-		border-bottom: 2px solid var(--border-light);
-		padding-bottom: var(--spacing-md);
-	}
-
-	.qr-container {
-		display: flex;
-		gap: var(--spacing-xl);
-		align-items: flex-start;
-	}
-
-	.qr-wrapper {
-		flex: 1;
-		background: var(--white);
-		border: 2px solid var(--border-light);
-		border-radius: var(--border-radius-lg);
-		padding: var(--spacing-xl);
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		box-shadow: var(--shadow-sm);
-		position: relative;
-		overflow: hidden;
-	}
-
-	.qr-wrapper::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 3px;
-		background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
-	}
-
-	.qr-wrapper :global(svg) {
-		max-width: 100%;
-		height: auto;
-		border-radius: var(--border-radius-sm);
 	}
 
 	/* Responsive Design */
@@ -337,11 +271,6 @@
 			gap: var(--spacing-sm);
 		}
 
-		.qr-container {
-			flex-direction: column;
-			gap: var(--spacing-lg);
-		}
-
 		.input-section,
 		.preview-section {
 			padding: var(--spacing-lg);
@@ -360,17 +289,6 @@
 
 		.page-title {
 			font-size: var(--font-size-lg);
-		}
-
-		.section-title {
-			font-size: var(--font-size-lg);
-			flex-direction: column;
-			gap: var(--spacing-xs);
-			text-align: center;
-		}
-
-		.qr-wrapper {
-			padding: var(--spacing-md);
 		}
 
 		.input-section,
@@ -394,16 +312,6 @@
 
 		.input-section {
 			display: none;
-		}
-
-		.qr-container {
-			flex-direction: column;
-			align-items: center;
-			gap: var(--spacing-lg);
-		}
-
-		.qr-wrapper {
-			border: 2px solid #000;
 		}
 	}
 </style>
