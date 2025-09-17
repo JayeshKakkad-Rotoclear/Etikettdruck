@@ -31,16 +31,16 @@
 	} else if (form.anzahl_optiken === 'Ein_Optik' && form.optik_format === 'TFT') {
       form.artikel_bezeichnung = 'Kamerakopf TFT';
       form.artikel_nummer = '10471';
-    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+F2' && form.KonfigurationKK === 'RC') {
+    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1_F2' && form.KonfigurationKK === 'RC') {
       form.artikel_bezeichnung = 'Kamerakopf F1+F2';
       form.artikel_nummer = '10085';
-    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+F2' && form.KonfigurationKK === 'DMG') {
+    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1_F2' && form.KonfigurationKK === 'DMG') {
 	  form.artikel_bezeichnung = 'Kamerakopf F1+F2';
 	  form.artikel_nummer = '10081';
-	} else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1+TFT') {
+	} else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F1_TFT') {
       form.artikel_bezeichnung = 'Kamerakopf F1+TFT';
       form.artikel_nummer = '10691';
-    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F2+TFT') {
+    } else if (form.anzahl_optiken === 'Zwei_Optiken' && form.optik_format === 'F2_TFT') {
       form.artikel_bezeichnung = 'Kamerakopf F2+TFT';
       form.artikel_nummer = '10692';
     }
@@ -85,7 +85,7 @@
       lagesensor_ok: null,
       zustandsdaten_ok: null,
       zustandsdaten_fehler: '',
-      anzahl_optiken: 'Ein Optik',
+      anzahl_optiken: null,
       optik_format: null,
       fokuslage_ok: null,
       optik_wechseln_funktioniert: null,
